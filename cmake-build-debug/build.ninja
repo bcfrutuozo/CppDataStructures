@@ -11,7 +11,7 @@
 # =============================================================================
 
 # =============================================================================
-# Project: lnxcpplearning
+# Project: CppDataStructures
 # Configurations: Debug
 # =============================================================================
 
@@ -39,13 +39,13 @@ include CMakeFiles/rules.ninja
 #############################################
 # Logical path to working directory; prefix for absolute paths.
 
-cmake_ninja_workdir = /data/bcfrutuozo/source/lnxcpplearning/cmake-build-debug/
+cmake_ninja_workdir = /data/bcfrutuozo/source/CppDataStructures/cmake-build-debug/
 
 #############################################
 # Utility command for rebuild_cache
 
 build CMakeFiles/rebuild_cache.util: CUSTOM_COMMAND
-  COMMAND = cd /data/bcfrutuozo/source/lnxcpplearning/cmake-build-debug && /opt/clion/bin/cmake/linux/bin/cmake --regenerate-during-build -S/data/bcfrutuozo/source/lnxcpplearning -B/data/bcfrutuozo/source/lnxcpplearning/cmake-build-debug
+  COMMAND = cd /data/bcfrutuozo/source/CppDataStructures/cmake-build-debug && /opt/clion/bin/cmake/linux/bin/cmake --regenerate-during-build -S/data/bcfrutuozo/source/CppDataStructures -B/data/bcfrutuozo/source/CppDataStructures/cmake-build-debug
   DESC = Running CMake to regenerate build system...
   pool = console
   restat = 1
@@ -57,57 +57,217 @@ build rebuild_cache: phony CMakeFiles/rebuild_cache.util
 # Utility command for edit_cache
 
 build CMakeFiles/edit_cache.util: CUSTOM_COMMAND
-  COMMAND = cd /data/bcfrutuozo/source/lnxcpplearning/cmake-build-debug && /opt/clion/bin/cmake/linux/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
+  COMMAND = cd /data/bcfrutuozo/source/CppDataStructures/cmake-build-debug && /opt/clion/bin/cmake/linux/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
   DESC = No interactive CMake dialog available...
   restat = 1
 
 build edit_cache: phony CMakeFiles/edit_cache.util
 
+
+#############################################
+# Utility command for test
+
+build CMakeFiles/test.util: CUSTOM_COMMAND
+  COMMAND = cd /data/bcfrutuozo/source/CppDataStructures/cmake-build-debug && /opt/clion/bin/cmake/linux/bin/ctest --force-new-ctest-process
+  DESC = Running tests...
+  pool = console
+  restat = 1
+
+build test: phony CMakeFiles/test.util
+
 # =============================================================================
-# Object build statements for EXECUTABLE target lnxcpplearning
+# Object build statements for EXECUTABLE target CppDataStructures
 
 
 #############################################
-# Order-only phony target for lnxcpplearning
+# Order-only phony target for CppDataStructures
 
-build cmake_object_order_depends_target_lnxcpplearning: phony || CMakeFiles/lnxcpplearning.dir
+build cmake_object_order_depends_target_CppDataStructures: phony || CMakeFiles/CppDataStructures.dir
 
-build CMakeFiles/lnxcpplearning.dir/main.cpp.o: CXX_COMPILER__lnxcpplearning_Debug /data/bcfrutuozo/source/lnxcpplearning/main.cpp || cmake_object_order_depends_target_lnxcpplearning
-  DEP_FILE = CMakeFiles/lnxcpplearning.dir/main.cpp.o.d
+build CMakeFiles/CppDataStructures.dir/main.cpp.o: CXX_COMPILER__CppDataStructures_Debug /data/bcfrutuozo/source/CppDataStructures/main.cpp || cmake_object_order_depends_target_CppDataStructures
+  DEP_FILE = CMakeFiles/CppDataStructures.dir/main.cpp.o.d
   FLAGS = -g -std=gnu++23
-  OBJECT_DIR = CMakeFiles/lnxcpplearning.dir
-  OBJECT_FILE_DIR = CMakeFiles/lnxcpplearning.dir
+  OBJECT_DIR = CMakeFiles/CppDataStructures.dir
+  OBJECT_FILE_DIR = CMakeFiles/CppDataStructures.dir
 
-build CMakeFiles/lnxcpplearning.dir/String.cpp.o: CXX_COMPILER__lnxcpplearning_Debug /data/bcfrutuozo/source/lnxcpplearning/String.cpp || cmake_object_order_depends_target_lnxcpplearning
-  DEP_FILE = CMakeFiles/lnxcpplearning.dir/String.cpp.o.d
+build CMakeFiles/CppDataStructures.dir/String.cpp.o: CXX_COMPILER__CppDataStructures_Debug /data/bcfrutuozo/source/CppDataStructures/String.cpp || cmake_object_order_depends_target_CppDataStructures
+  DEP_FILE = CMakeFiles/CppDataStructures.dir/String.cpp.o.d
   FLAGS = -g -std=gnu++23
-  OBJECT_DIR = CMakeFiles/lnxcpplearning.dir
-  OBJECT_FILE_DIR = CMakeFiles/lnxcpplearning.dir
-
-build CMakeFiles/lnxcpplearning.dir/Char.cpp.o: CXX_COMPILER__lnxcpplearning_Debug /data/bcfrutuozo/source/lnxcpplearning/cmake-build-debug/Char.cpp || cmake_object_order_depends_target_lnxcpplearning
-  DEP_FILE = CMakeFiles/lnxcpplearning.dir/Char.cpp.o.d
-  FLAGS = -g -std=gnu++23
-  OBJECT_DIR = CMakeFiles/lnxcpplearning.dir
-  OBJECT_FILE_DIR = CMakeFiles/lnxcpplearning.dir
+  OBJECT_DIR = CMakeFiles/CppDataStructures.dir
+  OBJECT_FILE_DIR = CMakeFiles/CppDataStructures.dir
 
 
 # =============================================================================
-# Link build statements for EXECUTABLE target lnxcpplearning
+# Link build statements for EXECUTABLE target CppDataStructures
 
 
 #############################################
-# Link the executable lnxcpplearning
+# Link the executable CppDataStructures
 
-build lnxcpplearning: CXX_EXECUTABLE_LINKER__lnxcpplearning_Debug CMakeFiles/lnxcpplearning.dir/main.cpp.o CMakeFiles/lnxcpplearning.dir/String.cpp.o CMakeFiles/lnxcpplearning.dir/Char.cpp.o
+build CppDataStructures: CXX_EXECUTABLE_LINKER__CppDataStructures_Debug CMakeFiles/CppDataStructures.dir/main.cpp.o CMakeFiles/CppDataStructures.dir/String.cpp.o
   FLAGS = -g
-  OBJECT_DIR = CMakeFiles/lnxcpplearning.dir
+  OBJECT_DIR = CMakeFiles/CppDataStructures.dir
   POST_BUILD = :
   PRE_LINK = :
-  TARGET_FILE = lnxcpplearning
-  TARGET_PDB = lnxcpplearning.dbg
+  TARGET_FILE = CppDataStructures
+  TARGET_PDB = CppDataStructures.dbg
+
+# =============================================================================
+# Write statements declared in CMakeLists.txt:
+# /data/bcfrutuozo/source/CppDataStructures/CMakeLists.txt
+# =============================================================================
+
+
+#############################################
+# Utility command for rebuild_cache
+
+build dependencies/CMakeFiles/rebuild_cache.util: CUSTOM_COMMAND
+  COMMAND = cd /data/bcfrutuozo/source/CppDataStructures/cmake-build-debug/dependencies && /opt/clion/bin/cmake/linux/bin/cmake --regenerate-during-build -S/data/bcfrutuozo/source/CppDataStructures -B/data/bcfrutuozo/source/CppDataStructures/cmake-build-debug
+  DESC = Running CMake to regenerate build system...
+  pool = console
+  restat = 1
+
+build dependencies/rebuild_cache: phony dependencies/CMakeFiles/rebuild_cache.util
+
+
+#############################################
+# Utility command for edit_cache
+
+build dependencies/CMakeFiles/edit_cache.util: CUSTOM_COMMAND
+  COMMAND = cd /data/bcfrutuozo/source/CppDataStructures/cmake-build-debug/dependencies && /opt/clion/bin/cmake/linux/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
+  DESC = No interactive CMake dialog available...
+  restat = 1
+
+build dependencies/edit_cache: phony dependencies/CMakeFiles/edit_cache.util
+
+
+#############################################
+# Utility command for test
+
+build dependencies/CMakeFiles/test.util: CUSTOM_COMMAND
+  COMMAND = cd /data/bcfrutuozo/source/CppDataStructures/cmake-build-debug/dependencies && /opt/clion/bin/cmake/linux/bin/ctest --force-new-ctest-process
+  DESC = Running tests...
+  pool = console
+  restat = 1
+
+build dependencies/test: phony dependencies/CMakeFiles/test.util
+
+# =============================================================================
+# Write statements declared in CMakeLists.txt:
+# /data/bcfrutuozo/source/CppDataStructures/dependencies/CMakeLists.txt
+# =============================================================================
+
+
+#############################################
+# Utility command for rebuild_cache
+
+build _deps/catch2-build/CMakeFiles/rebuild_cache.util: CUSTOM_COMMAND
+  COMMAND = cd /data/bcfrutuozo/source/CppDataStructures/cmake-build-debug/_deps/catch2-build && /opt/clion/bin/cmake/linux/bin/cmake --regenerate-during-build -S/data/bcfrutuozo/source/CppDataStructures -B/data/bcfrutuozo/source/CppDataStructures/cmake-build-debug
+  DESC = Running CMake to regenerate build system...
+  pool = console
+  restat = 1
+
+build _deps/catch2-build/rebuild_cache: phony _deps/catch2-build/CMakeFiles/rebuild_cache.util
+
+
+#############################################
+# Utility command for edit_cache
+
+build _deps/catch2-build/CMakeFiles/edit_cache.util: CUSTOM_COMMAND
+  COMMAND = cd /data/bcfrutuozo/source/CppDataStructures/cmake-build-debug/_deps/catch2-build && /opt/clion/bin/cmake/linux/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
+  DESC = No interactive CMake dialog available...
+  restat = 1
+
+build _deps/catch2-build/edit_cache: phony _deps/catch2-build/CMakeFiles/edit_cache.util
+
+
+#############################################
+# Utility command for test
+
+build _deps/catch2-build/CMakeFiles/test.util: CUSTOM_COMMAND
+  COMMAND = cd /data/bcfrutuozo/source/CppDataStructures/cmake-build-debug/_deps/catch2-build && /opt/clion/bin/cmake/linux/bin/ctest --force-new-ctest-process
+  DESC = Running tests...
+  pool = console
+  restat = 1
+
+build _deps/catch2-build/test: phony _deps/catch2-build/CMakeFiles/test.util
+
+# =============================================================================
+# Write statements declared in CMakeLists.txt:
+# /data/bcfrutuozo/source/CppDataStructures/CMakeLists.txt
+# =============================================================================
+
+
+#############################################
+# Utility command for edit_cache
+
+build tests/CMakeFiles/edit_cache.util: CUSTOM_COMMAND
+  COMMAND = cd /data/bcfrutuozo/source/CppDataStructures/cmake-build-debug/tests && /opt/clion/bin/cmake/linux/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
+  DESC = No interactive CMake dialog available...
+  restat = 1
+
+build tests/edit_cache: phony tests/CMakeFiles/edit_cache.util
+
+
+#############################################
+# Utility command for test
+
+build tests/CMakeFiles/test.util: CUSTOM_COMMAND
+  COMMAND = cd /data/bcfrutuozo/source/CppDataStructures/cmake-build-debug/tests && /opt/clion/bin/cmake/linux/bin/ctest --force-new-ctest-process
+  DESC = Running tests...
+  pool = console
+  restat = 1
+
+build tests/test: phony tests/CMakeFiles/test.util
+
+
+#############################################
+# Utility command for rebuild_cache
+
+build tests/CMakeFiles/rebuild_cache.util: CUSTOM_COMMAND
+  COMMAND = cd /data/bcfrutuozo/source/CppDataStructures/cmake-build-debug/tests && /opt/clion/bin/cmake/linux/bin/cmake --regenerate-during-build -S/data/bcfrutuozo/source/CppDataStructures -B/data/bcfrutuozo/source/CppDataStructures/cmake-build-debug
+  DESC = Running CMake to regenerate build system...
+  pool = console
+  restat = 1
+
+build tests/rebuild_cache: phony tests/CMakeFiles/rebuild_cache.util
+
+# =============================================================================
+# Object build statements for EXECUTABLE target tests
+
+
+#############################################
+# Order-only phony target for tests
+
+build cmake_object_order_depends_target_tests: phony || tests/CMakeFiles/tests.dir
+
+build tests/CMakeFiles/tests.dir/test_array.cpp.o: CXX_COMPILER__tests_Debug /data/bcfrutuozo/source/CppDataStructures/tests/test_array.cpp || cmake_object_order_depends_target_tests
+  DEP_FILE = tests/CMakeFiles/tests.dir/test_array.cpp.o.d
+  FLAGS = -g -std=gnu++23
+  INCLUDES = -I/data/bcfrutuozo/source/CppDataStructures/cmake-build-debug/_deps/catch2-src/single_include
+  OBJECT_DIR = tests/CMakeFiles/tests.dir
+  OBJECT_FILE_DIR = tests/CMakeFiles/tests.dir
+
+
+# =============================================================================
+# Link build statements for EXECUTABLE target tests
+
+
+#############################################
+# Link the executable tests/tests
+
+build tests/tests: CXX_EXECUTABLE_LINKER__tests_Debug tests/CMakeFiles/tests.dir/test_array.cpp.o
+  FLAGS = -g
+  OBJECT_DIR = tests/CMakeFiles/tests.dir
+  POST_BUILD = :
+  PRE_LINK = :
+  TARGET_FILE = tests/tests
+  TARGET_PDB = tests.dbg
 
 # =============================================================================
 # Target aliases.
+
+build tests: phony tests/tests
 
 # =============================================================================
 # Folder targets.
@@ -115,9 +275,30 @@ build lnxcpplearning: CXX_EXECUTABLE_LINKER__lnxcpplearning_Debug CMakeFiles/lnx
 # =============================================================================
 
 #############################################
-# Folder: /data/bcfrutuozo/source/lnxcpplearning/cmake-build-debug
+# Folder: /data/bcfrutuozo/source/CppDataStructures/cmake-build-debug
 
-build all: phony lnxcpplearning
+build all: phony CppDataStructures dependencies/all tests/all
+
+# =============================================================================
+
+#############################################
+# Folder: /data/bcfrutuozo/source/CppDataStructures/cmake-build-debug/_deps/catch2-build
+
+build _deps/catch2-build/all: phony
+
+# =============================================================================
+
+#############################################
+# Folder: /data/bcfrutuozo/source/CppDataStructures/cmake-build-debug/dependencies
+
+build dependencies/all: phony _deps/catch2-build/all
+
+# =============================================================================
+
+#############################################
+# Folder: /data/bcfrutuozo/source/CppDataStructures/cmake-build-debug/tests
+
+build tests/all: phony tests/tests
 
 # =============================================================================
 # Built-in targets
@@ -126,14 +307,14 @@ build all: phony lnxcpplearning
 #############################################
 # Re-run CMake if any of its inputs changed.
 
-build build.ninja: RERUN_CMAKE | ../CMakeLists.txt /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/CMakeCInformation.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/CMakeCXXInformation.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/CMakeCommonLanguageInclude.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/CMakeGenericSystem.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/CMakeInitializeConfigs.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/CMakeLanguageInformation.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/CMakeSystemSpecificInformation.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/CMakeSystemSpecificInitialize.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/Compiler/CMakeCommonCompilerMacros.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/Compiler/GNU-C.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/Compiler/GNU-CXX.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/Compiler/GNU.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/Platform/Linux-GNU-C.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/Platform/Linux-GNU-CXX.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/Platform/Linux-GNU.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/Platform/Linux.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/Platform/UnixPaths.cmake CMakeCache.txt CMakeFiles/3.21.1/CMakeCCompiler.cmake CMakeFiles/3.21.1/CMakeCXXCompiler.cmake CMakeFiles/3.21.1/CMakeSystem.cmake
+build build.ninja: RERUN_CMAKE | ../CMakeLists.txt ../dependencies/CMakeLists.txt ../tests/CMakeLists.txt /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/CMakeCInformation.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/CMakeCXXInformation.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/CMakeCommonLanguageInclude.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/CMakeGenericSystem.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/CMakeInitializeConfigs.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/CMakeLanguageInformation.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/CMakeSystemSpecificInformation.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/CMakeSystemSpecificInitialize.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/Compiler/CMakeCommonCompilerMacros.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/Compiler/GNU-C.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/Compiler/GNU-CXX.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/Compiler/GNU.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/FetchContent.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/FetchContent/CMakeLists.cmake.in /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/FindGit.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/FindPackageHandleStandardArgs.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/FindPackageMessage.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/GNUInstallDirs.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/Platform/Linux-GNU-C.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/Platform/Linux-GNU-CXX.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/Platform/Linux-GNU.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/Platform/Linux.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/Platform/UnixPaths.cmake CMakeCache.txt CMakeFiles/3.21.1/CMakeCCompiler.cmake CMakeFiles/3.21.1/CMakeCXXCompiler.cmake CMakeFiles/3.21.1/CMakeSystem.cmake _deps/catch2-src/CMakeLists.txt
   pool = console
 
 
 #############################################
 # A missing CMake input file is not an error.
 
-build ../CMakeLists.txt /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/CMakeCInformation.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/CMakeCXXInformation.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/CMakeCommonLanguageInclude.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/CMakeGenericSystem.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/CMakeInitializeConfigs.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/CMakeLanguageInformation.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/CMakeSystemSpecificInformation.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/CMakeSystemSpecificInitialize.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/Compiler/CMakeCommonCompilerMacros.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/Compiler/GNU-C.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/Compiler/GNU-CXX.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/Compiler/GNU.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/Platform/Linux-GNU-C.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/Platform/Linux-GNU-CXX.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/Platform/Linux-GNU.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/Platform/Linux.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/Platform/UnixPaths.cmake CMakeCache.txt CMakeFiles/3.21.1/CMakeCCompiler.cmake CMakeFiles/3.21.1/CMakeCXXCompiler.cmake CMakeFiles/3.21.1/CMakeSystem.cmake: phony
+build ../CMakeLists.txt ../dependencies/CMakeLists.txt ../tests/CMakeLists.txt /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/CMakeCInformation.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/CMakeCXXInformation.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/CMakeCommonLanguageInclude.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/CMakeGenericSystem.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/CMakeInitializeConfigs.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/CMakeLanguageInformation.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/CMakeSystemSpecificInformation.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/CMakeSystemSpecificInitialize.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/Compiler/CMakeCommonCompilerMacros.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/Compiler/GNU-C.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/Compiler/GNU-CXX.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/Compiler/GNU.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/FetchContent.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/FetchContent/CMakeLists.cmake.in /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/FindGit.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/FindPackageHandleStandardArgs.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/FindPackageMessage.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/GNUInstallDirs.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/Platform/Linux-GNU-C.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/Platform/Linux-GNU-CXX.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/Platform/Linux-GNU.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/Platform/Linux.cmake /opt/clion/bin/cmake/linux/share/cmake-3.21/Modules/Platform/UnixPaths.cmake CMakeCache.txt CMakeFiles/3.21.1/CMakeCCompiler.cmake CMakeFiles/3.21.1/CMakeCXXCompiler.cmake CMakeFiles/3.21.1/CMakeSystem.cmake _deps/catch2-src/CMakeLists.txt: phony
 
 
 #############################################
