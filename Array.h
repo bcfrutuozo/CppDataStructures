@@ -142,7 +142,10 @@ public:
     }
 
     ~Array() {
-        delete[] ptr;
+        if (ptr != nullptr) {
+            delete[] ptr;
+            ptr = nullptr;
+        }
     }
 
     // Using proxy class ArrayValue to handle this function as Getter/Setter
@@ -151,6 +154,20 @@ public:
             throw std::out_of_range("index is too large for the resized array");
 
         return ArrayValue(ptr + index);
+    }
+
+    constexpr Array& operator=(const Array &other) {
+        if (other.GetSize() > 0) {
+            m_Size = other.GetSize();
+            ptr = new T[m_Size];
+
+            std::copy(other.ptr, other.ptr + other.m_Size, ptr);
+        } else {
+            m_Size = 0;
+            ptr = nullptr;
+        }
+
+        return *this;
     }
 
     bool operator==(const Array &other) const {
@@ -191,7 +208,7 @@ public:
     }
 
     void AddAtIndex(const T &element, size_t index) {
-        if(index > LastIndex())
+        if (index > LastIndex())
             throw std::out_of_range("Invalid array boundaries");
 
         if (IsEmpty())
@@ -215,8 +232,8 @@ public:
         }
     }
 
-    void AddAtIndex(const Array& a, size_t index) {
-        if(index > LastIndex())
+    void AddAtIndex(const Array &a, size_t index) {
+        if (index > LastIndex())
             throw std::out_of_range("Invalid array boundaries");
 
         if (IsEmpty())
@@ -238,6 +255,31 @@ public:
             ptr = newArray;
             m_Size = newSize;
         }
+    }
+
+    static void Copy(Array &a, Array &b) {
+        if (a.GetSize() > b.GetSize())
+            b = a;
+        else {
+            for (auto itsource = a.begin(), itdestination = b.begin();
+                 itsource != a.end(); ++itsource, ++itdestination) {
+                *itdestination = *itsource;
+            }
+        }
+    }
+
+    static void Copy(Array&a, size_t aIndex, Array&b, size_t bIndex){
+        if(aIndex > a.LastIndex() || bIndex > b.LastIndex())
+            throw std::out_of_range("Specified index is out of array bounds");
+
+        ssize_t copyAmount = a.GetSize() - aIndex;
+        ssize_t availableSpace = b.GetSize() - bIndex;
+
+        bool needExtraSpace = (copyAmount - availableSpace) > 0;
+        if(needExtraSpace)
+            Array::Resize(b,b.GetSize() + (copyAmount - availableSpace));
+
+        std::copy(a.ptr + aIndex, a.ptr + aIndex + copyAmount, b.ptr + bIndex);
     }
 
     bool Contains(const T &other) const {
@@ -356,6 +398,34 @@ public:
         m_Size = newSize;
 
         return obj;
+    }
+
+    static void Resize(Array &a, size_t newSize) {
+        if (newSize == a.GetSize()) return;
+
+        T *newArray = nullptr;
+
+        if (newSize > 0) {
+            newArray = new T[newSize];
+            if (newSize > a.GetSize()) {
+                // Create a default object to fill the new spaces
+                T def{0};
+
+                if (a.GetSize() > 0) {
+                    std::copy(a.ptr, a.ptr + a.GetSize(), newArray);
+                    for (size_t i = a.GetSize(); i < newSize; ++i)
+                        newArray[i] = def;
+                } else {
+                    for (size_t i = 0; i < newSize; ++i)
+                        newArray[i] = def;
+                }
+            } else
+                std::copy(a.ptr, a.ptr + newSize, newArray);
+        }
+
+        delete[] a.ptr;
+        a.ptr = newArray;
+        a.m_Size = newSize;
     }
 
     void Reverse() {

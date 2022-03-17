@@ -5,17 +5,13 @@
 
 void Test() {
 
-    Array<int> a = {0, 0, 0};
-    Array<int> b = {4, 2, 6, 2, 2, 2, 1, 1, 2, 4, 5, 5, 5, 2, 1, 2, 1};
-    Array<String> c = {"ABC", "DEF", "111"};
+    Array<int> a = { 0, 1, 2, 3, 4, 5};
+    Array<int> b = { 5, 4, 3, 2, 1, 0};
 
-    Array<String> z = { "OI1", "OI2" };
-    c.AddAtIndex(z, 0);
-    std::cout << c << std::endl;
+    Array<int>::Copy(a, 0, b, 0);
 
-    for(auto it = b.begin(); it != b.end(); ++it)
-        std::cout << *it;
-
+    std::cout << a << std::endl;
+    std::cout << b << std::endl;
 }
 
 int main(int argc, char *argv[]) {
