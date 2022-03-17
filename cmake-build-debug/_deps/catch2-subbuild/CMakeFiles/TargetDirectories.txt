@@ -1,0 +1,3 @@
+/data/bcfrutuozo/source/CppDataStructures/cmake-build-debug/_deps/catch2-subbuild/CMakeFiles/rebuild_cache.dir
+/data/bcfrutuozo/source/CppDataStructures/cmake-build-debug/_deps/catch2-subbuild/CMakeFiles/edit_cache.dir
+/data/bcfrutuozo/source/CppDataStructures/cmake-build-debug/_deps/catch2-subbuild/CMakeFiles/catch2-populate.dir
