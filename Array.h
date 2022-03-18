@@ -119,12 +119,12 @@ public:
 
     constexpr explicit Array(size_t size)
             :
-            ptr(new T[size]),
+            ptr(new T[size]()),
             m_Size(size) {}
 
     constexpr Array(const T &defaultValue, size_t size)
             :
-            ptr(new T[size]),
+            ptr(new T[size]()),
             m_Size(size) {
         Fill(defaultValue);
     }
@@ -150,15 +150,15 @@ public:
 
     // Using proxy class ArrayValue to handle this function as Getter/Setter
     constexpr ArrayValue operator[](size_t index) {
-        if (index > LastIndex())
+        if (index > m_Size - 1)
             throw std::out_of_range("index is too large for the resized array");
 
         return ArrayValue(ptr + index);
     }
 
     constexpr Array& operator=(const Array &other) {
-        if (other.GetSize() > 0) {
-            m_Size = other.GetSize();
+        if (other.m_Size > 0) {
+            m_Size = other.m_Size;
             ptr = new T[m_Size];
 
             std::copy(other.ptr, other.ptr + other.m_Size, ptr);
@@ -171,7 +171,7 @@ public:
     }
 
     bool operator==(const Array &other) const {
-        if (m_Size != other.GetSize()) return false;
+        if (m_Size != other.m_Size) return false;
 
         for (auto itself = cbegin(), itother = other.cbegin(); itself != cend(); ++itself, ++itother)
             if (*itself != *itother)
@@ -203,15 +203,27 @@ public:
     }
 
     void Add(const Array<T> &other) {
-        for (auto it = other.cbegin(); it != other.cend(); ++it)
-            Add(*it);
+        if(other.m_Size == 0) return;
+
+        auto newSize = m_Size + other.m_Size;
+        T* newArray = new T[newSize];
+        if(m_Size == 0){
+            std::copy(other.ptr, other.ptr + other.m_Size, newArray);
+        } else {
+            std::copy(ptr, ptr + m_Size, newArray);
+            std::copy(other.ptr, other.ptr + other.m_Size, newArray + m_Size);
+        }
+
+        delete[] ptr;
+        ptr = newArray;
+        m_Size = newSize;
     }
 
     void AddAtIndex(const T &element, size_t index) {
-        if (index > LastIndex())
+        if (m_Size == 0 || index > m_Size - 1)
             throw std::out_of_range("Invalid array boundaries");
 
-        if (IsEmpty())
+        if (m_Size == 0)
             Add(element);
         else {
             size_t newSize = m_Size + 1;
@@ -233,20 +245,20 @@ public:
     }
 
     void AddAtIndex(const Array &a, size_t index) {
-        if (index > LastIndex())
+        if (m_Size == 0 || index > m_Size - 1)
             throw std::out_of_range("Invalid array boundaries");
 
-        if (IsEmpty())
+        if (m_Size == 0)
             Add(a);
         else {
-            size_t newSize = m_Size + a.GetSize();
+            size_t newSize = m_Size + a.m_Size;
             T *newArray = new T[newSize];
 
             // Copy pre-block from start until the desired index
             std::copy(ptr, ptr + index, newArray);
 
             // Copy the following blocks until the end of the array
-            std::copy(ptr + index, ptr + m_Size, newArray + index + a.GetSize());
+            std::copy(ptr + index, ptr + m_Size, newArray + index + a.m_Size);
 
             // Fill the desired index block with the new element
             std::copy(a.ptr, a.ptr + a.m_Size, newArray + index);
@@ -257,39 +269,29 @@ public:
         }
     }
 
-    static void Copy(Array &a, Array &b) {
-        if (a.GetSize() > b.GetSize())
-            b = a;
+    static void Copy(Array &sourceArray, Array &destinationArray) {
+        if (sourceArray.m_Size > destinationArray.m_Size)
+            destinationArray = sourceArray;
         else {
-            for (auto itsource = a.begin(), itdestination = b.begin();
-                 itsource != a.end(); ++itsource, ++itdestination) {
+            for (auto itsource = sourceArray.begin(), itdestination = destinationArray.begin();
+                 itsource != sourceArray.end(); ++itsource, ++itdestination) {
                 *itdestination = *itsource;
             }
         }
     }
 
-    static void Copy(Array&a, size_t aIndex, Array&b, size_t bIndex){
-        if(aIndex > a.LastIndex() || bIndex > b.LastIndex())
+    static void Copy(Array& sourceArray, size_t sourceIndex, Array& destinationArray, size_t destinationIndex){
+        if(sourceIndex > sourceArray.m_Size - 1 || destinationIndex > destinationArray.m_Size - 1)
             throw std::out_of_range("Specified index is out of array bounds");
 
-        ssize_t copyAmount = a.GetSize() - aIndex;
-        ssize_t availableSpace = b.GetSize() - bIndex;
+        ssize_t copyAmount = sourceArray.m_Size - sourceIndex;
+        ssize_t availableSpace = destinationArray.m_Size - destinationIndex;
 
         bool needExtraSpace = (copyAmount - availableSpace) > 0;
         if(needExtraSpace)
-            Array::Resize(b,b.GetSize() + (copyAmount - availableSpace));
+            Array::Resize(destinationArray, destinationArray.m_Size + (copyAmount - availableSpace));
 
-        std::copy(a.ptr + aIndex, a.ptr + aIndex + copyAmount, b.ptr + bIndex);
-    }
-
-    bool Contains(const T &other) const {
-        if (IsEmpty()) return false;
-
-        for (auto it = cbegin(); it != cend(); ++it)
-            if (*it == other)
-                return true;
-
-        return false;
+        std::copy(sourceArray.ptr + sourceIndex, sourceArray.ptr + sourceIndex + copyAmount, destinationArray.ptr + destinationIndex);
     }
 
     size_t Count(const T &element) const {
@@ -300,40 +302,75 @@ public:
         return total;
     }
 
+    bool Exists(const T &other) const {
+        if (m_Size == 0) return false;
+
+        for (auto it = cbegin(); it != cend(); ++it)
+            if (*it == other)
+                return true;
+
+        return false;
+    }
+
     void Fill(const T &element) {
         for (auto it = begin(); it != end(); ++it)
             *it = element;
     }
 
-    constexpr T &GetAtIndex(size_t index) const {
-        if (index > LastIndex())
-            throw std::out_of_range("index is too large for the resized array");
-
-        return *(ptr + index);
-    }
-
     constexpr T &GetBack() const {
-        if (IsEmpty())
+        if (m_Size == 0)
             throw std::out_of_range("The array is empty");
 
         return *(ptr + m_Size - 1);
     }
 
     constexpr T &GetFront() const {
-        if (IsEmpty())
+        if (m_Size == 0)
             throw std::out_of_range("The array is empty");
 
         return *ptr;
     }
 
-    inline constexpr size_t GetSize() const { return m_Size; }
+    inline constexpr size_t GetLength() const { return m_Size; }
+
+    size_t IndexOf(const T &element) const {
+        for (auto it = cbegin(); it != cend(); ++it)
+            if (*it == element)
+                return std::distance(cbegin(), it);
+
+        throw std::out_of_range("The array doesn't have the provided argument in it");
+    }
+
+    Array<size_t> IndicesOf(const T &element) const {
+        size_t count = Count(element);
+        Array<size_t> a(count);
+
+        for (size_t i = 0, j = 0; i < m_Size; ++i) {
+            if (*(ptr + i) == element) {
+                a[j] = i;
+                ++j;
+
+                if (j == count) break;
+            }
+        }
+
+        return a;
+    }
 
     inline constexpr bool IsEmpty() const { return m_Size == 0; }
 
     inline constexpr ssize_t LastIndex() const { return m_Size - 1; }
 
+    size_t LastIndexOf(const T &element) const {
+        for (auto it = crbegin(); it != crend(); ++it)
+            if (*it == element)
+                return (m_Size - 1) - std::distance(crbegin(), it);
+
+        throw std::out_of_range("The array doesn't have the provided argument in it");
+    }
+
     [[nodiscard]] T RemoveAt(size_t index) {
-        if (index > LastIndex())
+        if (m_Size == 0 || index > m_Size - 1)
             throw std::out_of_range("index is too large for the resized array");
 
         size_t newSize = m_Size - 1;
@@ -344,7 +381,7 @@ public:
             newArray = new T[newSize];
             if (index == 0) {
                 std::copy(ptr + 1, ptr + m_Size, newArray);
-            } else if (index == LastIndex()) {
+            } else if (index == m_Size - 1) {
                 std::copy(ptr, ptr + index, newArray);
             } else {
                 std::copy(ptr, ptr + index, newArray);
@@ -360,7 +397,7 @@ public:
     }
 
     [[nodiscard]] T RemoveBack() {
-        if (IsEmpty())
+        if (m_Size == 0)
             throw std::out_of_range("Cannot remove element from an empty array");
 
         size_t newSize = m_Size - 1;
@@ -369,7 +406,7 @@ public:
 
         if (newSize > 0) {
             newArray = new T[newSize];
-            std::copy(ptr, ptr + LastIndex(), newArray);
+            std::copy(ptr, ptr + m_Size - 1, newArray);
         }
 
         delete[] ptr;
@@ -401,19 +438,19 @@ public:
     }
 
     static void Resize(Array &a, size_t newSize) {
-        if (newSize == a.GetSize()) return;
+        if (newSize == a.m_Size) return;
 
         T *newArray = nullptr;
 
         if (newSize > 0) {
             newArray = new T[newSize];
-            if (newSize > a.GetSize()) {
+            if (newSize > a.m_Size) {
                 // Create a default object to fill the new spaces
                 T def{0};
 
-                if (a.GetSize() > 0) {
-                    std::copy(a.ptr, a.ptr + a.GetSize(), newArray);
-                    for (size_t i = a.GetSize(); i < newSize; ++i)
+                if (a.GetLength() > 0) {
+                    std::copy(a.ptr, a.ptr + a.m_Size, newArray);
+                    for (size_t i = a.m_Size; i < newSize; ++i)
                         newArray[i] = def;
                 } else {
                     for (size_t i = 0; i < newSize; ++i)
@@ -434,38 +471,6 @@ public:
             *ite = *itb;
             *itb = tmp;
         }
-    }
-
-    Array<size_t> WhereAreAll(const T &element) const {
-        size_t count = Count(element);
-        Array<size_t> a(count);
-
-        for (size_t i = 0, j = 0; i < GetSize(); ++i) {
-            if (*(ptr + i) == element) {
-                a[j] = i;
-                ++j;
-
-                if (j == count) break;
-            }
-        }
-
-        return a;
-    }
-
-    size_t WhereIsFirstElement(const T &element) const {
-        for (auto it = cbegin(); it != cend(); ++it)
-            if (*it == element)
-                return std::distance(cbegin(), it);
-
-        throw std::out_of_range("The array doesn't have the provided argument in it");
-    }
-
-    size_t WhereIsLastElement(const T &element) const {
-        for (auto it = crbegin(); it != crend(); ++it)
-            if (*it == element)
-                return LastIndex() - std::distance(crbegin(), it);
-
-        throw std::out_of_range("The array doesn't have the provided argument in it");
     }
 
     constexpr Iterator begin() { return ptr; }
