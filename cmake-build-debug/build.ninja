@@ -241,8 +241,8 @@ build tests/rebuild_cache: phony tests/CMakeFiles/rebuild_cache.util
 
 build cmake_object_order_depends_target_tests: phony || tests/CMakeFiles/tests.dir
 
-build tests/CMakeFiles/tests.dir/test_array.cpp.o: CXX_COMPILER__tests_Debug /data/bcfrutuozo/source/CppDataStructures/tests/test_array.cpp || cmake_object_order_depends_target_tests
-  DEP_FILE = tests/CMakeFiles/tests.dir/test_array.cpp.o.d
+build tests/CMakeFiles/tests.dir/test_main.cpp.o: CXX_COMPILER__tests_Debug /data/bcfrutuozo/source/CppDataStructures/tests/test_main.cpp || cmake_object_order_depends_target_tests
+  DEP_FILE = tests/CMakeFiles/tests.dir/test_main.cpp.o.d
   FLAGS = -g -std=gnu++23
   INCLUDES = -I/data/bcfrutuozo/source/CppDataStructures/cmake-build-debug/_deps/catch2-src/single_include
   OBJECT_DIR = tests/CMakeFiles/tests.dir
@@ -256,7 +256,7 @@ build tests/CMakeFiles/tests.dir/test_array.cpp.o: CXX_COMPILER__tests_Debug /da
 #############################################
 # Link the executable tests/tests
 
-build tests/tests: CXX_EXECUTABLE_LINKER__tests_Debug tests/CMakeFiles/tests.dir/test_array.cpp.o
+build tests/tests: CXX_EXECUTABLE_LINKER__tests_Debug tests/CMakeFiles/tests.dir/test_main.cpp.o
   FLAGS = -g
   OBJECT_DIR = tests/CMakeFiles/tests.dir
   POST_BUILD = :

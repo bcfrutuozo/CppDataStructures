@@ -8,4 +8,4 @@ add_subdirectory(dependencies)
 enable_testing()
 add_subdirectory(tests)
 
-add_executable(CppDataStructures main.cpp String.cpp String.h Array.h ForwardIterator.h)
+add_executable(CppDataStructures main.cpp String.cpp String.h Array.h ForwardIterator.h Stack.h)

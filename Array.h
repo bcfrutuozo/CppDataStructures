@@ -9,6 +9,7 @@
 
 #include <stdexcept>
 #include <iostream>
+#include <algorithm>
 
 template<typename T>
 class Array {
@@ -129,6 +130,19 @@ public:
         Fill(defaultValue);
     }
 
+    constexpr Array(const Array &other)
+            :
+            m_Size(other.m_Size) {
+        if (other.m_Size > 0) {
+            m_Size = other.m_Size;
+            ptr = new T[m_Size];
+            std::copy(other.ptr, other.ptr + other.m_Size, ptr);
+        } else {
+            m_Size = 0;
+            ptr = nullptr;
+        }
+    }
+
     Array(std::initializer_list<T> l) {
         if (empty(l)) {
             ptr = nullptr;
@@ -157,16 +171,8 @@ public:
     }
 
     constexpr Array& operator=(const Array &other) {
-        if (other.m_Size > 0) {
-            m_Size = other.m_Size;
-            ptr = new T[m_Size];
-
-            std::copy(other.ptr, other.ptr + other.m_Size, ptr);
-        } else {
-            m_Size = 0;
-            ptr = nullptr;
-        }
-
+        Array copied(other);
+        Swap(copied);
         return *this;
     }
 
@@ -471,6 +477,13 @@ public:
             *ite = *itb;
             *itb = tmp;
         }
+    }
+
+    void Swap(Array& other){
+        using std::swap;
+
+        swap(ptr, other.ptr);
+        swap(m_Size, other.m_Size);
     }
 
     constexpr Iterator begin() { return ptr; }
