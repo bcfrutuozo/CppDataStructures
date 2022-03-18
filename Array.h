@@ -2,8 +2,8 @@
 // Created by bcfrutuozo on 14/03/2022.
 //
 
-#ifndef LNXCPPLEARNING_ARRAY_H
-#define LNXCPPLEARNING_ARRAY_H
+#ifndef CPPDATASTRUCTURES_ARRAY_H
+#define CPPDATASTRUCTURES_ARRAY_H
 
 #include "ForwardIterator.h"
 
@@ -490,4 +490,4 @@ public:
     constexpr ConstReverseIterator crend() const { return ptr - 1; }
 };
 
-#endif //LNXCPPLEARNING_ARRAY_H
+#endif //CPPDATASTRUCTURES_ARRAY_H

@@ -2,8 +2,8 @@
 // Created by bcfrutuozo on 12/03/2022.
 //
 
-#ifndef LNXCPPLEARNING_STRING_H
-#define LNXCPPLEARNING_STRING_H
+#ifndef CPPDATASTRUCTURES_STRING_H
+#define CPPDATASTRUCTURES_STRING_H
 
 #include "Array.h"
 
@@ -69,4 +69,4 @@ inline std::ostream& operator<<(std::ostream& os, const String& s)
     return os;
 }
 
-#endif //LNXCPPLEARNING_STRING_H
+#endif //CPPDATASTRUCTURES_STRING_H
