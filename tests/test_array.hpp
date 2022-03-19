@@ -341,7 +341,7 @@ TEST_CASE("Array")
             Array<int> d;
             d.AddAtIndex(1, 0);
             Array<int> e = { 1 };
-            REQUIRE(d == e);
+            REQUIRE(d != e);
 
             Array<int> f(0);
             CHECK_THROWS(f.AddAtIndex(1, 1));

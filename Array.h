@@ -39,7 +39,7 @@ private:
     //<editor-fold desc="Iterators implementation">
     struct Iterator : ForwardIterator<T> {
 
-        constexpr Iterator(T *ptr) noexcept : ForwardIterator<T>(ptr) {}
+        constexpr Iterator(T *ptr) noexcept: ForwardIterator<T>(ptr) {}
 
         // Prefix increment
         constexpr Iterator &operator++() override {
@@ -57,7 +57,7 @@ private:
 
     struct ConstIterator : ForwardIterator<const T> {
 
-        constexpr ConstIterator(const T *ptr) noexcept : ForwardIterator<const T>(ptr) {}
+        constexpr ConstIterator(const T *ptr) noexcept: ForwardIterator<const T>(ptr) {}
 
         // Prefix increment
         constexpr ConstIterator &operator++() override {
@@ -75,7 +75,7 @@ private:
 
     struct ReverseIterator : ForwardIterator<T> {
 
-        constexpr ReverseIterator(T *ptr) noexcept : ForwardIterator<T>(ptr) {}
+        constexpr ReverseIterator(T *ptr) noexcept: ForwardIterator<T>(ptr) {}
 
         // Prefix increment
         constexpr ReverseIterator &operator++() override {
@@ -93,7 +93,7 @@ private:
 
     struct ConstReverseIterator : ForwardIterator<const T> {
 
-        constexpr ConstReverseIterator(const T *ptr) noexcept : ForwardIterator<const T>(ptr) {}
+        constexpr ConstReverseIterator(const T *ptr) noexcept: ForwardIterator<const T>(ptr) {}
 
         // Prefix increment
         constexpr ConstReverseIterator &operator++() override {
@@ -163,13 +163,13 @@ public:
 
     // Using proxy class ArrayValue to handle this function as Getter/Setter
     constexpr ArrayValue operator[](size_t index) {
-        if ((ssize_t)index > LastIndex())
+        if ((ssize_t) index > LastIndex())
             throw std::out_of_range("index is too large for the resized array");
 
         return ArrayValue(pData + index);
     }
 
-    constexpr Array& operator=(const Array &other) noexcept{
+    constexpr Array &operator=(const Array &other) noexcept {
         Array copied(other);
         Swap(copied);
         return *this;
@@ -202,11 +202,11 @@ public:
     }
 
     void Add(const Array<T> &other) noexcept {
-        if(other.IsEmpty()) return;
+        if (other.IsEmpty()) return;
 
         auto newSize = Size + other.Size;
-        T* newArray = new T[newSize];
-        if(Size == 0){
+        T *newArray = new T[newSize];
+        if (Size == 0) {
             std::copy(other.pData, other.pData + other.Size, newArray);
         } else {
             std::copy(pData, pData + Size, newArray);
@@ -219,32 +219,32 @@ public:
     }
 
     void AddAtIndex(const T &element, size_t index) {
-        if ((ssize_t)index > LastIndex())
+
+        if (GetLength() == 0 && index == 0) Add(element);
+
+        if ((ssize_t) index > LastIndex())
             throw std::out_of_range("Invalid array boundaries");
 
-        if (Size == 0)
-            Add(element);
-        else {
-            size_t newSize = Size + 1;
-            T *newArray = new T[newSize];
+        size_t newSize = Size + 1;
+        T *newArray = new T[newSize];
 
-            // Copy preblock from start until the desired index
-            std::copy(pData, pData + index, newArray);
+        // Copy preblock from start until the desired index
+        std::copy(pData, pData + index, newArray);
 
-            // Copy the following blocks until the end of the array
-            std::copy(pData + index, pData + Size, newArray + index + 1);
+        // Copy the following blocks until the end of the array
+        std::copy(pData + index, pData + Size, newArray + index + 1);
 
-            // Fill the desired index block with the new element
-            *(newArray + index) = element;
+        // Fill the desired index block with the new element
+        *(newArray + index) = element;
 
-            delete[] pData;
-            pData = newArray;
-            Size = newSize;
-        }
+        delete[] pData;
+        pData = newArray;
+        Size = newSize;
+
     }
 
     void AddAtIndex(const Array &a, size_t index) {
-        if ((ssize_t)index > LastIndex())
+        if ((ssize_t) index > LastIndex())
             throw std::out_of_range("Invalid array boundaries");
 
         if (IsEmpty())
@@ -279,18 +279,19 @@ public:
         }
     }
 
-    static void Copy(Array& sourceArray, size_t sourceIndex, Array& destinationArray, size_t destinationIndex) {
-        if(sourceIndex > sourceArray.LastIndex() || destinationIndex > destinationArray.LastIndex())
+    static void Copy(Array &sourceArray, size_t sourceIndex, Array &destinationArray, size_t destinationIndex) {
+        if (sourceIndex > sourceArray.LastIndex() || destinationIndex > destinationArray.LastIndex())
             throw std::out_of_range("Specified index is out of array bounds");
 
         ssize_t copyAmount = sourceArray.Size - sourceIndex;
         ssize_t availableSpace = destinationArray.Size - destinationIndex;
 
         bool needExtraSpace = (copyAmount - availableSpace) > 0;
-        if(needExtraSpace)
+        if (needExtraSpace)
             Array::Resize(destinationArray, destinationArray.Size + (copyAmount - availableSpace));
 
-        std::copy(sourceArray.pData + sourceIndex, sourceArray.pData + sourceIndex + copyAmount, destinationArray.pData + destinationIndex);
+        std::copy(sourceArray.pData + sourceIndex, sourceArray.pData + sourceIndex + copyAmount,
+                  destinationArray.pData + destinationIndex);
     }
 
     size_t Count(const T &element) const noexcept {
@@ -369,7 +370,7 @@ public:
     }
 
     [[nodiscard]] T RemoveAt(size_t index) {
-        if (IsEmpty() || (ssize_t)index > LastIndex())
+        if (IsEmpty() || (ssize_t) index > LastIndex())
             throw std::out_of_range("index is too large for the resized array");
 
         size_t newSize = Size - 1;
@@ -472,7 +473,7 @@ public:
         }
     }
 
-    void Swap(Array& other) noexcept {
+    void Swap(Array &other) noexcept {
         using std::swap;
 
         swap(pData, other.pData);
