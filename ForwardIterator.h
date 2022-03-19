@@ -21,7 +21,7 @@ public:
     // Pointer field representation
     pointer pElement = nullptr;
 
-    constexpr ForwardIterator(pointer ptr)
+    constexpr ForwardIterator(pointer ptr) noexcept
             :
             pElement(ptr) {
     }

@@ -11,7 +11,7 @@
 
 TEST_CASE("Stack")
 {
-    SECTION("Stack instantiation")
+    SECTION("Instantiation")
     {
         SECTION("Primitive types")
         {
@@ -262,19 +262,13 @@ TEST_CASE("Stack")
         CHECK_THROWS(c.Pop());
     }
 
-    SECTION("Check the Stack peek")
+    SECTION("Check peek")
     {
         Stack<int> c = {4, 99, -37, 0, 2};
         REQUIRE(c.Peek() == 2);
         REQUIRE(c.GetLength() == 5);
-        while (!c.
-
-                IsEmpty()
-
-                )
-            c.
-
-                    Pop();
+        while (!c.IsEmpty())
+            c.Pop();
         CHECK_THROWS(c.Peek());
     }
 
@@ -291,7 +285,7 @@ TEST_CASE("Stack")
         REQUIRE(c == final);
     }
 
-    SECTION("Swap Stack container")
+    SECTION("Swap container")
     {
         Stack<int> a{0, 1, 2, 3};
         Stack<int> b{9, 8, 7, 6};

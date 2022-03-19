@@ -11,7 +11,7 @@
 
 TEST_CASE("Array")
 {
-    SECTION("Array instantiation")
+    SECTION("Instantiation")
     {
         SECTION("Primitive types")
         {
@@ -266,7 +266,7 @@ TEST_CASE("Array")
                          "C",
                          "ELEMENT 6", "ELEMENT 7", "ELEMENT 8", "ELEMENT 9", "ELEMENT 10"});
 
-            // Checking index and size
+            // Checking index and Size
             REQUIRE(cpArray.GetLength() == 17);
             REQUIRE(cpArray.LastIndex() == 16);
 
@@ -288,13 +288,13 @@ TEST_CASE("Array")
         {
             Array<int> emptyArrayForSingleInsertion;
 
-            // Checking index and size
+            // Checking index and Size
             REQUIRE(emptyArrayForSingleInsertion.GetLength() == 0);
             REQUIRE(emptyArrayForSingleInsertion.LastIndex() == -1);
 
             emptyArrayForSingleInsertion.Add(10);
 
-            // Checking index and size
+            // Checking index and Size
             REQUIRE(emptyArrayForSingleInsertion.GetLength() == 1);
             REQUIRE(emptyArrayForSingleInsertion.LastIndex() == 0);
 
@@ -308,13 +308,13 @@ TEST_CASE("Array")
         {
             Array<int> emptyArrayForRangeInsertion;
 
-            // Checking index and size
+            // Checking index and Size
             REQUIRE(emptyArrayForRangeInsertion.GetLength() == 0);
             REQUIRE(emptyArrayForRangeInsertion.LastIndex() == -1);
 
             emptyArrayForRangeInsertion.Add({4, 6, 3, 1, 6, 6, 6, 19, 2, 164, 52231, 2, 1, 0, -132, -4, -7, 32, -999});
 
-            // Checking index and size
+            // Checking index and Size
             REQUIRE(emptyArrayForRangeInsertion.GetLength() == 19);
             REQUIRE(emptyArrayForRangeInsertion.LastIndex() == 18);
 
@@ -330,16 +330,21 @@ TEST_CASE("Array")
 
         SECTION("Adding element at the middle of Array")
         {
-            Array<char> a = {1, 3, -4, 2, 8};
-            a.AddAtIndex(100, 2);
-            Array<char> b = {1, 3, 100, -4, 2, 8};
+            Array<char> a = {'1', '3', '4', '2', '8'};
+            a.AddAtIndex('1', 2);
+            Array<char> b = {'1', '3', '1', '4', '2', '8'};
             REQUIRE(a == b);
-            a.AddAtIndex(127, 5);
-            Array<char> c = {1, 3, 100, -4, 2, 127, 8};
+            a.AddAtIndex('9', 5);
+            Array<char> c = {'1', '3', '1', '4', '2', '9', '8'};
             REQUIRE(a == c);
 
             Array<int> d;
-            CHECK_THROWS(d.AddAtIndex(1, 0));
+            d.AddAtIndex(1, 0);
+            Array<int> e = { 1 };
+            REQUIRE(d == e);
+
+            Array<int> f(0);
+            CHECK_THROWS(f.AddAtIndex(1, 1));
         }
 
         SECTION("Adding collection at the middle of Array")

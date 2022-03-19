@@ -96,6 +96,12 @@ build CMakeFiles/CppDataStructures.dir/String.cpp.o: CXX_COMPILER__CppDataStruct
   OBJECT_DIR = CMakeFiles/CppDataStructures.dir
   OBJECT_FILE_DIR = CMakeFiles/CppDataStructures.dir
 
+build CMakeFiles/CppDataStructures.dir/Timer.cpp.o: CXX_COMPILER__CppDataStructures_Debug /data/bcfrutuozo/source/CppDataStructures/Timer.cpp || cmake_object_order_depends_target_CppDataStructures
+  DEP_FILE = CMakeFiles/CppDataStructures.dir/Timer.cpp.o.d
+  FLAGS = -g -std=gnu++23
+  OBJECT_DIR = CMakeFiles/CppDataStructures.dir
+  OBJECT_FILE_DIR = CMakeFiles/CppDataStructures.dir
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target CppDataStructures
@@ -104,7 +110,7 @@ build CMakeFiles/CppDataStructures.dir/String.cpp.o: CXX_COMPILER__CppDataStruct
 #############################################
 # Link the executable CppDataStructures
 
-build CppDataStructures: CXX_EXECUTABLE_LINKER__CppDataStructures_Debug CMakeFiles/CppDataStructures.dir/main.cpp.o CMakeFiles/CppDataStructures.dir/String.cpp.o
+build CppDataStructures: CXX_EXECUTABLE_LINKER__CppDataStructures_Debug CMakeFiles/CppDataStructures.dir/main.cpp.o CMakeFiles/CppDataStructures.dir/String.cpp.o CMakeFiles/CppDataStructures.dir/Timer.cpp.o
   FLAGS = -g
   OBJECT_DIR = CMakeFiles/CppDataStructures.dir
   POST_BUILD = :

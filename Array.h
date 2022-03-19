@@ -8,7 +8,6 @@
 #include "ForwardIterator.h"
 
 #include <stdexcept>
-#include <iostream>
 #include <algorithm>
 
 template<typename T>
@@ -16,8 +15,8 @@ class Array {
 
 private:
 
-    T *ptr;
-    size_t m_Size;
+    T *pData;
+    size_t Size;
 
     //<editor-fold desc="Proxy to handle operator[] as Getter/Setter">
     class ArrayValue {
@@ -27,20 +26,20 @@ private:
 
     public:
 
-        constexpr explicit ArrayValue(T *value)
+        constexpr explicit ArrayValue(T *value) noexcept
                 :
                 value(value) {}
 
-        constexpr operator T() const { return *value; }
+        constexpr operator T() const noexcept { return *value; }
 
-        constexpr void operator=(const T &val) { *value = val; }
+        constexpr void operator=(const T &val) noexcept { *value = val; }
     };
     //</editor-fold>
 
     //<editor-fold desc="Iterators implementation">
     struct Iterator : ForwardIterator<T> {
 
-        constexpr Iterator(T *ptr) : ForwardIterator<T>(ptr) {}
+        constexpr Iterator(T *ptr) noexcept : ForwardIterator<T>(ptr) {}
 
         // Prefix increment
         constexpr Iterator &operator++() override {
@@ -58,7 +57,7 @@ private:
 
     struct ConstIterator : ForwardIterator<const T> {
 
-        constexpr ConstIterator(const T *ptr) : ForwardIterator<const T>(ptr) {}
+        constexpr ConstIterator(const T *ptr) noexcept : ForwardIterator<const T>(ptr) {}
 
         // Prefix increment
         constexpr ConstIterator &operator++() override {
@@ -76,7 +75,7 @@ private:
 
     struct ReverseIterator : ForwardIterator<T> {
 
-        constexpr ReverseIterator(T *ptr) : ForwardIterator<T>(ptr) {}
+        constexpr ReverseIterator(T *ptr) noexcept : ForwardIterator<T>(ptr) {}
 
         // Prefix increment
         constexpr ReverseIterator &operator++() override {
@@ -94,7 +93,7 @@ private:
 
     struct ConstReverseIterator : ForwardIterator<const T> {
 
-        constexpr ConstReverseIterator(const T *ptr) : ForwardIterator<const T>(ptr) {}
+        constexpr ConstReverseIterator(const T *ptr) noexcept : ForwardIterator<const T>(ptr) {}
 
         // Prefix increment
         constexpr ConstReverseIterator &operator++() override {
@@ -113,71 +112,71 @@ private:
 
 public:
 
-    constexpr Array()
+    constexpr Array() noexcept
             :
-            ptr(nullptr),
-            m_Size(0) {}
+            pData(nullptr),
+            Size(0) {}
 
-    constexpr explicit Array(size_t size)
+    constexpr explicit Array(size_t size) noexcept
             :
-            ptr(new T[size]()),
-            m_Size(size) {}
+            pData(new T[size]()),
+            Size(size) {}
 
-    constexpr Array(const T &defaultValue, size_t size)
+    constexpr Array(const T &defaultValue, size_t size) noexcept
             :
-            ptr(new T[size]()),
-            m_Size(size) {
+            pData(new T[size]()),
+            Size(size) {
         Fill(defaultValue);
     }
 
-    constexpr Array(const Array &other)
+    constexpr Array(const Array &other) noexcept
             :
-            m_Size(other.m_Size) {
-        if (other.m_Size > 0) {
-            m_Size = other.m_Size;
-            ptr = new T[m_Size];
-            std::copy(other.ptr, other.ptr + other.m_Size, ptr);
+            Size(other.Size) {
+        if (other.Size > 0) {
+            Size = other.Size;
+            pData = new T[Size];
+            std::copy(other.pData, other.pData + other.Size, pData);
         } else {
-            m_Size = 0;
-            ptr = nullptr;
+            Size = 0;
+            pData = nullptr;
         }
     }
 
-    Array(std::initializer_list<T> l) {
+    Array(std::initializer_list<T> l) noexcept {
         if (empty(l)) {
-            ptr = nullptr;
-            m_Size = 0;
+            pData = nullptr;
+            Size = 0;
         } else {
-            m_Size = l.size();
-            ptr = new T[m_Size];
+            Size = l.size();
+            pData = new T[Size];
             for (auto it = begin(), itl = l.begin(); it != end(); ++it, ++itl)
                 *it = *itl;
         }
     }
 
-    ~Array() {
-        if (ptr != nullptr) {
-            delete[] ptr;
-            ptr = nullptr;
+    ~Array() noexcept {
+        if (pData != nullptr) {
+            delete[] pData;
+            pData = nullptr;
         }
     }
 
     // Using proxy class ArrayValue to handle this function as Getter/Setter
     constexpr ArrayValue operator[](size_t index) {
-        if (index > m_Size - 1)
+        if ((ssize_t)index > LastIndex())
             throw std::out_of_range("index is too large for the resized array");
 
-        return ArrayValue(ptr + index);
+        return ArrayValue(pData + index);
     }
 
-    constexpr Array& operator=(const Array &other) {
+    constexpr Array& operator=(const Array &other) noexcept{
         Array copied(other);
         Swap(copied);
         return *this;
     }
 
-    bool operator==(const Array &other) const {
-        if (m_Size != other.m_Size) return false;
+    bool operator==(const Array &other) const noexcept {
+        if (Size != other.Size) return false;
 
         for (auto itself = cbegin(), itother = other.cbegin(); itself != cend(); ++itself, ++itother)
             if (*itself != *itother)
@@ -186,97 +185,91 @@ public:
         return true;
     }
 
-    bool operator!=(const Array &other) const {
+    bool operator!=(const Array &other) const noexcept {
         return !(*this == other);
     }
 
-    friend std::ostream &operator<<(std::ostream &os, const Array &a) {
-        for (auto it = a.cbegin(); it != a.cend(); ++it)
-            os << *it;
-        return os;
-    }
-
-    void Add(const T &element) {
-        size_t newSize = m_Size + 1;
+    void Add(const T &element) noexcept {
+        size_t newSize = Size + 1;
         auto *newArray = new T[newSize];
-        std::copy(ptr, ptr + m_Size, newArray);
+        std::copy(pData, pData + Size, newArray);
 
-        delete[] ptr;
-        ptr = newArray;
-        m_Size = newSize;
+        delete[] pData;
+        pData = newArray;
+        Size = newSize;
 
-        ptr[m_Size - 1] = element;
+        pData[LastIndex()] = element;
     }
 
-    void Add(const Array<T> &other) {
-        if(other.m_Size == 0) return;
+    void Add(const Array<T> &other) noexcept {
+        if(other.IsEmpty()) return;
 
-        auto newSize = m_Size + other.m_Size;
+        auto newSize = Size + other.Size;
         T* newArray = new T[newSize];
-        if(m_Size == 0){
-            std::copy(other.ptr, other.ptr + other.m_Size, newArray);
+        if(Size == 0){
+            std::copy(other.pData, other.pData + other.Size, newArray);
         } else {
-            std::copy(ptr, ptr + m_Size, newArray);
-            std::copy(other.ptr, other.ptr + other.m_Size, newArray + m_Size);
+            std::copy(pData, pData + Size, newArray);
+            std::copy(other.pData, other.pData + other.Size, newArray + Size);
         }
 
-        delete[] ptr;
-        ptr = newArray;
-        m_Size = newSize;
+        delete[] pData;
+        pData = newArray;
+        Size = newSize;
     }
 
     void AddAtIndex(const T &element, size_t index) {
-        if (m_Size == 0 || index > m_Size - 1)
+        if ((ssize_t)index > LastIndex())
             throw std::out_of_range("Invalid array boundaries");
 
-        if (m_Size == 0)
+        if (Size == 0)
             Add(element);
         else {
-            size_t newSize = m_Size + 1;
+            size_t newSize = Size + 1;
             T *newArray = new T[newSize];
 
             // Copy preblock from start until the desired index
-            std::copy(ptr, ptr + index, newArray);
+            std::copy(pData, pData + index, newArray);
 
             // Copy the following blocks until the end of the array
-            std::copy(ptr + index, ptr + m_Size, newArray + index + 1);
+            std::copy(pData + index, pData + Size, newArray + index + 1);
 
             // Fill the desired index block with the new element
             *(newArray + index) = element;
 
-            delete[] ptr;
-            ptr = newArray;
-            m_Size = newSize;
+            delete[] pData;
+            pData = newArray;
+            Size = newSize;
         }
     }
 
     void AddAtIndex(const Array &a, size_t index) {
-        if (m_Size == 0 || index > m_Size - 1)
+        if ((ssize_t)index > LastIndex())
             throw std::out_of_range("Invalid array boundaries");
 
-        if (m_Size == 0)
+        if (IsEmpty())
             Add(a);
         else {
-            size_t newSize = m_Size + a.m_Size;
+            size_t newSize = Size + a.Size;
             T *newArray = new T[newSize];
 
             // Copy pre-block from start until the desired index
-            std::copy(ptr, ptr + index, newArray);
+            std::copy(pData, pData + index, newArray);
 
             // Copy the following blocks until the end of the array
-            std::copy(ptr + index, ptr + m_Size, newArray + index + a.m_Size);
+            std::copy(pData + index, pData + Size, newArray + index + a.Size);
 
             // Fill the desired index block with the new element
-            std::copy(a.ptr, a.ptr + a.m_Size, newArray + index);
+            std::copy(a.pData, a.pData + a.Size, newArray + index);
 
-            delete[] ptr;
-            ptr = newArray;
-            m_Size = newSize;
+            delete[] pData;
+            pData = newArray;
+            Size = newSize;
         }
     }
 
-    static void Copy(Array &sourceArray, Array &destinationArray) {
-        if (sourceArray.m_Size > destinationArray.m_Size)
+    static void Copy(Array &sourceArray, Array &destinationArray) noexcept {
+        if (sourceArray.Size > destinationArray.Size)
             destinationArray = sourceArray;
         else {
             for (auto itsource = sourceArray.begin(), itdestination = destinationArray.begin();
@@ -286,21 +279,21 @@ public:
         }
     }
 
-    static void Copy(Array& sourceArray, size_t sourceIndex, Array& destinationArray, size_t destinationIndex){
-        if(sourceIndex > sourceArray.m_Size - 1 || destinationIndex > destinationArray.m_Size - 1)
+    static void Copy(Array& sourceArray, size_t sourceIndex, Array& destinationArray, size_t destinationIndex) {
+        if(sourceIndex > sourceArray.LastIndex() || destinationIndex > destinationArray.LastIndex())
             throw std::out_of_range("Specified index is out of array bounds");
 
-        ssize_t copyAmount = sourceArray.m_Size - sourceIndex;
-        ssize_t availableSpace = destinationArray.m_Size - destinationIndex;
+        ssize_t copyAmount = sourceArray.Size - sourceIndex;
+        ssize_t availableSpace = destinationArray.Size - destinationIndex;
 
         bool needExtraSpace = (copyAmount - availableSpace) > 0;
         if(needExtraSpace)
-            Array::Resize(destinationArray, destinationArray.m_Size + (copyAmount - availableSpace));
+            Array::Resize(destinationArray, destinationArray.Size + (copyAmount - availableSpace));
 
-        std::copy(sourceArray.ptr + sourceIndex, sourceArray.ptr + sourceIndex + copyAmount, destinationArray.ptr + destinationIndex);
+        std::copy(sourceArray.pData + sourceIndex, sourceArray.pData + sourceIndex + copyAmount, destinationArray.pData + destinationIndex);
     }
 
-    size_t Count(const T &element) const {
+    size_t Count(const T &element) const noexcept {
         size_t total = 0;
         for (auto it = cbegin(); it != cend(); ++it)
             if (*it == element)
@@ -308,8 +301,8 @@ public:
         return total;
     }
 
-    bool Exists(const T &other) const {
-        if (m_Size == 0) return false;
+    bool Exists(const T &other) const noexcept {
+        if (IsEmpty()) return false;
 
         for (auto it = cbegin(); it != cend(); ++it)
             if (*it == other)
@@ -318,26 +311,26 @@ public:
         return false;
     }
 
-    void Fill(const T &element) {
+    void Fill(const T &element) noexcept {
         for (auto it = begin(); it != end(); ++it)
             *it = element;
     }
 
     constexpr T &GetBack() const {
-        if (m_Size == 0)
+        if (IsEmpty())
             throw std::out_of_range("The array is empty");
 
-        return *(ptr + m_Size - 1);
+        return *(pData + LastIndex());
     }
 
     constexpr T &GetFront() const {
-        if (m_Size == 0)
+        if (IsEmpty())
             throw std::out_of_range("The array is empty");
 
-        return *ptr;
+        return *pData;
     }
 
-    inline constexpr size_t GetLength() const { return m_Size; }
+    inline constexpr size_t GetLength() const noexcept { return Size; }
 
     size_t IndexOf(const T &element) const {
         for (auto it = cbegin(); it != cend(); ++it)
@@ -347,12 +340,12 @@ public:
         throw std::out_of_range("The array doesn't have the provided argument in it");
     }
 
-    Array<size_t> IndicesOf(const T &element) const {
+    Array<size_t> IndicesOf(const T &element) const noexcept {
         size_t count = Count(element);
         Array<size_t> a(count);
 
-        for (size_t i = 0, j = 0; i < m_Size; ++i) {
-            if (*(ptr + i) == element) {
+        for (size_t i = 0, j = 0; i < Size; ++i) {
+            if (*(pData + i) == element) {
                 a[j] = i;
                 ++j;
 
@@ -363,115 +356,115 @@ public:
         return a;
     }
 
-    inline constexpr bool IsEmpty() const { return m_Size == 0; }
+    inline constexpr bool IsEmpty() const noexcept { return Size == 0; }
 
-    inline constexpr ssize_t LastIndex() const { return m_Size - 1; }
+    inline constexpr ssize_t LastIndex() const noexcept { return Size - 1; }
 
     size_t LastIndexOf(const T &element) const {
         for (auto it = crbegin(); it != crend(); ++it)
             if (*it == element)
-                return (m_Size - 1) - std::distance(crbegin(), it);
+                return LastIndex() - std::distance(crbegin(), it);
 
         throw std::out_of_range("The array doesn't have the provided argument in it");
     }
 
     [[nodiscard]] T RemoveAt(size_t index) {
-        if (m_Size == 0 || index > m_Size - 1)
+        if (IsEmpty() || (ssize_t)index > LastIndex())
             throw std::out_of_range("index is too large for the resized array");
 
-        size_t newSize = m_Size - 1;
+        size_t newSize = Size - 1;
         T *newArray = nullptr;
-        T obj = *(ptr + index);
+        T obj = *(pData + index);
 
         if (newSize > 0) {
             newArray = new T[newSize];
             if (index == 0) {
-                std::copy(ptr + 1, ptr + m_Size, newArray);
-            } else if (index == m_Size - 1) {
-                std::copy(ptr, ptr + index, newArray);
+                std::copy(pData + 1, pData + Size, newArray);
+            } else if (index == LastIndex()) {
+                std::copy(pData, pData + index, newArray);
             } else {
-                std::copy(ptr, ptr + index, newArray);
-                std::copy(ptr + index + 1, ptr + m_Size, newArray + index);
+                std::copy(pData, pData + index, newArray);
+                std::copy(pData + index + 1, pData + Size, newArray + index);
             }
         }
 
-        delete[] ptr;
-        ptr = newArray;
-        m_Size = newSize;
+        delete[] pData;
+        pData = newArray;
+        Size = newSize;
 
         return obj;
     }
 
     [[nodiscard]] T RemoveBack() {
-        if (m_Size == 0)
+        if (IsEmpty())
             throw std::out_of_range("Cannot remove element from an empty array");
 
-        size_t newSize = m_Size - 1;
+        size_t newSize = Size - 1;
         T *newArray = nullptr;
-        T obj = *(ptr + newSize);
+        T obj = *(pData + newSize);
 
         if (newSize > 0) {
             newArray = new T[newSize];
-            std::copy(ptr, ptr + m_Size - 1, newArray);
+            std::copy(pData, pData + Size - 1, newArray);
         }
 
-        delete[] ptr;
-        ptr = newArray;
-        m_Size = newSize;
+        delete[] pData;
+        pData = newArray;
+        Size = newSize;
 
         return obj;
     }
 
     [[nodiscard]] T RemoveFront() {
-        if (m_Size == 0)
+        if (IsEmpty())
             throw std::out_of_range("Cannot remove element from an empty array");
 
-        size_t newSize = m_Size - 1;
+        size_t newSize = Size - 1;
         T *newArray = nullptr;
 
-        T obj = *ptr;
+        T obj = *pData;
 
         if (newSize > 0) {
             newArray = new T[newSize];
-            std::copy(ptr + 1, ptr + m_Size, newArray);
+            std::copy(pData + 1, pData + Size, newArray);
         }
 
-        delete[] ptr;
-        ptr = newArray;
-        m_Size = newSize;
+        delete[] pData;
+        pData = newArray;
+        Size = newSize;
 
         return obj;
     }
 
-    static void Resize(Array &a, size_t newSize) {
-        if (newSize == a.m_Size) return;
+    static void Resize(Array &a, size_t newSize) noexcept {
+        if (newSize == a.Size) return;
 
         T *newArray = nullptr;
 
         if (newSize > 0) {
             newArray = new T[newSize];
-            if (newSize > a.m_Size) {
+            if (newSize > a.Size) {
                 // Create a default object to fill the new spaces
                 T def{0};
 
                 if (a.GetLength() > 0) {
-                    std::copy(a.ptr, a.ptr + a.m_Size, newArray);
-                    for (size_t i = a.m_Size; i < newSize; ++i)
+                    std::copy(a.pData, a.pData + a.Size, newArray);
+                    for (size_t i = a.Size; i < newSize; ++i)
                         newArray[i] = def;
                 } else {
                     for (size_t i = 0; i < newSize; ++i)
                         newArray[i] = def;
                 }
             } else
-                std::copy(a.ptr, a.ptr + newSize, newArray);
+                std::copy(a.pData, a.pData + newSize, newArray);
         }
 
-        delete[] a.ptr;
-        a.ptr = newArray;
-        a.m_Size = newSize;
+        delete[] a.pData;
+        a.pData = newArray;
+        a.Size = newSize;
     }
 
-    void Reverse() {
+    void Reverse() noexcept {
         for (auto itb = begin(), ite = rbegin(); &(*itb) < &(*ite); ++itb, ++ite) {
             auto tmp = *ite;
             *ite = *itb;
@@ -479,28 +472,28 @@ public:
         }
     }
 
-    void Swap(Array& other){
+    void Swap(Array& other) noexcept {
         using std::swap;
 
-        swap(ptr, other.ptr);
-        swap(m_Size, other.m_Size);
+        swap(pData, other.pData);
+        swap(Size, other.Size);
     }
 
-    constexpr Iterator begin() { return ptr; }
+    constexpr Iterator begin() noexcept { return pData; }
 
-    constexpr Iterator end() { return ptr + m_Size; }
+    constexpr Iterator end() noexcept { return pData + Size; }
 
-    constexpr ConstIterator cbegin() const { return ptr; }
+    constexpr ConstIterator cbegin() const noexcept { return pData; }
 
-    constexpr ConstIterator cend() const { return ptr + m_Size; }
+    constexpr ConstIterator cend() const noexcept { return pData + Size; }
 
-    constexpr ReverseIterator rbegin() { return ptr + m_Size - 1; }
+    constexpr ReverseIterator rbegin() noexcept { return pData + LastIndex(); }
 
-    constexpr ReverseIterator rend() { return ptr - 1; }
+    constexpr ReverseIterator rend() noexcept { return pData - 1; }
 
-    constexpr ConstReverseIterator crbegin() const { return ptr + m_Size - 1; }
+    constexpr ConstReverseIterator crbegin() const noexcept { return pData + LastIndex(); }
 
-    constexpr ConstReverseIterator crend() const { return ptr - 1; }
+    constexpr ConstReverseIterator crend() const noexcept { return pData - 1; }
 };
 
 #endif //CPPDATASTRUCTURES_ARRAY_H
