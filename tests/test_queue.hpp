@@ -242,14 +242,29 @@ TEST_CASE("Queue")
 
         SECTION("Array of elements")
         {
-            Queue<const char *> c = {"A", "TEST", "LOREM"};
-            Array<const char *> a = {"ABC", "DEF", "ZZZ"};
-            c.Enqueue(a);
-            REQUIRE(c.GetLength() == 6);
-            REQUIRE(strcmp(c.Dequeue(), "A") == 0);
-            REQUIRE(c.GetLength() == 5);
-            Queue<const char *> final = {"TEST", "LOREM", "ABC", "DEF", "ZZZ"};
-            REQUIRE(c == final);
+            SECTION("Single element")
+            {
+                Queue<const char *> c = {"A", "TEST", "LOREM"};
+                Array<const char *> a = {"ABC", "DEF", "ZZZ"};
+                c.Enqueue(a);
+                REQUIRE(c.GetLength() == 6);
+                REQUIRE(strcmp(c.Dequeue(), "A") == 0);
+                REQUIRE(c.GetLength() == 5);
+                Queue<const char *> final = {"TEST", "LOREM", "ABC", "DEF", "ZZZ"};
+                REQUIRE(c == final);
+            }
+
+            SECTION("Array of elements")
+            {
+                Queue<const char *> c = {"A", "TEST", "LOREM", "TEST", "TEST2", "TEST3"};
+                REQUIRE(c.GetLength() == 6);
+                Array<const char *> a = c.Dequeue(3);
+                REQUIRE(a.GetLength() == 3);
+                REQUIRE(c.GetLength() == 3);
+                a[0] == "A";
+                a[1] == "TEST";
+                a[2] == "LOREM";
+            }
         }
     }
 
@@ -290,6 +305,15 @@ TEST_CASE("Queue")
         REQUIRE(b.Dequeue() == 2);
         REQUIRE(b.Dequeue() == 3);
         CHECK_THROWS(b.Dequeue());
+    }
+
+    SECTION("Conversion to Array<T>"){
+        Queue<int> a { 1, 2, 3, 4, 5 };
+        Array<int> b = a.ToArray();
+        Queue<int> copy = a;
+        Array<int> comp { 1, 2, 3, 4, 5};
+        REQUIRE(a == copy);
+        REQUIRE(b == comp);
     }
 }
 

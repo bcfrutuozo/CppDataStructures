@@ -8,7 +8,6 @@
 #include <stdexcept>
 #include <algorithm>
 
-#include "ForwardIterator.h"
 #include "Array.h"
 
 template<typename T>
@@ -40,37 +39,34 @@ public:
 
     constexpr Stack(const Stack &other) noexcept
             :
+            Top(nullptr),
             Size(other.GetLength()) {
-        if (other.IsEmpty()) {
-            Top = nullptr;
-        } else {
-            auto p = other.Top;                 // points to current node on other
-            auto tmp = new StackNode(p->Data); // make a copy of the first node
-            Top = tmp;
-            auto tail = tmp;              // points to last node of this list
-            while (p->Previous != nullptr) {
-                p = p->Previous;
-                tmp = new StackNode(p->Data);
-                tail->Previous = tmp;
-                tail = tmp;
-            }
+        if (other.IsEmpty()) return;
+
+        auto p = other.Top;                 // points to current node on other
+        auto tmp = new StackNode(p->Data); // make a copy of the first node
+        Top = tmp;
+        auto tail = tmp;              // points to last node of this list
+        while (p->Previous != nullptr) {
+            p = p->Previous;
+            tmp = new StackNode(p->Data);
+            tail->Previous = tmp;
+            tail = tmp;
         }
     }
 
     Stack(std::initializer_list<T> l) noexcept
             :
             Top(nullptr),
-            Size(0) {
-        if (empty(l)) {
-            Top = nullptr;
-        } else {
-            for (auto it = l.begin(); it != l.end(); ++it) {
-                Push(*it);
-            }
+            Size(0) {   // Initialize it with 0 because Size will be increment in Push function
+        if (empty(l)) return;
+
+        for (auto it = l.begin(); it != l.end(); ++it) {
+            Push(*it);
         }
     }
 
-    ~Stack() noexcept {
+    constexpr ~Stack() noexcept {
         Clear();
     }
 
@@ -80,7 +76,7 @@ public:
         return *this;
     }
 
-    bool operator==(const Stack &other) const noexcept {
+    constexpr bool operator==(const Stack &other) const noexcept {
         if (GetLength() != other.GetLength()) return false;
 
         auto a = Top;
@@ -96,15 +92,15 @@ public:
         return true;
     }
 
-    bool operator!=(const Stack &other) const noexcept {
+    constexpr bool operator!=(const Stack &other) const noexcept {
         return !(*this == other);
     }
 
-    inline void Clear() noexcept {
+    inline constexpr void Clear() noexcept {
         while (!IsEmpty()) RemoveTop();
     }
 
-    bool Contains(const T &element) const noexcept {
+    constexpr bool Contains(const T &element) const noexcept {
         auto n = Top;
         while (n != nullptr) {
             if (n->Data == element) return true;
@@ -113,7 +109,7 @@ public:
         return false;
     }
 
-    void CopyTo(Array<T> &array, size_t arrayIndex) {
+    constexpr void CopyTo(Array<T> &array, size_t arrayIndex) const {
         if (arrayIndex > array.LastIndex()) throw std::out_of_range("arrayIndex is out of Array boundaries");
         if (IsEmpty()) return;
 
@@ -135,23 +131,23 @@ public:
 
     inline constexpr size_t GetLength() const noexcept { return Size; }
 
-    void Push(const T &element) noexcept {
+    constexpr void Push(const T &element) noexcept {
         auto n = new StackNode(element, Top);
         Top = n;
         ++Size;
     }
 
-    void Push(const Array<T> &array) noexcept {
+    constexpr void Push(const Array<T> &array) noexcept {
         for (auto it = array.cbegin(); it != array.cend(); ++it)
             Push(*it);
     }
 
-    T Peek() const {
+    constexpr T Peek() const {
         if (IsEmpty()) throw std::out_of_range("Stack is empty");
         return Top->Data;
     }
 
-    [[nodiscard]] T Pop() {
+    [[nodiscard]] constexpr T Pop() {
         if (IsEmpty()) throw std::out_of_range("Stack is empty");
 
         T obj = Peek();
@@ -159,19 +155,19 @@ public:
         return obj;
     }
 
-    [[nodiscard]] Array<T> Pop(size_t amount) {
+    [[nodiscard]] constexpr Array<T> Pop(size_t amount) {
         if (amount > GetLength())
             throw std::out_of_range("Cannot Pop a number of elements higher than the Stack itself");
 
         Array<T> array(amount);
-        for (size_t i = amount - 1; i >= 0; --i) {
+        for (ssize_t i = array.LastIndex(); i >= 0; --i) {
             array[i] = Pop();
         }
 
         return array;
     }
 
-    void Swap(Stack &other) noexcept {
+    constexpr void Swap(Stack &other) noexcept {
         using std::swap;
 
         swap(Top, other.Top);
@@ -183,13 +179,13 @@ public:
 
         Array<T> a(Size);
         auto n = Top;
-        for (size_t i = 0; n != nullptr; ++i, n = n->Previous)
+        for (ssize_t i = a.LastIndex(); n != nullptr; --i, n = n->Previous)
             a[i] = n->Data;
 
         return a;
     }
 
-    static void UnloadInto(Stack &sourceStack, Stack &destinationStack) {
+    static constexpr void UnloadInto(Stack &sourceStack, Stack &destinationStack) {
         while (!sourceStack.IsEmpty())
             destinationStack.Push(sourceStack.Pop());
     }

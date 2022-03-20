@@ -253,13 +253,28 @@ TEST_CASE("Stack")
 
     SECTION("Pop elements")
     {
-        Stack<int> c = {4, 99, -37, 0, 2};
-        REQUIRE(c.Pop() == 2);
-        REQUIRE(c.Pop() == 0);
-        REQUIRE(c.Pop() == -37);
-        REQUIRE(c.Pop() == 99);
-        REQUIRE(c.Pop() == 4);
-        CHECK_THROWS(c.Pop());
+        SECTION("Single element")
+        {
+            Stack<int> c = {4, 99, -37, 0, 2};
+            REQUIRE(c.Pop() == 2);
+            REQUIRE(c.Pop() == 0);
+            REQUIRE(c.Pop() == -37);
+            REQUIRE(c.Pop() == 99);
+            REQUIRE(c.Pop() == 4);
+            CHECK_THROWS(c.Pop());
+        }
+
+        SECTION("Array of elements")
+        {
+            Stack<const char *> c = {"A", "TEST", "LOREM", "TEST", "TEST2", "TEST3"};
+            REQUIRE(c.GetLength() == 6);
+            Array<const char *> a = c.Pop(3);
+            REQUIRE(a.GetLength() == 3);
+            REQUIRE(c.GetLength() == 3);
+            a[0] == "TEST3";
+            a[1] == "TEST2";
+            a[2] == "TEST";
+        }
     }
 
     SECTION("Check peek")
@@ -290,8 +305,7 @@ TEST_CASE("Stack")
         Stack<int> a{0, 1, 2, 3};
         Stack<int> b{9, 8, 7, 6};
 
-        a.
-                Swap(b);
+        a.Swap(b);
         REQUIRE(a.Pop() == 6);
         REQUIRE(a.Pop() == 7);
         REQUIRE(a.Pop() == 8);
@@ -302,6 +316,15 @@ TEST_CASE("Stack")
         REQUIRE(b.Pop() == 1);
         REQUIRE(b.Pop() == 0);
         CHECK_THROWS(b.Pop());
+    }
+
+    SECTION("Conversion to Array<T>"){
+        Stack<int> a { 1, 2, 3, 4, 5 };
+        Array<int> b = a.ToArray();
+        Stack<int> copy = a;
+        Array<int> comp { 1, 2, 3, 4, 5};
+        REQUIRE(a == copy);
+        REQUIRE(b == comp);
     }
 }
 

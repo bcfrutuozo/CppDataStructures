@@ -7,6 +7,7 @@
 
 #include <catch2/catch.hpp>
 #include <cstring>
+#include <ostream>
 #include "../Array.h"
 
 TEST_CASE("Array")
@@ -572,7 +573,7 @@ TEST_CASE("Array")
             REQUIRE(a.IndexOf(0l) == 0);
             REQUIRE(a.IndexOf(-1l) == 3);
             REQUIRE(a.IndexOf(97057l) == 10);
-            CHECK_THROWS(a.IndexOf(444444));
+            REQUIRE(a.IndexOf(444444) == -1);
         }
 
         SECTION("Find the index of the last occurrence")
@@ -581,7 +582,7 @@ TEST_CASE("Array")
             REQUIRE(a.LastIndexOf(0l) == 11);
             REQUIRE(a.LastIndexOf(-3321) == 9);
             REQUIRE(a.LastIndexOf(3218875l) == 2);
-            CHECK_THROWS(a.LastIndexOf(-4444));
+            REQUIRE(a.LastIndexOf(-4444) == -1);
         }
 
         SECTION("Find all indices ")
@@ -599,8 +600,8 @@ TEST_CASE("Array")
     SECTION("Check if element exists in array")
     {
         Array<const char *> a{"BRUNO", "FRUTUOZO", "LOREM", "IMPSUM"};
-        REQUIRE(a.Exists("LOREM") == 1);
-        REQUIRE(a.Exists("TEST") == 0);
+        REQUIRE(a.Contains("LOREM") == 1);
+        REQUIRE(a.Contains("TEST") == 0);
     }
 
     SECTION("Count the amount of the same element in Array")
@@ -735,6 +736,88 @@ TEST_CASE("Array")
         REQUIRE(b.RemoveBack() == 1);
         REQUIRE(b.RemoveBack() == 0);
         CHECK_THROWS(b.RemoveBack());
+    }
+
+    SECTION("Resizing")
+    {
+        Array<int> a;
+        Array<int>::Resize(a, 30);
+
+        // Check if the correct amount is set
+        REQUIRE(a.GetLength() == 30);
+
+        // Check if default pValue was set
+        REQUIRE(a.Count(0) == 30);
+
+        Array<int> b = { 1, 2, 3, 4, 5, 6 };
+        Array<int> c = { 1, 2, 3, 4 };
+        Array<int>::Resize(b, 4);
+
+        // Check if array is properly reduced keeping its elements
+        REQUIRE(b == c);
+
+        Array<int> d { 1, 2, 3, 4 };
+        Array<int> e = { 1 };
+        Array<int>::Resize(d, 1);
+        REQUIRE(d == e);
+
+        Array<int> f { 1, 2, 3};
+        Array<int> g {};
+        Array<int>::Resize(f, 0);
+        REQUIRE(f == g);
+    }
+
+    SECTION("Forward Iterators")
+    {
+        SECTION("Iterator")
+        {
+            std::ostringstream oss;
+            Array<const char*> c = { "ABC", "DEF", "G", "HI", "J", "KLMNOPQ"};
+
+            for(auto it = c.begin(); it != c.end(); ++it) {
+                *it = "A";
+                oss << *it;
+            }
+
+            REQUIRE(strcmp("AAAAAA", oss.str().c_str()) == 0);
+        }
+
+        SECTION("ConstIterator")
+        {
+            std::ostringstream oss;
+            Array<const char*> c = { "ABC", "DEF", "G", "HI", "J", "KLMNOPQ"};
+
+            for(auto it = c.cbegin(); it != c.cend(); ++it) {
+                oss << *it;
+            }
+
+            REQUIRE(strcmp("ABCDEFGHIJKLMNOPQ", oss.str().c_str()) == 0);
+        }
+
+        SECTION("ReverseIterator")
+        {
+            std::ostringstream oss;
+            Array<const char*> c = { "ABC", "DEF", "G", "HI", "J", "KLMNOPQ"};
+
+            for(auto it = c.rbegin(); it != c.rend(); ++it) {
+                *it = "A";
+                oss << *it;
+            }
+
+            REQUIRE(strcmp("AAAAAA", oss.str().c_str()) == 0);
+        }
+
+        SECTION("ConstReverseIterator")
+        {
+            std::ostringstream oss;
+            Array<const char*> c = { "ABC", "DEF", "G", "HI", "J", "KLMNOPQ"};
+
+            for(auto it = c.crbegin(); it != c.crend(); ++it) {
+                oss << *it;
+            }
+
+            REQUIRE(strcmp("KLMNOPQJHIGDEFABC", oss.str().c_str()) == 0);
+        }
     }
 }
 
