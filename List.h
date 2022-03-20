@@ -22,22 +22,6 @@ private:
         constexpr ListNode(const T &element, ListNode *next) noexcept: Data(element), Next(next) {}
     };
 
-    class ListValue {
-    private:
-
-        ListNode *pValue;
-
-    public:
-
-        explicit constexpr ListValue(ListNode *value) noexcept
-                :
-                pValue(value) {}
-
-        constexpr operator T() const noexcept { return pValue->Data; }
-
-        constexpr void operator=(const T &val) noexcept { pValue->Data = val; }
-    };
-
     //<editor-fold desc="Iterators implementation">
     struct Iterator {
 
@@ -181,7 +165,7 @@ public:
     }
 
     constexpr bool operator==(const List &other) const noexcept {
-        if (GetLength() != other.Size) return false;
+        if (GetLength() != other.GetLength()) return false;
 
         for (auto itself = cbegin(), itother = other.cbegin(); itself != cend(); ++itself, ++itother)
             if (*itself != *itother)
@@ -214,7 +198,12 @@ public:
     }
 
     constexpr void AddRangeAt(const List<T> &list, size_t index) {
-        if (index > LastIndex()) std::out_of_range("Index is larger than the actual list index");
+        if(index == LastIndex() + 1) {
+            AddRange(list);
+            return;
+        }
+
+        if ((ssize_t)index > LastIndex() + 1) throw std::out_of_range("Index is larger than the actual list index");
 
         auto n = Head;
         size_t i = 0;
@@ -227,17 +216,20 @@ public:
         size_t j = 0;
         while (other != nullptr) {
             auto newNode = new ListNode(other->Data);
-            newNode->Next = otherPrevious;
-            otherPrevious = newNode;
 
-            // Not cool but optimizations come later
-            if(j == 0)
+            if(previous == nullptr)
             {
+                previous = newNode;
+                newNode->Next = Head;
+                Head = newNode;
+            } else {
                 previous->Next = newNode;
-                ++j;
+                //newNode->Next = other;
+                previous = newNode;
             }
 
             other = other->Next;
+            //if(Tail == n) Tail = newNode;
             if(other == nullptr) newNode->Next = n;
         }
 
@@ -306,7 +298,7 @@ public:
     }
 
     constexpr Array<size_t> IndicesOf(const T &element) const noexcept {
-        if (GetLength() == 0) return Array<T>(0);
+        if (GetLength() == 0) return Array<size_t>(0);
 
         auto n = Head;
         size_t i = 0;
@@ -400,13 +392,14 @@ public:
         // Empty for statement to move pointers to the desired ListNode. O(n) operation again...
         for (size_t i = 0; i < index; ++i, previous = n, n = n->Next);
 
-        // TODO: NEED TO GET THE LOGIC WORKING HERE
         for (size_t i = 0; i < count; ++i) {
             if(previous != nullptr) previous->Next = n->Next;
+
             if (Head == n) Head = n->Next;
             if (Tail == n) Tail = previous;
             auto t = n->Next;
-            delete t;
+            delete n;
+            n = t;
         }
 
         Size -= count;
