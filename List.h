@@ -29,7 +29,7 @@ private:
 
     public:
 
-        explicit constexpr ListValue(T *value) noexcept
+        explicit constexpr ListValue(ListNode *value) noexcept
                 :
                 pValue(value) {}
 
@@ -172,26 +172,6 @@ public:
 
     constexpr ~List() noexcept {
         Clear();
-    }
-
-    /* Using proxy class ListValue to handle this function as Getter/Setter
-     * THIS IS EXTREMELY DISGUSTING TO USE. IF YOU REALLY NEED TO WORK WITH INDICES
-     * TRY THE Array<T> CLASS.
-     * It was implemented only for cases that it's really necessary to work with a
-     * List<T> and need it without so much thinking
-     */
-    constexpr ListValue operator[](size_t index) {
-        if ((ssize_t) index > LastIndex())
-            throw std::out_of_range("index is too large for the resized array");
-
-        if(index == LastIndex()) return ListValue(Tail);
-
-        auto n = Head;
-        for (size_t i = 0; i < index; ++i) {
-            n = n->Next;
-        }
-
-        return ListValue(n);
     }
 
     constexpr List &operator=(const List &other) noexcept {
@@ -380,10 +360,15 @@ public:
         while (n != nullptr) {
             if (n->Data == element) {
                 previous->Next = n->Next;
-                delete n;
+                auto t = n;
+                n = n->Next;
+                delete t;
                 --Size;
-            } else previous = n;
-            n = n->Next;
+            } else
+            {
+                previous = n;
+                n = n->Next;
+            }
         }
     }
 
@@ -396,10 +381,9 @@ public:
         // Empty for statement to move pointers to the desired ListNode. O(n) operation again...
         for (size_t i = 0; i < index; ++i, previous = n, n = n->Next);
 
-        previous->Next = n->Next;
-
+        if(previous != nullptr) previous->Next = n->Next;
         if (Head == n) Head = n->Next;
-        if (Tail == n) Tail = previous;
+        if (Tail == n) { Tail = previous;}
 
         --Size;
         delete n;
@@ -416,14 +400,15 @@ public:
         // Empty for statement to move pointers to the desired ListNode. O(n) operation again...
         for (size_t i = 0; i < index; ++i, previous = n, n = n->Next);
 
+        // TODO: NEED TO GET THE LOGIC WORKING HERE
         for (size_t i = 0; i < count; ++i) {
-            previous->Next = n->Next;
+            if(previous != nullptr) previous->Next = n->Next;
             if (Head == n) Head = n->Next;
+            if (Tail == n) Tail = previous;
+            auto t = n->Next;
+            delete t;
         }
 
-        if (Tail == n) Tail = previous;
-
-        delete n;
         Size -= count;
     }
 
