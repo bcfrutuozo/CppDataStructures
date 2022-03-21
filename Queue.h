@@ -87,7 +87,7 @@ public:
         return *this;
     }
 
-    constexpr bool operator==(const Queue &other) const noexcept {
+    inline constexpr bool operator==(const Queue &other) const noexcept {
         if (GetLength() != other.GetLength()) return false;
 
         auto r = Front;
@@ -101,7 +101,7 @@ public:
         return true;
     }
 
-    constexpr bool operator!=(const Queue &other) const noexcept {
+    inline constexpr bool operator!=(const Queue &other) const noexcept {
         return !(*this == other);
     }
 
@@ -119,7 +119,7 @@ public:
     }
 
     constexpr void CopyTo(Array<T> &array, size_t arrayIndex) const {
-        if (arrayIndex > array.LastIndex()) throw std::out_of_range("arrayIndex is out of Array boundaries");
+        if ((ssize_t)arrayIndex > array.LastIndex()) throw std::out_of_range("arrayIndex is out of Array boundaries");
         if (IsEmpty()) return;
 
         /* diff represents the amount of additional space the provided array needs to
@@ -127,11 +127,10 @@ public:
          * the array has plenty of space. Otherwise it represents the number of
          * additional slots
         */
-        ssize_t diff = (array.GetLength() + arrayIndex) - GetLength();
-        if (diff > 0) Array<T>::Resize(diff, array.GetLength() + diff);
+        ssize_t diff = GetLength() - (array.GetLength() - arrayIndex);
+        if (diff > 0) Array<T>::Resize(array, array.GetLength() + (size_t)diff);
         auto n = Front;
-        size_t i = 0;
-        for (size_t i = 0; n != nullptr; ++i, n = n->Next) {
+        for (size_t i = arrayIndex; n != nullptr; ++i, n = n->Next) {
             array[i] = n->Data;
         }
     }

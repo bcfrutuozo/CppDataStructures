@@ -57,7 +57,7 @@ TEST_CASE("Queue")
                 REQUIRE(c == c2);
             }
 
-            SECTION("Stack<uint64_t>")
+            SECTION("Queue<uint64_t>")
             {
                 Queue<uint64_t> c;
                 REQUIRE(c.GetLength() == 0);
@@ -71,7 +71,7 @@ TEST_CASE("Queue")
                 REQUIRE(c == c2);
             }
 
-            SECTION("Stack<int8_t>")
+            SECTION("Queue<int8_t>")
             {
                 Queue<int8_t> c;
                 REQUIRE(c.GetLength() == 0);
@@ -85,7 +85,7 @@ TEST_CASE("Queue")
                 REQUIRE(c == c2);
             }
 
-            SECTION("Stack<int16_t>")
+            SECTION("Queue<int16_t>")
             {
                 Queue<int16_t> c;
                 REQUIRE(c.GetLength() == 0);
@@ -99,7 +99,7 @@ TEST_CASE("Queue")
                 REQUIRE(c == c2);
             }
 
-            SECTION("Stack<int32_t>")
+            SECTION("Queue<int32_t>")
             {
                 Queue<int32_t> c;
                 REQUIRE(c.GetLength() == 0);
@@ -113,7 +113,7 @@ TEST_CASE("Queue")
                 REQUIRE(c == c2);
             }
 
-            SECTION("Stack<int64_t>")
+            SECTION("Queue<int64_t>")
             {
                 Queue<int64_t> c;
                 REQUIRE(c.GetLength() == 0);
@@ -127,7 +127,7 @@ TEST_CASE("Queue")
                 REQUIRE(c == c2);
             }
 
-            SECTION("Stack<char>")
+            SECTION("Queue<char>")
             {
                 Queue<char> c;
                 REQUIRE(c.GetLength() == 0);
@@ -141,7 +141,7 @@ TEST_CASE("Queue")
                 REQUIRE(c == c2);
             }
 
-            SECTION("Stack<unsigned char>")
+            SECTION("Queue<unsigned char>")
             {
                 Queue<unsigned char> c;
                 REQUIRE(c.GetLength() == 0);
@@ -155,7 +155,7 @@ TEST_CASE("Queue")
                 REQUIRE(c == c2);
             }
 
-            SECTION("Stack<float>")
+            SECTION("Queue<float>")
             {
                 Queue<float> c;
                 REQUIRE(c.GetLength() == 0);
@@ -169,7 +169,7 @@ TEST_CASE("Queue")
                 REQUIRE(c == c2);
             }
 
-            SECTION("Stack<double>")
+            SECTION("Queue<double>")
             {
                 Queue<double> c;
                 REQUIRE(c.GetLength() == 0);
@@ -186,7 +186,7 @@ TEST_CASE("Queue")
 
         SECTION("Non-primitive types")
         {
-            SECTION("Stack<const char*> Array")
+            SECTION("Queue<const char*> Array")
             {
                 Queue<const char *> c;
                 REQUIRE(c.GetLength() == 0);
@@ -226,6 +226,25 @@ TEST_CASE("Queue")
             REQUIRE(a == c);
             a.Dequeue();
             a.Enqueue(10);
+            REQUIRE(a != b);
+        }
+    }
+
+    SECTION("Comparison")
+    {
+        SECTION("Queue<T> == Queue<T>")
+        {
+            Queue<int> a{1, 2, 3, 4, 5, 6};
+            Queue<int> b{1, 2, 3, 4, 5, 6};
+
+            REQUIRE(a == b);
+        }
+
+        SECTION("Queue<T> != Queue<T>")
+        {
+            Queue<int> a{1, 2, 3, 4, 5, 6};
+            Queue<int> b{1, 2, 3, 0, 5, 6};
+
             REQUIRE(a != b);
         }
     }
@@ -289,6 +308,14 @@ TEST_CASE("Queue")
         CHECK_THROWS(c.Peek());
     }
 
+    SECTION("Clear container")
+    {
+        Queue<const char*> a { "ABC", "DEF", "GHIJKLM" };
+        a.Clear();
+        Queue<const char*> b;
+        REQUIRE(a == b);
+    }
+
     SECTION("Swap container")
     {
         Queue<int> a{0, 1, 2, 3};
@@ -314,6 +341,31 @@ TEST_CASE("Queue")
         Array<int> comp { 1, 2, 3, 4, 5};
         REQUIRE(a == copy);
         REQUIRE(b == comp);
+    }
+
+    SECTION("CopyTo(Array<T>)") {
+        Queue<int> a{1, 2, 3, 4, 5, 6};
+        Array<int> b{0, 0, 0, 0, 0, 0, 0, 0};
+
+        a.CopyTo(b, 2);
+        Array<int> res{0, 0, 1, 2, 3, 4, 5, 6 };
+        REQUIRE(b == res);
+
+        Array<int> c;
+        CHECK_THROWS(a.CopyTo(c, 0));
+
+        Array<int> d { 1, 2, 3 };
+        a.CopyTo(d, 2);
+        res = { 1 , 2, 1, 2, 3, 4, 5, 6 };
+        REQUIRE(d == res);
+
+        Array<int> e { 1 };
+        CHECK_THROWS(a.CopyTo(e, 1));
+
+        Array<int> f{0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        a.CopyTo(f, 2);
+        res = { 0, 0, 1, 2, 3, 4, 5, 6, 0, 0};
+        REQUIRE(f == res);
     }
 }
 

@@ -256,7 +256,7 @@ public:
         return *this;
     }
 
-    constexpr bool operator==(const Array &other) const noexcept {
+    inline constexpr bool operator==(const Array &other) const noexcept {
         if (Size != other.Size) return false;
 
         for (auto itself = cbegin(), itother = other.cbegin(); itself != cend(); ++itself, ++itother)
@@ -266,7 +266,7 @@ public:
         return true;
     }
 
-    constexpr bool operator!=(const Array &other) const noexcept {
+    inline constexpr bool operator!=(const Array &other) const noexcept {
         return !(*this == other);
     }
 
@@ -300,7 +300,10 @@ public:
     }
 
     constexpr void AddAtIndex(const T &element, size_t index) {
-        if (GetLength() == 0 && index == 0) Add(element);
+        if (GetLength() == 0 && index == 0) {
+            Add(element);
+            return;
+        }
 
         if ((ssize_t) index > LastIndex())
             throw std::out_of_range("Invalid array boundaries");

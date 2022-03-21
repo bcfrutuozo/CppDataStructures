@@ -164,7 +164,7 @@ public:
         return *this;
     }
 
-    constexpr bool operator==(const List &other) const noexcept {
+    inline constexpr bool operator==(const List &other) const noexcept {
         if (GetLength() != other.GetLength()) return false;
 
         for (auto itself = cbegin(), itother = other.cbegin(); itself != cend(); ++itself, ++itother)
@@ -174,7 +174,7 @@ public:
         return true;
     }
 
-    constexpr bool operator!=(const List &other) const noexcept {
+    inline constexpr bool operator!=(const List &other) const noexcept {
         return !(*this == other);
     }
 
@@ -188,6 +188,30 @@ public:
             Tail->Next = n;
             Tail = n;
         }
+        ++Size;
+    }
+
+    constexpr void AddAt(const T& element, size_t index) {
+
+        // By checking this, we eliminate the necessity to work with Head and Tail pointers
+        if(index == LastIndex() + 1) {
+            Add(element);
+            return;
+        }
+
+        if ((ssize_t)index > LastIndex() + 1) throw std::out_of_range("Index is larger than the actual list index");
+
+        auto n = Head;
+        size_t i = 0;
+        ListNode *previous = nullptr;
+
+        // Move pointer and variables to the desired values
+        for (; i < index; ++i, previous = n, n = n->Next);
+
+        auto newNode = new ListNode(element);
+        newNode->Next = n;
+        previous->Next = newNode;
+
         ++Size;
     }
 
@@ -242,7 +266,10 @@ public:
             auto t = Head;
             Head = Head->Next;
             delete t;
+            --Size;
         }
+
+        Head = Tail = nullptr;
     }
 
     constexpr bool Contains(const T &other) const noexcept {
@@ -336,14 +363,18 @@ public:
         ListNode* previous = nullptr;
         while (n != nullptr) {
             if (n->Data == element) {
-                previous->Next = n->Next;
-                delete n;
+                if(Head != n) previous->Next = n->Next;
+                auto t = n;
+                n = n->Next;
+                if(Head == t) Head = n;
+                if(Tail == t) Tail = previous;
+                delete t;
+                --Size;
                 return;
             }
             previous = n;
             n = n->Next;
         }
-        --Size;
     }
 
     constexpr void RemoveAll(const T &element) {
@@ -351,9 +382,11 @@ public:
         ListNode* previous = nullptr;
         while (n != nullptr) {
             if (n->Data == element) {
-                previous->Next = n->Next;
+                if(Head != n) previous->Next = n->Next;
                 auto t = n;
                 n = n->Next;
+                if(Head == t) Head = n;
+                if(Tail == t) Tail = previous;
                 delete t;
                 --Size;
             } else
@@ -383,7 +416,7 @@ public:
 
     constexpr void RemoveRange(size_t index, size_t count) {
         if ((ssize_t) index > LastIndex()) throw std::out_of_range("Index is out of bounds");
-        if ((index + count - 1) > LastIndex())
+        if ((ssize_t)(index + count - 1) > LastIndex())
             throw std::out_of_range("Provided ranged is not valid for the operation");
 
         auto n = Head;

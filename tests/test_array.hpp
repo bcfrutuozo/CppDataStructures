@@ -238,6 +238,25 @@ TEST_CASE("Array")
         }
     }
 
+    SECTION("Comparison")
+    {
+        SECTION("Array<T> == Array<T>")
+        {
+            Array<int> a{1, 2, 3, 4, 5, 6};
+            Array<int> b{1, 2, 3, 4, 5, 6};
+
+            REQUIRE(a == b);
+        }
+
+        SECTION("Array<T> != Array<T>")
+        {
+            Array<int> a{1, 2, 3, 4, 5, 6};
+            Array<int> b{1, 2, 3, 0, 5, 6};
+
+            REQUIRE(a != b);
+        }
+    }
+
     SECTION("Elements insertion")
     {
         SECTION("Adding element at the end of a populated array")
@@ -329,7 +348,7 @@ TEST_CASE("Array")
             REQUIRE(emptyArrayForRangeInsertion == other);
         }
 
-        SECTION("Adding element at the middle of Array")
+        SECTION("Adding element at to an specific index")
         {
             Array<char> a = {'1', '3', '4', '2', '8'};
             a.AddAtIndex('1', 2);
@@ -342,13 +361,13 @@ TEST_CASE("Array")
             Array<int> d;
             d.AddAtIndex(1, 0);
             Array<int> e = { 1 };
-            REQUIRE(d != e);
+            REQUIRE(d == e);
 
             Array<int> f(0);
             CHECK_THROWS(f.AddAtIndex(1, 1));
         }
 
-        SECTION("Adding collection at the middle of Array")
+        SECTION("Adding collection at the middle of the container")
         {
             Array<char> a = {1, 3, -4, 2, 8};
             Array<char> b = {1, 3, 100, -4, 2, 8};
@@ -367,33 +386,6 @@ TEST_CASE("Array")
             e.AddAtIndex(f, e.LastIndex());
             Array<char> final3 = {1, 3, -4, 2, 1, 3, 100, -4, 2, 8, 8};
             REQUIRE(e == final3);
-        }
-    }
-
-    SECTION("Array comparison")
-    {
-        SECTION("Comparing two equal arrays")
-        {
-            Array<int> a{1, 2, 3, 4, 5, 6};
-            Array<int> b{1, 2, 3, 4, 5, 6};
-
-            REQUIRE(a == b);
-        }
-
-        SECTION("Comparing two different arrays")
-        {
-            Array<int> a{1, 2, 3, 4, 5, 6};
-            Array<int> b{1, 2, 3, 0, 5, 6};
-
-            REQUIRE(a != b);
-        }
-
-        SECTION("Comparing empty arrays")
-        {
-            Array<double> a;
-            Array<double> b;
-
-            REQUIRE(a == b);
         }
     }
 
@@ -597,14 +589,14 @@ TEST_CASE("Array")
         }
     }
 
-    SECTION("Check if element exists in array")
+    SECTION("Check if element exists in Array<T>")
     {
         Array<const char *> a{"BRUNO", "FRUTUOZO", "LOREM", "IMPSUM"};
         REQUIRE(a.Contains("LOREM") == 1);
         REQUIRE(a.Contains("TEST") == 0);
     }
 
-    SECTION("Count the amount of the same element in Array")
+    SECTION("Count an specified element within the Array<T>")
     {
         Array<int> a{0, 4, 3, 1, 1, 1, 1, 1, 3, 3, 2, 1, 0, 6, 0, -4, -2, 1};
         REQUIRE(a.Count(0) == 3);
@@ -614,7 +606,7 @@ TEST_CASE("Array")
         REQUIRE(a.Count(3) == 3);
     }
 
-    SECTION("Fill array with the same element")
+    SECTION("Fill Array<T> with the same element")
     {
         Array<long> a{1, 1, 1, 1, 1, 1, 1, 1};
         Array<long> b{0, 0, 0, 0, 0, 0, 0, 0};
@@ -624,7 +616,7 @@ TEST_CASE("Array")
 
     SECTION("Copy")
     {
-        SECTION("Full Array to full Array")
+        SECTION("Full Array<T> to full Array<T>")
         {
             Array<const char *> a{"ABC", "DEF", "GHI"};
             Array<const char *> b{"XYZ", "UYT", "PON"};
