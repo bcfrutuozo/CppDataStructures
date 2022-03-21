@@ -259,7 +259,7 @@ TEST_CASE("Array")
 
     SECTION("Elements insertion")
     {
-        SECTION("Adding element at the end of a populated array")
+        SECTION("Adding element at the end of a populated Array<T>")
         {
             Array<const char *> cpArray = {"BRUNO", "FRUTUOZO", "ENGINEERING", "LOREM", "IPSUM"};
             REQUIRE(cpArray.GetLength() == 5);
@@ -275,7 +275,7 @@ TEST_CASE("Array")
             REQUIRE(cpArray == other);
         }
 
-        SECTION("Adding a collection of elements to the array")
+        SECTION("Adding a collection of elements to the Array<T>")
         {
             Array<const char *> cpArray = {"BRUNO", "FRUTUOZO", "ENGINEERING", "LOREM", "IPSUM"};
             REQUIRE(cpArray.GetLength() == 5);
@@ -304,7 +304,7 @@ TEST_CASE("Array")
             REQUIRE(cpArray == other);
         }
 
-        SECTION("Adding element at an empty instantiated array")
+        SECTION("Adding element at an empty instantiated Array<T>")
         {
             Array<int> emptyArrayForSingleInsertion;
 
@@ -324,7 +324,7 @@ TEST_CASE("Array")
             REQUIRE(emptyArrayForSingleInsertion == other);
         }
 
-        SECTION("Adding a collection of element at an empty instantiated array")
+        SECTION("Adding a collection of element at an empty instantiated Array<T>")
         {
             Array<int> emptyArrayForRangeInsertion;
 
@@ -389,15 +389,15 @@ TEST_CASE("Array")
         }
     }
 
-    SECTION("First element manipulation from array")
+    SECTION("First element manipulation from Array<T>")
     {
-        SECTION("Trying to remove an element from an empty array")
+        SECTION("Trying to remove an element from an empty Array<T>")
         {
             Array<float> fArray{};
             CHECK_THROWS(fArray.GetFront());
         }
 
-        SECTION("Removing an element from array with single element")
+        SECTION("Removing an element from Array<T> with single element")
         {
             Array<int> iArray{-44};
             REQUIRE(iArray.GetFront() == -44);
@@ -409,7 +409,7 @@ TEST_CASE("Array")
             CHECK_THROWS(iArray.RemoveAt(0));
         }
 
-        SECTION("Removing an element from array with multiple elements")
+        SECTION("Removing an element from Array<T> with multiple elements")
         {
             Array<int> iArray{0, 2, 8, 45, -332, 1};
             REQUIRE(iArray.GetFront() == 0);
@@ -426,9 +426,9 @@ TEST_CASE("Array")
         }
     }
 
-    SECTION("Remove elements")
+    SECTION("Elements removal")
     {
-        SECTION("Check at the beginning of Array")
+        SECTION("Remove at the beginning of Array<T>")
         {
             Array<int> iArray{0, 2, 8, 45, -332, 1};
             REQUIRE(iArray.GetLength() == 6);
@@ -441,7 +441,7 @@ TEST_CASE("Array")
             REQUIRE(iArray == end);
         }
 
-        SECTION("Check in the middle of Array")
+        SECTION("Remove in the middle of Array<T>")
         {
             Array<int> iArray{0, 2, 8, 45, -332, 1};
             REQUIRE(iArray.GetLength() == 6);
@@ -453,7 +453,7 @@ TEST_CASE("Array")
             REQUIRE(iArray == end);
         }
 
-        SECTION("Check at the end of Array")
+        SECTION("Remove at the end of Array<T>")
         {
             Array<int> iArray{0, 2, 8, 45, -332, 1};
             REQUIRE(iArray.GetLength() == 6);
@@ -467,15 +467,15 @@ TEST_CASE("Array")
         }
     }
 
-    SECTION("Last element manipulation from array")
+    SECTION("Last element manipulation from Array<T>")
     {
-        SECTION("Trying to remove an element from an empty array")
+        SECTION("Trying to remove an element from an empty Array<T>")
         {
             Array<float> fArray{};
             CHECK_THROWS(fArray.GetBack());
         }
 
-        SECTION("Removing an element from array with single element")
+        SECTION("Removing an element from Array<T> with single element")
         {
             Array<int> iArray{-44};
             REQUIRE(iArray.GetBack() == -44);
@@ -487,7 +487,7 @@ TEST_CASE("Array")
             CHECK_THROWS(iArray.RemoveAt(0));
         }
 
-        SECTION("Removing an element from array with multiple elements")
+        SECTION("Removing an element from Array<T> with multiple elements")
         {
             Array<int> iArray{0, 2, 8, 45, -332, 1};
             REQUIRE(iArray.GetBack() == 1);
@@ -504,7 +504,7 @@ TEST_CASE("Array")
         }
     }
 
-    SECTION("Validating Array::ArrayValue proxy class to handle operator[]")
+    SECTION("Validating Array<T>::ArrayValue proxy class to handle operator[]")
     {
         SECTION("Getter")
         {
@@ -712,7 +712,7 @@ TEST_CASE("Array")
         REQUIRE(a == out);
     }
 
-    SECTION("Swap Array container")
+    SECTION("Swap Array<T> with another one")
     {
         Array<int> a{0, 1, 2, 3};
         Array<int> b{9, 8, 7, 6};
@@ -759,9 +759,9 @@ TEST_CASE("Array")
         REQUIRE(f == g);
     }
 
-    SECTION("Forward Iterators")
+    SECTION("Iterators")
     {
-        SECTION("Iterator")
+        SECTION("Array<T>::Iterator")
         {
             std::ostringstream oss;
             Array<const char*> c = { "ABC", "DEF", "G", "HI", "J", "KLMNOPQ"};
@@ -774,7 +774,7 @@ TEST_CASE("Array")
             REQUIRE(strcmp("AAAAAA", oss.str().c_str()) == 0);
         }
 
-        SECTION("ConstIterator")
+        SECTION("Array<T>::ConstIterator")
         {
             std::ostringstream oss;
             Array<const char*> c = { "ABC", "DEF", "G", "HI", "J", "KLMNOPQ"};
@@ -786,7 +786,7 @@ TEST_CASE("Array")
             REQUIRE(strcmp("ABCDEFGHIJKLMNOPQ", oss.str().c_str()) == 0);
         }
 
-        SECTION("ReverseIterator")
+        SECTION("Array<T>::ReverseIterator")
         {
             std::ostringstream oss;
             Array<const char*> c = { "ABC", "DEF", "G", "HI", "J", "KLMNOPQ"};
@@ -799,7 +799,7 @@ TEST_CASE("Array")
             REQUIRE(strcmp("AAAAAA", oss.str().c_str()) == 0);
         }
 
-        SECTION("ConstReverseIterator")
+        SECTION("Array<T>::ConstReverseIterator")
         {
             std::ostringstream oss;
             Array<const char*> c = { "ABC", "DEF", "G", "HI", "J", "KLMNOPQ"};

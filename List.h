@@ -33,9 +33,9 @@ private:
         using reference = T &;  // or also value_type&
 
         // Pointer field representation
-        ListNode* pElement = nullptr;
+        ListNode *pElement = nullptr;
 
-        constexpr Iterator(ListNode *ptr) noexcept : pElement(ptr) {}
+        constexpr Iterator(ListNode *ptr) noexcept: pElement(ptr) {}
 
         constexpr reference operator*() const { return pElement->Data; }
 
@@ -73,7 +73,7 @@ private:
         using reference = const T &;  // or also value_type&
 
         // Pointer field representation
-        ListNode* pElement = nullptr;
+        ListNode *pElement = nullptr;
 
         constexpr ConstIterator(ListNode *ptr) noexcept: pElement(ptr) {}
 
@@ -125,7 +125,7 @@ public:
 
         auto n = other.Head;
         //ListNode begin = nullptr;
-        ListNode* previous = nullptr;
+        ListNode *previous = nullptr;
         while (n != nullptr) {
             if (Head == nullptr) {
                 Head = new ListNode(n->Data);
@@ -178,12 +178,12 @@ public:
         return !(*this == other);
     }
 
-    constexpr void Add(const T &element) {
+    constexpr void Add(const T &element) noexcept {
         auto n = new ListNode(element);
 
-        if(GetLength() == 0) {
+        if (GetLength() == 0) {
             Head = Tail = n;
-        }else {
+        } else {
             auto t = Tail;
             Tail->Next = n;
             Tail = n;
@@ -191,15 +191,15 @@ public:
         ++Size;
     }
 
-    constexpr void AddAt(const T& element, size_t index) {
+    constexpr void AddAt(const T &element, size_t index) {
 
         // By checking this, we eliminate the necessity to work with Head and Tail pointers
-        if(index == LastIndex() + 1) {
+        if (index == LastIndex() + 1) {
             Add(element);
             return;
         }
 
-        if ((ssize_t)index > LastIndex() + 1) throw std::out_of_range("Index is larger than the actual list index");
+        if ((ssize_t) index > LastIndex() + 1) throw std::out_of_range("Index is larger than the actual list index");
 
         auto n = Head;
         size_t i = 0;
@@ -210,24 +210,26 @@ public:
 
         auto newNode = new ListNode(element);
         newNode->Next = n;
-        previous->Next = newNode;
+
+        if (previous == nullptr) Head = newNode;
+        else previous->Next = newNode;
 
         ++Size;
     }
 
-    constexpr void AddRange(const List<T> &list) {
+    constexpr void AddRange(const List<T> &list) noexcept {
         for (auto it = list.cbegin(); it != list.cend(); ++it) {
             Add(*it);
         }
     }
 
     constexpr void AddRangeAt(const List<T> &list, size_t index) {
-        if(index == LastIndex() + 1) {
+        if (index == LastIndex() + 1) {
             AddRange(list);
             return;
         }
 
-        if ((ssize_t)index > LastIndex() + 1) throw std::out_of_range("Index is larger than the actual list index");
+        if ((ssize_t) index > LastIndex() + 1) throw std::out_of_range("Index is larger than the actual list index");
 
         auto n = Head;
         size_t i = 0;
@@ -236,13 +238,12 @@ public:
 
         // Now that we are within range, let's add it!
         auto other = list.Head;
-        ListNode* otherPrevious = nullptr;
+        ListNode *otherPrevious = nullptr;
         size_t j = 0;
         while (other != nullptr) {
             auto newNode = new ListNode(other->Data);
 
-            if(previous == nullptr)
-            {
+            if (previous == nullptr) {
                 previous = newNode;
                 newNode->Next = Head;
                 Head = newNode;
@@ -254,15 +255,14 @@ public:
 
             other = other->Next;
             //if(Tail == n) Tail = newNode;
-            if(other == nullptr) newNode->Next = n;
+            if (other == nullptr) newNode->Next = n;
         }
 
         Size = GetLength() + list.GetLength();
     }
 
     constexpr void Clear() noexcept {
-        while (Head != nullptr)
-        {
+        while (Head != nullptr) {
             auto t = Head;
             Head = Head->Next;
             delete t;
@@ -300,7 +300,7 @@ public:
             *itArray = *itself;
     }
 
-    constexpr size_t Count(const T &element) {
+    constexpr size_t Count(const T &element) const noexcept {
         size_t total = 0;
         for (auto it = cbegin(); it != cend(); ++it)
             if (*it == element)
@@ -358,46 +358,46 @@ public:
         return idx;
     }
 
-    constexpr void Remove(const T &element) {
+    [[nodiscard]] constexpr bool Remove(const T &element) noexcept {
         auto n = Head;
-        ListNode* previous = nullptr;
+        ListNode *previous = nullptr;
         while (n != nullptr) {
             if (n->Data == element) {
-                if(Head != n) previous->Next = n->Next;
+                if (Head != n) previous->Next = n->Next;
                 auto t = n;
                 n = n->Next;
-                if(Head == t) Head = n;
-                if(Tail == t) Tail = previous;
+                if (Head == t) Head = n;
+                if (Tail == t) Tail = previous;
                 delete t;
                 --Size;
-                return;
+                return true;
             }
             previous = n;
             n = n->Next;
         }
+        return false;
     }
 
-    constexpr void RemoveAll(const T &element) {
+    constexpr void RemoveAll(const T &element) noexcept {
         auto n = Head;
-        ListNode* previous = nullptr;
+        ListNode *previous = nullptr;
         while (n != nullptr) {
             if (n->Data == element) {
-                if(Head != n) previous->Next = n->Next;
+                if (Head != n) previous->Next = n->Next;
                 auto t = n;
                 n = n->Next;
-                if(Head == t) Head = n;
-                if(Tail == t) Tail = previous;
+                if (Head == t) Head = n;
+                if (Tail == t) Tail = previous;
                 delete t;
                 --Size;
-            } else
-            {
+            } else {
                 previous = n;
                 n = n->Next;
             }
         }
     }
 
-    constexpr void RemoveAt(size_t index) {
+    [[nodiscard]] constexpr T RemoveAt(size_t index) {
         if ((ssize_t) index > LastIndex()) throw std::out_of_range("Index is out of bounds");
 
         auto n = Head;
@@ -406,36 +406,42 @@ public:
         // Empty for statement to move pointers to the desired ListNode. O(n) operation again...
         for (size_t i = 0; i < index; ++i, previous = n, n = n->Next);
 
-        if(previous != nullptr) previous->Next = n->Next;
+        if (previous != nullptr) previous->Next = n->Next;
+        T obj = n->Data;
         if (Head == n) Head = n->Next;
-        if (Tail == n) { Tail = previous;}
+        if (Tail == n) Tail = previous;
 
         --Size;
         delete n;
+
+        return obj;
     }
 
-    constexpr void RemoveRange(size_t index, size_t count) {
+    [[nodiscard]] constexpr Array<T> RemoveRange(size_t index, size_t count) {
+        if (count < 1) throw std::invalid_argument("count cannot be 0 or negative");
         if ((ssize_t) index > LastIndex()) throw std::out_of_range("Index is out of bounds");
-        if ((ssize_t)(index + count - 1) > LastIndex())
+        if ((ssize_t) (index + count - 1) > LastIndex())
             throw std::out_of_range("Provided ranged is not valid for the operation");
 
         auto n = Head;
         ListNode *previous = nullptr;
-
+        Array<T> array(count);
         // Empty for statement to move pointers to the desired ListNode. O(n) operation again...
         for (size_t i = 0; i < index; ++i, previous = n, n = n->Next);
 
         for (size_t i = 0; i < count; ++i) {
-            if(previous != nullptr) previous->Next = n->Next;
+            if (previous != nullptr) previous->Next = n->Next;
 
             if (Head == n) Head = n->Next;
             if (Tail == n) Tail = previous;
+            array[i] = n->Data;
             auto t = n->Next;
             delete n;
             n = t;
         }
 
         Size -= count;
+        return array;
     }
 
     constexpr void Swap(List &other) noexcept {
