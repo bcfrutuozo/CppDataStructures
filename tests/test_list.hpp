@@ -229,6 +229,23 @@ TEST_CASE("List")
             a.Add(10);
             REQUIRE(a != b);
         }
+
+        SECTION("Move constructor")
+        {
+            List<int> a{1, 2, 3, 4};
+            List<int> b = std::move(a);
+            REQUIRE(a.IsEmpty());
+            REQUIRE(b == List<int>({1, 2, 3, 4}));
+        }
+
+        SECTION("Move assignment")
+        {
+            List<int> a{1, 2, 3, 4};
+            List<int> b{5, 6};
+            b = std::move(a);
+            REQUIRE(a.IsEmpty());
+            REQUIRE(b == List<int>({1, 2, 3, 4}));
+        }
     }
 
     SECTION("Comparison")
@@ -380,26 +397,26 @@ TEST_CASE("List")
 
         SECTION("Remove an specific element")
         {
-            List<int> il { 0, 1, 2, 3, 4, 5};
+            List<int> il{0, 1, 2, 3, 4, 5};
             il.Remove(3);
-            List<int> res = { 0, 1, 2, 4, 5 };
+            List<int> res = {0, 1, 2, 4, 5};
             REQUIRE(il == res);
             il.Remove(0);
-            res = { 1, 2, 4 ,5};
+            res = {1, 2, 4, 5};
             REQUIRE(il == res);
             il.Remove(5);
-            res = { 1, 2, 4};
+            res = {1, 2, 4};
             REQUIRE(il == res);
             REQUIRE(il.Remove(100) == false);
         }
 
         SECTION("Remove an range of elements")
         {
-            List<int> il { 1, 2, 3, 4, 5, 6, 7, 8, 9};
+            List<int> il{1, 2, 3, 4, 5, 6, 7, 8, 9};
             REQUIRE(il.RemoveRange(1, 3) == Array<int>({2, 3, 4}));
-            REQUIRE(il.RemoveRange(0, 2) == Array<int>({ 1, 5}));
+            REQUIRE(il.RemoveRange(0, 2) == Array<int>({1, 5}));
             REQUIRE(il.RemoveRange(2, 2) == Array<int>({8, 9}));
-            List<int> finalState { 6, 7};
+            List<int> finalState{6, 7};
             REQUIRE(il == finalState);
             CHECK_THROWS(il.RemoveRange(0, 0));
             CHECK_THROWS(il.RemoveRange(0, 3));
@@ -409,9 +426,9 @@ TEST_CASE("List")
 
     SECTION("Clear container")
     {
-        List<const char*> a { "ABC", "DEF", "GHIJKLM" };
+        List<const char *> a{"ABC", "DEF", "GHIJKLM"};
         a.Clear();
-        List<const char*> b;
+        List<const char *> b;
         REQUIRE(a == b);
     }
 
@@ -485,7 +502,7 @@ TEST_CASE("List")
 
     SECTION("Head analysis")
     {
-        List<int> a { 0, 1 ,2, 3};
+        List<int> a{0, 1, 2, 3};
         a.AddAt(-1, 0);
         REQUIRE(a.IndexOf(-1) == 0);
         a.AddRangeAt({-3, -2}, 0);
@@ -499,7 +516,7 @@ TEST_CASE("List")
 
     SECTION("Tail analysis")
     {
-        List<int> a { 0, 1 ,2, 3};
+        List<int> a{0, 1, 2, 3};
         a.AddAt(4, 4);
         REQUIRE(a.IndexOf(3) == 3);
         REQUIRE(a.IndexOf(4) == 4);
@@ -515,7 +532,7 @@ TEST_CASE("List")
         a.RemoveAt(9);
         REQUIRE(a == List<int>{0, 1, 2, 3, 5, -3, -2, 4, 1});
         a.RemoveRange(7, 2);
-        REQUIRE(a == List<int>{0, 1, 2, 3, 5, -3, -2 });
+        REQUIRE(a == List<int>{0, 1, 2, 3, 5, -3, -2});
         CHECK_THROWS(a.RemoveRange(6, 2));
     }
 

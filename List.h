@@ -142,7 +142,15 @@ public:
         }
     }
 
-    List(std::initializer_list<T> l) noexcept
+    constexpr List(List &&other) noexcept :
+            Head(std::move(other.Head)),
+            Tail(std::move(other.Tail)),
+            Size(std::move(other.Size)) {
+        other.Head = other.Tail = nullptr;
+        other.Size = 0;
+    }
+
+    constexpr List(std::initializer_list<T> l) noexcept
             :
             Head(nullptr),
             Tail(nullptr),
@@ -164,7 +172,24 @@ public:
         return *this;
     }
 
-    inline constexpr bool operator==(const List &other) const noexcept {
+    constexpr List &operator=(List &&other) noexcept {
+
+        // Self-assignment detection
+        if (&other == this) return *this;
+
+        // First clear the actual list
+        Clear();
+        Head = other.Head;
+        Tail = other.Tail;
+        Size = other.Size;
+
+        other.Head = other.Tail = nullptr;
+        other.Size = 0;
+
+        return *this;
+    }
+
+    constexpr bool operator==(const List &other) const noexcept {
         if (GetLength() != other.GetLength()) return false;
 
         for (auto itself = cbegin(), itother = other.cbegin(); itself != cend(); ++itself, ++itother)
@@ -174,7 +199,7 @@ public:
         return true;
     }
 
-    inline constexpr bool operator!=(const List &other) const noexcept {
+    constexpr bool operator!=(const List &other) const noexcept {
         return !(*this == other);
     }
 
@@ -202,11 +227,10 @@ public:
         if ((ssize_t) index > LastIndex() + 1) throw std::out_of_range("Index is larger than the actual list index");
 
         auto n = Head;
-        size_t i = 0;
         ListNode *previous = nullptr;
 
         // Move pointer and variables to the desired values
-        for (; i < index; ++i, previous = n, n = n->Next);
+        for (size_t i = 0; i < index; ++i, previous = n, n = n->Next);
 
         auto newNode = new ListNode(element);
         newNode->Next = n;
@@ -232,29 +256,24 @@ public:
         if ((ssize_t) index > LastIndex() + 1) throw std::out_of_range("Index is larger than the actual list index");
 
         auto n = Head;
-        size_t i = 0;
         ListNode *previous = nullptr;
-        for (; i < index; ++i, previous = n, n = n->Next);
+        for (size_t i = 0; i < index; ++i, previous = n, n = n->Next);
 
         // Now that we are within range, let's add it!
         auto other = list.Head;
         ListNode *otherPrevious = nullptr;
-        size_t j = 0;
         while (other != nullptr) {
             auto newNode = new ListNode(other->Data);
-
             if (previous == nullptr) {
                 previous = newNode;
                 newNode->Next = Head;
                 Head = newNode;
             } else {
                 previous->Next = newNode;
-                //newNode->Next = other;
                 previous = newNode;
             }
 
             other = other->Next;
-            //if(Tail == n) Tail = newNode;
             if (other == nullptr) newNode->Next = n;
         }
 
@@ -370,6 +389,7 @@ public:
                 if (Tail == t) Tail = previous;
                 delete t;
                 --Size;
+                if (Size == 0) Head = Tail = nullptr;
                 return true;
             }
             previous = n;
@@ -395,6 +415,8 @@ public:
                 n = n->Next;
             }
         }
+
+        if (Size == 0) Head = Tail = nullptr;
     }
 
     [[nodiscard]] constexpr T RemoveAt(size_t index) {
@@ -413,6 +435,8 @@ public:
 
         --Size;
         delete n;
+
+        if (Size == 0) Head = Tail = nullptr;
 
         return obj;
     }
@@ -441,6 +465,9 @@ public:
         }
 
         Size -= count;
+
+        if (Size == 0) Head = Tail = nullptr;
+
         return array;
     }
 

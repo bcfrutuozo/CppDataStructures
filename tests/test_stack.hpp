@@ -226,6 +226,23 @@ TEST_CASE("Stack")
             a.Push(10);
             REQUIRE(a != b);
         }
+
+        SECTION("Move constructor")
+        {
+            Stack<int> a{1, 2, 3, 4};
+            Stack<int> b = std::move(a);
+            REQUIRE(a.IsEmpty());
+            REQUIRE(b == Stack<int>({1, 2, 3, 4}));
+        }
+
+        SECTION("Move assignment")
+        {
+            Stack<int> a{1, 2, 3, 4};
+            Stack<int> b{5, 6};
+            b = std::move(a);
+            REQUIRE(a.IsEmpty());
+            REQUIRE(b == Stack<int>({1, 2, 3, 4}));
+        }
     }
 
     SECTION("Comparison")
@@ -359,23 +376,23 @@ TEST_CASE("Stack")
         Array<int> b{0, 0, 0, 0, 0, 0, 0, 0};
 
         a.CopyTo(b, 2);
-        Array<int> res{0, 0, 1, 2, 3, 4, 5, 6 };
+        Array<int> res{0, 0, 1, 2, 3, 4, 5, 6};
         REQUIRE(b == res);
 
         Array<int> c;
         CHECK_THROWS(a.CopyTo(c, 0));
 
-        Array<int> d { 1, 2, 3 };
+        Array<int> d{1, 2, 3};
         a.CopyTo(d, 2);
-        res = { 1 , 2, 1, 2, 3, 4, 5, 6};
+        res = {1, 2, 1, 2, 3, 4, 5, 6};
         REQUIRE(d == res);
 
-        Array<int> e { 1 };
+        Array<int> e{1};
         CHECK_THROWS(a.CopyTo(e, 1));
 
         Array<int> f{0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
         a.CopyTo(f, 2);
-        res = { 0, 0, 1, 2, 3, 4, 5, 6, 0, 0};
+        res = {0, 0, 1, 2, 3, 4, 5, 6, 0, 0};
         REQUIRE(f == res);
     }
 }

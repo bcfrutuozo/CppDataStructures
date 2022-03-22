@@ -65,7 +65,15 @@ public:
         };
     }
 
-    Queue(std::initializer_list<T> l) noexcept
+    constexpr Queue(Queue &&other) noexcept:
+            Front(std::move(other.Front)),
+            Rear(std::move(other.Rear)),
+            Size(std::move(other.Size)) {
+        other.Front = other.Rear = nullptr;
+        other.Size = 0;
+    }
+
+    constexpr Queue(std::initializer_list<T> l) noexcept
             :
             Front(nullptr),
             Rear(nullptr),
@@ -84,6 +92,23 @@ public:
     constexpr Queue &operator=(const Queue &other) noexcept {
         Queue copied(other);
         Swap(copied);
+        return *this;
+    }
+
+    constexpr Queue &operator=(Queue &&other) noexcept {
+
+        // Self-assignment detection
+        if (&other == this) return *this;
+
+        // First clear the actual list
+        Clear();
+        Front = other.Front;
+        Rear = other.Rear;
+        Size = other.Size;
+
+        other.Front = other.Rear = nullptr;
+        other.Size = 0;
+
         return *this;
     }
 
@@ -119,7 +144,7 @@ public:
     }
 
     constexpr void CopyTo(Array<T> &array, size_t arrayIndex) const {
-        if ((ssize_t)arrayIndex > array.LastIndex()) throw std::out_of_range("arrayIndex is out of Array boundaries");
+        if ((ssize_t) arrayIndex > array.LastIndex()) throw std::out_of_range("arrayIndex is out of Array boundaries");
         if (IsEmpty()) return;
 
         /* diff represents the amount of additional space the provided array needs to
@@ -128,7 +153,7 @@ public:
          * additional slots
         */
         ssize_t diff = GetLength() - (array.GetLength() - arrayIndex);
-        if (diff > 0) Array<T>::Resize(array, array.GetLength() + (size_t)diff);
+        if (diff > 0) Array<T>::Resize(array, array.GetLength() + (size_t) diff);
         auto n = Front;
         for (size_t i = arrayIndex; n != nullptr; ++i, n = n->Next) {
             array[i] = n->Data;

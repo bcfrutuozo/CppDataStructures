@@ -205,7 +205,7 @@ TEST_CASE("Queue")
             REQUIRE(a == b);
             a.Enqueue(7);
             REQUIRE(a != b);
-            Queue<int> c {2, 3, 4, 5, 6, 7};
+            Queue<int> c{2, 3, 4, 5, 6, 7};
             REQUIRE(a.Dequeue() == 1);
             REQUIRE(a == c);
             a.Dequeue();
@@ -221,12 +221,29 @@ TEST_CASE("Queue")
             REQUIRE(a == b);
             a.Enqueue(7);
             REQUIRE(a != b);
-            Queue<int> c {2, 3, 4, 5, 6, 7};
+            Queue<int> c{2, 3, 4, 5, 6, 7};
             REQUIRE(a.Dequeue() == 1);
             REQUIRE(a == c);
             a.Dequeue();
             a.Enqueue(10);
             REQUIRE(a != b);
+        }
+
+        SECTION("Move constructor")
+        {
+            Queue<int> a{1, 2, 3, 4};
+            Queue<int> b = std::move(a);
+            REQUIRE(a.IsEmpty());
+            REQUIRE(b == Queue<int>({1, 2, 3, 4}));
+        }
+
+        SECTION("Move assignment")
+        {
+            Queue<int> a{1, 2, 3, 4};
+            Queue<int> b{5, 6};
+            b = std::move(a);
+            REQUIRE(a.IsEmpty());
+            REQUIRE(b == Queue<int>({1, 2, 3, 4}));
         }
     }
 
@@ -310,9 +327,9 @@ TEST_CASE("Queue")
 
     SECTION("Clear container")
     {
-        Queue<const char*> a { "ABC", "DEF", "GHIJKLM" };
+        Queue<const char *> a{"ABC", "DEF", "GHIJKLM"};
         a.Clear();
-        Queue<const char*> b;
+        Queue<const char *> b;
         REQUIRE(a == b);
     }
 
@@ -334,11 +351,11 @@ TEST_CASE("Queue")
         CHECK_THROWS(b.Dequeue());
     }
 
-    SECTION("Conversion to Array<T>"){
-        Queue<int> a { 1, 2, 3, 4, 5 };
+    SECTION("Conversion to Array<T>") {
+        Queue<int> a{1, 2, 3, 4, 5};
         Array<int> b = a.ToArray();
         Queue<int> copy = a;
-        Array<int> comp { 1, 2, 3, 4, 5};
+        Array<int> comp{1, 2, 3, 4, 5};
         REQUIRE(a == copy);
         REQUIRE(b == comp);
     }
@@ -348,23 +365,23 @@ TEST_CASE("Queue")
         Array<int> b{0, 0, 0, 0, 0, 0, 0, 0};
 
         a.CopyTo(b, 2);
-        Array<int> res{0, 0, 1, 2, 3, 4, 5, 6 };
+        Array<int> res{0, 0, 1, 2, 3, 4, 5, 6};
         REQUIRE(b == res);
 
         Array<int> c;
         CHECK_THROWS(a.CopyTo(c, 0));
 
-        Array<int> d { 1, 2, 3 };
+        Array<int> d{1, 2, 3};
         a.CopyTo(d, 2);
-        res = { 1 , 2, 1, 2, 3, 4, 5, 6 };
+        res = {1, 2, 1, 2, 3, 4, 5, 6};
         REQUIRE(d == res);
 
-        Array<int> e { 1 };
+        Array<int> e{1};
         CHECK_THROWS(a.CopyTo(e, 1));
 
         Array<int> f{0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
         a.CopyTo(f, 2);
-        res = { 0, 0, 1, 2, 3, 4, 5, 6, 0, 0};
+        res = {0, 0, 1, 2, 3, 4, 5, 6, 0, 0};
         REQUIRE(f == res);
     }
 }

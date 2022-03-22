@@ -44,7 +44,7 @@ private:
         // Pointer field representation
         pointer pElement = nullptr;
 
-        constexpr Iterator(T *ptr) noexcept : pElement(ptr) {}
+        constexpr Iterator(T *ptr) noexcept: pElement(ptr) {}
 
         constexpr reference operator*() const { return *pElement; }
 
@@ -225,7 +225,14 @@ public:
         std::copy(other.Data, other.Data + other.Size, Data);
     }
 
-    Array(std::initializer_list<T> l) noexcept:
+    constexpr Array(Array &&other) noexcept:
+            Data(std::move(other.Data)),
+            Size(std::move(other.Size)) {
+        other.Data = nullptr;
+        other.Size = 0;
+    }
+
+    constexpr Array(std::initializer_list<T> l) noexcept:
             Data(nullptr),
             Size(l.size()) {
         if (empty(l)) return;
@@ -253,6 +260,21 @@ public:
     constexpr Array &operator=(const Array &other) noexcept {
         Array copied(other);
         Swap(copied);
+        return *this;
+    }
+
+    constexpr Array &operator=(Array &&other) noexcept {
+
+        // Self-assignment detection
+        if (&other == this) return *this;
+
+        delete[] Data;
+        Data = other.Data;
+        Size = other.Size;
+
+        other.Data = nullptr;
+        other.Size = 0;
+
         return *this;
     }
 
@@ -430,7 +452,7 @@ public:
         Array<size_t> a(count);
 
         for (size_t i = 0, j = 0; i < Size; ++i) {
-            if (*(Data + i) == element) {
+            if (Data[i] == element) {
                 a[j] = i;
                 ++j;
 
@@ -459,7 +481,7 @@ public:
 
         size_t newSize = Size - 1;
         T *newArray = nullptr;
-        T obj = *(Data + index);
+        T obj = Data[index];
 
         if (newSize > 0) {
             newArray = new T[newSize];
@@ -486,7 +508,7 @@ public:
 
         size_t newSize = Size - 1;
         T *newArray = nullptr;
-        T obj = *(Data + newSize);
+        T obj = Data[newSize];
 
         if (newSize > 0) {
             newArray = new T[newSize];

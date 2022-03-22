@@ -55,7 +55,14 @@ public:
         }
     }
 
-    Stack(std::initializer_list<T> l) noexcept
+    constexpr Stack(Stack &&other) noexcept:
+            Top(std::move(other.Top)),
+            Size(std::move(other.Size)) {
+        other.Top = nullptr;
+        other.Size = 0;
+    }
+
+    constexpr Stack(std::initializer_list<T> l) noexcept
             :
             Top(nullptr),
             Size(0) {   // Initialize it with 0 because Size will be increment in Push function
@@ -73,6 +80,22 @@ public:
     constexpr Stack &operator=(const Stack &other) noexcept {
         Stack copied(other);
         Swap(copied);
+        return *this;
+    }
+
+    constexpr Stack &operator=(Stack &&other) noexcept {
+
+        // Self-assignment detection
+        if (&other == this) return *this;
+
+        // First clear the actual list
+        Clear();
+        Top = other.Top;
+        Size = other.Size;
+
+        other.Top = nullptr;
+        other.Size = 0;
+
         return *this;
     }
 

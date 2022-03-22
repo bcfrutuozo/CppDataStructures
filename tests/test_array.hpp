@@ -236,6 +236,23 @@ TEST_CASE("Array")
             a.Add(10);
             REQUIRE(a != b);
         }
+
+        SECTION("Move constructor")
+        {
+            Array<int> a{1, 2, 3, 4};
+            Array<int> b = std::move(a);
+            REQUIRE(a.IsEmpty());
+            REQUIRE(b == Array<int>({1, 2, 3, 4}));
+        }
+
+        SECTION("Move assignment")
+        {
+            Array<int> a{1, 2, 3, 4};
+            Array<int> b{5, 6};
+            b = std::move(a);
+            REQUIRE(a.IsEmpty());
+            REQUIRE(b == Array<int>({1, 2, 3, 4}));
+        }
     }
 
     SECTION("Comparison")
@@ -360,7 +377,7 @@ TEST_CASE("Array")
 
             Array<int> d;
             d.AddAtIndex(1, 0);
-            Array<int> e = { 1 };
+            Array<int> e = {1};
             REQUIRE(d == e);
 
             Array<int> f(0);
@@ -741,20 +758,20 @@ TEST_CASE("Array")
         // Check if default pValue was set
         REQUIRE(a.Count(0) == 30);
 
-        Array<int> b = { 1, 2, 3, 4, 5, 6 };
-        Array<int> c = { 1, 2, 3, 4 };
+        Array<int> b = {1, 2, 3, 4, 5, 6};
+        Array<int> c = {1, 2, 3, 4};
         Array<int>::Resize(b, 4);
 
         // Check if array is properly reduced keeping its elements
         REQUIRE(b == c);
 
-        Array<int> d { 1, 2, 3, 4 };
-        Array<int> e = { 1 };
+        Array<int> d{1, 2, 3, 4};
+        Array<int> e = {1};
         Array<int>::Resize(d, 1);
         REQUIRE(d == e);
 
-        Array<int> f { 1, 2, 3};
-        Array<int> g {};
+        Array<int> f{1, 2, 3};
+        Array<int> g{};
         Array<int>::Resize(f, 0);
         REQUIRE(f == g);
     }
@@ -764,9 +781,9 @@ TEST_CASE("Array")
         SECTION("Array<T>::Iterator")
         {
             std::ostringstream oss;
-            Array<const char*> c = { "ABC", "DEF", "G", "HI", "J", "KLMNOPQ"};
+            Array<const char *> c = {"ABC", "DEF", "G", "HI", "J", "KLMNOPQ"};
 
-            for(auto it = c.begin(); it != c.end(); ++it) {
+            for (auto it = c.begin(); it != c.end(); ++it) {
                 *it = "A";
                 oss << *it;
             }
@@ -777,9 +794,9 @@ TEST_CASE("Array")
         SECTION("Array<T>::ConstIterator")
         {
             std::ostringstream oss;
-            Array<const char*> c = { "ABC", "DEF", "G", "HI", "J", "KLMNOPQ"};
+            Array<const char *> c = {"ABC", "DEF", "G", "HI", "J", "KLMNOPQ"};
 
-            for(auto it = c.cbegin(); it != c.cend(); ++it) {
+            for (auto it = c.cbegin(); it != c.cend(); ++it) {
                 oss << *it;
             }
 
@@ -789,9 +806,9 @@ TEST_CASE("Array")
         SECTION("Array<T>::ReverseIterator")
         {
             std::ostringstream oss;
-            Array<const char*> c = { "ABC", "DEF", "G", "HI", "J", "KLMNOPQ"};
+            Array<const char *> c = {"ABC", "DEF", "G", "HI", "J", "KLMNOPQ"};
 
-            for(auto it = c.rbegin(); it != c.rend(); ++it) {
+            for (auto it = c.rbegin(); it != c.rend(); ++it) {
                 *it = "A";
                 oss << *it;
             }
@@ -802,9 +819,9 @@ TEST_CASE("Array")
         SECTION("Array<T>::ConstReverseIterator")
         {
             std::ostringstream oss;
-            Array<const char*> c = { "ABC", "DEF", "G", "HI", "J", "KLMNOPQ"};
+            Array<const char *> c = {"ABC", "DEF", "G", "HI", "J", "KLMNOPQ"};
 
-            for(auto it = c.crbegin(); it != c.crend(); ++it) {
+            for (auto it = c.crbegin(); it != c.crend(); ++it) {
                 oss << *it;
             }
 
