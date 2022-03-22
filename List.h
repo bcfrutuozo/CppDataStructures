@@ -124,7 +124,6 @@ public:
         if (Size == 0) return;
 
         auto n = other.Head;
-        //ListNode begin = nullptr;
         ListNode *previous = nullptr;
         while (n != nullptr) {
             if (Head == nullptr) {
@@ -142,7 +141,7 @@ public:
         }
     }
 
-    constexpr List(List &&other) noexcept :
+    constexpr List(List &&other) noexcept:
             Head(std::move(other.Head)),
             Tail(std::move(other.Tail)),
             Size(std::move(other.Size)) {

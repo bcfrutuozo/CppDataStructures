@@ -1,6 +1,7 @@
 #include "Timer.h"
 #include "Array.h"
 #include "List.h"
+#include "LinkedList.h"
 #include "Stack.h"
 #include "Queue.h"
 #include <forward_list>
@@ -10,13 +11,13 @@
 #include <iostream>
 
 int main(int argc, char *argv[]) {
+    Timer t;
 
-    constexpr List<int> a = {1, 2, 3, 4, 5};
-    constexpr List<int> b = { 2, 3, 4, 5, 6};
+    LinkedList<int> a{1, 2, 3, 4, 5, 6, 7, 8};
 
-    std::list
+    for(auto it = a.crbegin(); it != a.crend(); ++it)
+        std::cout << *it;
 
-    //static_assert(a == b);
 
     return 0;
 }
