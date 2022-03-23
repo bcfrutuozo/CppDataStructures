@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
         std::cout << *it;
     std::cout << std::endl;
 
-    a.RemoveLast(8);
+    a.RemoveLast(0);
     for (auto it = a.cbegin(); it != a.cend(); ++it)
         std::cout << *it;
     std::cout << " | ";

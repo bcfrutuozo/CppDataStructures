@@ -18,7 +18,7 @@ private:
         Node *Previous;
         Node *Next;
 
-        constexpr explicit Node(const T &element) noexcept: Data(element) {}
+        constexpr explicit Node(const T &element) noexcept: Data(element), Previous(nullptr), Next(nullptr) {}
 
         constexpr Node(const T &element, Node *previous) noexcept: Data(element), Previous(previous) {}
 
@@ -259,7 +259,7 @@ public:
 
     }
 
-    constexpr LinkedList(LinkedList&& other) noexcept :
+    constexpr LinkedList(LinkedList &&other) noexcept:
             Head(std::move(other.Head)),
             Tail(std::move(other.Tail)),
             Size(std::move(other.Size)) {
@@ -321,12 +321,13 @@ public:
     }
 
     constexpr void Add(const T &element) noexcept {
-        auto n = new Node(element, Tail);
+        auto n = new Node(element);
 
         if (GetLength() == 0) {
             Head = Tail = n;
         } else {
             auto t = Tail;
+            n->Previous = Tail;
             Tail->Next = n;
             Tail = n;
         }
@@ -377,17 +378,17 @@ public:
         Node *previous = nullptr;
         Node *next = nullptr;
         bool isNearTail = (GetLength() - index) < index;
-        Node* n;
-        if(isNearTail){
+        Node *n;
+        if (isNearTail) {
             n = Tail;
-            for(size_t i = LastIndex(); i >= index; --i, next = n, n = n->Previous);
+            for (size_t i = LastIndex(); i >= index; --i, next = n, n = n->Previous);
         } else {
-             n = Head;
+            n = Head;
             for (size_t i = 0; i < index; ++i, previous = n, n = n->Next);
         }
 
         // Now that we are within range, let's add it!
-        if(isNearTail) {
+        if (isNearTail) {
             auto other = list.Tail;
             while (other != nullptr) {
                 auto newNode = new Node(other->Data);
@@ -408,8 +409,7 @@ public:
                     n->Next = newNode;
                 }
             }
-        }
-        else {
+        } else {
             auto other = list.Head;
             while (other != nullptr) {
                 auto newNode = new Node(other->Data);
@@ -435,10 +435,10 @@ public:
         Size = GetLength() + list.GetLength();
     }
 
-    constexpr void Clear(){
+    constexpr void Clear() {
         while (Head != nullptr) {
             auto t = Head;
-            if(Head != Tail) Head->Next->Previous = nullptr;
+            if (Head != Tail) Head->Next->Previous = nullptr;
             Head = Head->Next;
             delete t;
             --Size;
@@ -540,7 +540,7 @@ public:
             if (n->Data == element) {
                 if (Head != n) {
                     previous->Next = n->Next;
-                    if(n->Next != nullptr) n->Next->Previous = previous;
+                    if (n->Next != nullptr) n->Next->Previous = previous;
                 }
                 auto t = n;
                 n = n->Next;
@@ -564,7 +564,7 @@ public:
             if (n->Data == element) {
                 if (Head != n) {
                     previous->Next = n->Next;
-                    if(n->Next != nullptr) n->Next->Previous = previous;
+                    if (n->Next != nullptr) n->Next->Previous = previous;
                 }
                 auto t = n;
                 n = n->Next;
@@ -587,16 +587,16 @@ public:
         // Empty for statement to move pointers to the desired ListNode. O(n) operation again...
         Node *previous = nullptr;
         bool isNearTail = (GetLength() - index) < index;
-        Node* n;
+        Node *n;
         T obj;
-        if(isNearTail){
+        if (isNearTail) {
             n = Tail;
-            Node* next = nullptr;
-            for(size_t i = LastIndex(); i > index; --i, next = n, n = n->Previous);
+            Node *next = nullptr;
+            for (size_t i = LastIndex(); i > index; --i, next = n, n = n->Previous);
 
             if (next != nullptr) {
                 next->Previous = n->Previous;
-                if(n->Previous != nullptr) n->Previous->Next = next;
+                if (n->Previous != nullptr) n->Previous->Next = next;
             }
             obj = n->Data;
             if (Head == n) Head = next;
@@ -611,7 +611,7 @@ public:
 
             if (previous != nullptr) {
                 previous->Next = n->Next;
-                if(n->Next != nullptr) n->Next->Previous = previous;
+                if (n->Next != nullptr) n->Next->Previous = previous;
             }
 
             obj = n->Data;
@@ -630,56 +630,51 @@ public:
         return obj;
     }
 
-    [[nodiscard]] constexpr bool RemoveLast(const T& element) noexcept {
+    [[nodiscard]] constexpr bool RemoveLast(const T &element) noexcept {
         auto n = Tail;
         Node *next = nullptr;
         while (n != nullptr) {
             if (n->Data == element) {
-                if (Tail != n) {
-                    if(next != nullptr) next->Previous = n->Previous;
-                    if(n != Head) {
-                        n->Previous->Next = next;
-                        next->Previous = n->Previous;
-                    }
-                }
-                auto t = n;
                 if (Size == 1) Head = Tail = nullptr;
-
                 else {
-                    if (Head == t) {
-                        Head = n->Next;
+                    if (n != Tail && n != Head) {
+                        n->Previous->Next = n->Next;
+                        n->Next->Previous = n->Previous;
+                    } else if (n == Head) {
+                        Head = Head->Next;
                         Head->Previous = nullptr;
-                    }
-                    if (Tail == t) {
-                        Tail = t->Previous;
+                    } else {
+                        Tail = n->Previous;
                         Tail->Next = nullptr;
                     }
                 }
-
-                delete t;
+                delete n;
                 --Size;
                 return true;
             }
+
             next = n;
             n = n->Previous;
         }
+
         return false;
     }
 
+    // TODO: CHECK THIS LOGIC
     [[nodiscard]] constexpr Array<T> RemoveRange(size_t index, size_t count) {
         if (count < 1) throw std::invalid_argument("count cannot be 0 or negative");
         if ((ssize_t) index > LastIndex()) throw std::out_of_range("Index is out of bounds");
         if ((ssize_t) (index + count - 1) > LastIndex())
             throw std::out_of_range("Provided ranged is not valid for the operation");
 
-        Node* n;
+        Node *n;
         Node *previous = nullptr;
         Array<T> array(count);
-        // Empty for statement to move pointers to the desired ListNode. O(n) operation again...
+// Empty for statement to move pointers to the desired ListNode. O(n) operation again...
         bool isNearTail = (GetLength() - index) < index;
-        if(isNearTail){
+        if (isNearTail) {
             n = Tail;
-            for(size_t i = LastIndex(); i >= index; --i, previous = n, n = n->Previous);
+            for (size_t i = LastIndex(); i >= index; --i, previous = n, n = n->Previous);
         } else {
             n = Head;
             for (size_t i = 0; i < index; ++i, previous = n, n = n->Next);
@@ -688,7 +683,7 @@ public:
         for (size_t i = 0; i < count; ++i) {
             if (previous != nullptr) {
                 previous->Next = n->Next;
-                if(n->Next != nullptr) n->Next->Previous = previous;
+                if (n->Next != nullptr) n->Next->Previous = previous;
             }
 
             if (Head == n) Head = n->Next;
@@ -701,7 +696,8 @@ public:
 
         Size -= count;
 
-        if (Size == 0) Head = Tail = nullptr;
+        if (Size == 0)
+            Head = Tail = nullptr;
 
         return array;
     }
