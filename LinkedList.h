@@ -660,7 +660,6 @@ public:
         return false;
     }
 
-    // TODO: CHECK THIS LOGIC
     [[nodiscard]] constexpr Array<T> RemoveRange(size_t index, size_t count) {
         if (count < 1) throw std::invalid_argument("count cannot be 0 or negative");
         if ((ssize_t) index > LastIndex()) throw std::out_of_range("Index is out of bounds");
@@ -670,28 +669,55 @@ public:
         Node *n;
         Node *previous = nullptr;
         Array<T> array(count);
-// Empty for statement to move pointers to the desired ListNode. O(n) operation again...
+
+        // Empty for statement to move pointers to the desired ListNode. O(n) operation again...
         bool isNearTail = (GetLength() - index) < index;
         if (isNearTail) {
             n = Tail;
-            for (size_t i = LastIndex(); i >= index; --i, previous = n, n = n->Previous);
+            Node *next = nullptr;
+            for (size_t i = LastIndex(); i > index; --i, next = n, n = n->Previous);
+
+            for (size_t i = 0; i < count; ++i) {
+                if (next != nullptr) {
+                    next->Previous = n->Previous;
+                    if (n->Previous != nullptr) {
+                        n->Previous->Next = n->Next;
+                    }
+                }
+
+                array[i] = n->Data;
+                if (Head == n) Head = next;
+                if (Tail == n) {
+                    Tail = n->Previous;
+                    Tail->Next = nullptr;
+                }
+
+                auto t = n;
+                n = n->Next;
+                if (n != nullptr) next = n->Next;
+                delete t;
+            }
+
         } else {
             n = Head;
             for (size_t i = 0; i < index; ++i, previous = n, n = n->Next);
-        }
 
-        for (size_t i = 0; i < count; ++i) {
-            if (previous != nullptr) {
-                previous->Next = n->Next;
-                if (n->Next != nullptr) n->Next->Previous = previous;
+            for (size_t i = 0; i < count; ++i, previous = n->Previous) {
+                if (previous != nullptr) {
+                    previous->Next = n->Next;
+                    if (n->Next != nullptr) n->Next->Previous = previous;
+                }
+
+                array[i] = n->Data;
+                if (Head == n) {
+                    Head = n->Next;
+                    Head->Previous = nullptr;
+                }
+                if (Tail == n) Tail = previous;
+                auto t = n;
+                n = n->Next;
+                delete t;
             }
-
-            if (Head == n) Head = n->Next;
-            if (Tail == n) Tail = previous;
-            array[i] = n->Data;
-            auto t = n->Next;
-            delete n;
-            n = t;
         }
 
         Size -= count;
@@ -734,28 +760,38 @@ public:
         if (IsEmpty()) return Array<T>(0);
 
         Array<T> a(Size);
-        auto n = Head;
-        for (size_t i = 0; n != nullptr; ++i, n = n->Next)
-            a[i] = n->Data;
+        auto h = Head;
+        auto t = Tail;
+        for (size_t i = 0, j = LastIndex(); i <= j ; ++i, --j, h = h->Next, t = t->Previous) {
+            if(i != j) {
+                a[i] = h->Data;
+                a[j] = t->Data;
+            }
+            else
+            {
+                a[i] = h->Data;
+                break;
+            }
+        }
 
         return a;
     }
 
     constexpr Iterator begin() noexcept { return Head; }
 
-    constexpr Iterator end() noexcept { return Tail->Next; }
+    constexpr Iterator end() noexcept { return (Tail == nullptr) ? nullptr : Tail->Next; }
 
     constexpr ConstIterator cbegin() const noexcept { return Head; }
 
-    constexpr ConstIterator cend() const noexcept { return Tail->Next; }
+    constexpr ConstIterator cend() const noexcept { return (Tail == nullptr) ? nullptr : Tail->Next; }
 
     constexpr ReverseIterator rbegin() noexcept { return Tail; }
 
-    constexpr ReverseIterator rend() noexcept { return Head->Previous; }
+    constexpr ReverseIterator rend() noexcept { return (Head == nullptr) ? nullptr : Head->Previous; }
 
     constexpr ConstReverseIterator crbegin() const noexcept { return Tail; }
 
-    constexpr ConstReverseIterator crend() const noexcept { return Head->Previous; }
+    constexpr ConstReverseIterator crend() const noexcept { return (Head == nullptr) ? nullptr : Head->Previous; }
 
 };
 
