@@ -238,7 +238,9 @@ public:
         if (empty(l)) return;
 
         Data = new T[Size];
-        for (auto it = begin(), itl = l.begin(); it != end(); ++it, ++itl)
+        auto it = begin();
+        auto itl = l.begin();
+        for (; it != end(); ++it, ++itl)
             *it = *itl;
     }
 

@@ -108,6 +108,8 @@ private:
     ListNode *Tail;
     size_t Size;
 
+
+
 public:
 
     constexpr List() noexcept
@@ -260,7 +262,6 @@ public:
 
         // Now that we are within range, let's add it!
         auto other = list.Head;
-        ListNode *otherPrevious = nullptr;
         while (other != nullptr) {
             auto newNode = new ListNode(other->Data);
             if (previous == nullptr) {
@@ -313,7 +314,7 @@ public:
         if (diff > 0) Array<T>::Resize(diff, array.GetLength() + diff);
 
         auto itArray = array.begin();
-        Iterator itself;
+        auto itself = cbegin();
         for (; itArray != array.end(); ++itArray, ++itself)
             *itArray = *itself;
     }
@@ -383,12 +384,14 @@ public:
             if (n->Data == element) {
                 if (Head != n) previous->Next = n->Next;
                 auto t = n;
-                n = n->Next;
-                if (Head == t) Head = n;
-                if (Tail == t) Tail = previous;
+                if (Size == 1) Head = Tail = nullptr;
+                else {
+                    n = n->Next;
+                    if (Head == t) Head = n;
+                    if (Tail == t) Tail = previous;
+                }
                 delete t;
                 --Size;
-                if (Size == 0) Head = Tail = nullptr;
                 return true;
             }
             previous = n;

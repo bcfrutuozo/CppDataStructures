@@ -11,5 +11,6 @@
 #include "test_stack.hpp"
 #include "test_queue.hpp"
 #include "test_list.hpp"
+#include "test_linkedlist.hpp"
 
 #endif //CPPDATASTRUCTURES_TEST_MAIN_CPP
