@@ -9,7 +9,7 @@
 #include <cstring>
 #include "../Queue.h"
 
-TEST_CASE("Queue")
+TEST_CASE("Queue<T>")
 {
     SECTION("Instantiation")
     {

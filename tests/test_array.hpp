@@ -10,7 +10,7 @@
 #include <ostream>
 #include "../Array.h"
 
-TEST_CASE("Array")
+TEST_CASE("Array<T>")
 {
     SECTION("Instantiation")
     {

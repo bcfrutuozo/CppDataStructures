@@ -10,7 +10,7 @@
 #include <ostream>
 #include "../List.h"
 
-TEST_CASE("List")
+TEST_CASE("List<T>")
 {
     SECTION("Instantiation")
     {

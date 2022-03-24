@@ -9,7 +9,7 @@
 #include <cstring>
 #include "../Stack.h"
 
-TEST_CASE("Stack")
+TEST_CASE("Stack<T>")
 {
     SECTION("Instantiation")
     {

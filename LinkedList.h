@@ -20,7 +20,7 @@ private:
 
         constexpr explicit Node(const T &element) noexcept: Data(element), Previous(nullptr), Next(nullptr) {}
 
-        constexpr Node(const T &element, Node *previous) noexcept: Data(element), Previous(previous) {}
+        constexpr Node(const T &element, Node *previous) noexcept: Data(element), Previous(previous), Next(nullptr) {}
 
         constexpr Node(const T &element, Node *previous, Node *next) noexcept: Data(element), Previous(previous),
                                                                                Next(next) {}
@@ -256,7 +256,24 @@ public:
             Head(nullptr),
             Tail(nullptr),
             Size(other.Size) {
+        if(Size == 0) return;
 
+        auto n = other.Head;
+        Node *previous = nullptr;
+        while (n != nullptr) {
+            if (Head == nullptr) {
+                Head = new Node(n->Data);
+                //begin = Head;
+                previous = Head;
+                Tail = Head;
+            } else {
+                auto newNode = new Node(n->Data, previous);
+                Tail = newNode;
+                previous->Next = newNode;
+                previous = newNode;
+            }
+            n = n->Next;
+        }
     }
 
     constexpr LinkedList(LinkedList &&other) noexcept:
@@ -264,7 +281,7 @@ public:
             Tail(std::move(other.Tail)),
             Size(std::move(other.Size)) {
         other.Head = other.Tail = nullptr;
-        Size = 0;
+        other.Size = 0;
     }
 
     constexpr LinkedList(std::initializer_list<T> l) noexcept
@@ -523,14 +540,13 @@ public:
 
         auto n = Tail;
         size_t i = LastIndex();
-        ssize_t idx = -1;
         while (n != nullptr) {
-            if (n->Data == element) idx = i;
+            if (n->Data == element) return i;
             n = n->Previous;
             --i;
         }
 
-        return idx;
+        return -1;
     }
 
     [[nodiscard]] constexpr bool Remove(const T &element) noexcept {
@@ -702,7 +718,7 @@ public:
             n = Head;
             for (size_t i = 0; i < index; ++i, previous = n, n = n->Next);
 
-            for (size_t i = 0; i < count; ++i, previous = n->Previous) {
+            for (size_t i = 0; i < count; ++i) {
                 if (previous != nullptr) {
                     previous->Next = n->Next;
                     if (n->Next != nullptr) n->Next->Previous = previous;
@@ -715,7 +731,7 @@ public:
                 }
                 if (Tail == n) Tail = previous;
                 auto t = n;
-                n = n->Next;
+                if(n != nullptr) n = n->Next;
                 delete t;
             }
         }
