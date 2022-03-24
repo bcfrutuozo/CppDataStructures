@@ -182,7 +182,7 @@ public:
             throw std::out_of_range("Cannot Pop a number of elements higher than the Stack itself");
 
         Array<T> array(amount);
-        for (ssize_t i = array.LastIndex(); i >= 0; --i) {
+        for (ssize_t i = 0; i < amount; ++i) {
             array[i] = Pop();
         }
 
@@ -205,11 +205,6 @@ public:
             a[i] = n->Data;
 
         return a;
-    }
-
-    static constexpr void UnloadInto(Stack &sourceStack, Stack &destinationStack) {
-        while (!sourceStack.IsEmpty())
-            destinationStack.Push(sourceStack.Pop());
     }
 };
 

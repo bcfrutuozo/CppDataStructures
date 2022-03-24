@@ -25,8 +25,7 @@ TEST_CASE("Queue<T>")
                 c.Enqueue(4u);
                 c.Enqueue(5u);
                 REQUIRE(c.GetLength() == 5);
-                Queue<uint8_t> c2 = {1u, 2u, 3u, 4u, 5u};
-                REQUIRE(c == c2);
+                REQUIRE(c == Queue<uint8_t>{1u, 2u, 3u, 4u, 5u});
             }
 
             SECTION("Queue<uint16_t>")
@@ -39,8 +38,7 @@ TEST_CASE("Queue<T>")
                 c.Enqueue(4u);
                 c.Enqueue(5u);
                 REQUIRE(c.GetLength() == 5);
-                Queue<uint16_t> c2 = {1u, 2u, 3u, 4u, 5u};
-                REQUIRE(c == c2);
+                REQUIRE(c == Queue<uint16_t>{1u, 2u, 3u, 4u, 5u});
             }
 
             SECTION("Queue<uint32_t>")
@@ -53,8 +51,7 @@ TEST_CASE("Queue<T>")
                 c.Enqueue(4u);
                 c.Enqueue(5u);
                 REQUIRE(c.GetLength() == 5);
-                Queue<uint32_t> c2 = {1u, 2u, 3u, 4u, 5u};
-                REQUIRE(c == c2);
+                REQUIRE(c == Queue<uint32_t>{1u, 2u, 3u, 4u, 5u});
             }
 
             SECTION("Queue<uint64_t>")
@@ -67,8 +64,7 @@ TEST_CASE("Queue<T>")
                 c.Enqueue(4ul);
                 c.Enqueue(5ul);
                 REQUIRE(c.GetLength() == 5);
-                Queue<uint64_t> c2 = {1ul, 2ul, 3ul, 4ul, 5ul};
-                REQUIRE(c == c2);
+                REQUIRE(c == Queue<uint64_t>{1ul, 2ul, 3ul, 4ul, 5ul});
             }
 
             SECTION("Queue<int8_t>")
@@ -81,8 +77,7 @@ TEST_CASE("Queue<T>")
                 c.Enqueue(4);
                 c.Enqueue(5);
                 REQUIRE(c.GetLength() == 5);
-                Queue<int8_t> c2 = {1, 2, 3, 4, 5};
-                REQUIRE(c == c2);
+                REQUIRE(c == Queue<int8_t>{1, 2, 3, 4, 5});
             }
 
             SECTION("Queue<int16_t>")
@@ -95,8 +90,7 @@ TEST_CASE("Queue<T>")
                 c.Enqueue(4);
                 c.Enqueue(5);
                 REQUIRE(c.GetLength() == 5);
-                Queue<int16_t> c2 = {1, 2, 3, 4, 5};
-                REQUIRE(c == c2);
+                REQUIRE(c == Queue<int16_t>{1, 2, 3, 4, 5});
             }
 
             SECTION("Queue<int32_t>")
@@ -109,8 +103,7 @@ TEST_CASE("Queue<T>")
                 c.Enqueue(4);
                 c.Enqueue(5);
                 REQUIRE(c.GetLength() == 5);
-                Queue<int32_t> c2 = {1, 2, 3, 4, 5};
-                REQUIRE(c == c2);
+                REQUIRE(c == Queue<int32_t>{1, 2, 3, 4, 5});
             }
 
             SECTION("Queue<int64_t>")
@@ -123,8 +116,7 @@ TEST_CASE("Queue<T>")
                 c.Enqueue(4l);
                 c.Enqueue(5l);
                 REQUIRE(c.GetLength() == 5);
-                Queue<int64_t> c2 = {1l, 2l, 3l, 4l, 5l};
-                REQUIRE(c == c2);
+                REQUIRE(c == Queue<int64_t>{1l, 2l, 3l, 4l, 5l});
             }
 
             SECTION("Queue<char>")
@@ -137,8 +129,7 @@ TEST_CASE("Queue<T>")
                 c.Enqueue('4');
                 c.Enqueue('5');
                 REQUIRE(c.GetLength() == 5);
-                Queue<char> c2 = {'1', '2', '3', '4', '5'};
-                REQUIRE(c == c2);
+                REQUIRE(c == Queue<char>{'1', '2', '3', '4', '5'});
             }
 
             SECTION("Queue<unsigned char>")
@@ -151,8 +142,7 @@ TEST_CASE("Queue<T>")
                 c.Enqueue('4');
                 c.Enqueue('5');
                 REQUIRE(c.GetLength() == 5);
-                Queue<unsigned char> c2 = {'1', '2', '3', '4', '5'};
-                REQUIRE(c == c2);
+                REQUIRE(c == Queue<unsigned char>{'1', '2', '3', '4', '5'});
             }
 
             SECTION("Queue<float>")
@@ -165,8 +155,7 @@ TEST_CASE("Queue<T>")
                 c.Enqueue(4.0f);
                 c.Enqueue(5.0);
                 REQUIRE(c.GetLength() == 5);
-                Queue<float> c2 = {1.0f, 2.0f, 3.0f, 4.0f, 5.0f};
-                REQUIRE(c == c2);
+                REQUIRE(c == Queue<float>{1.0f, 2.0f, 3.0f, 4.0f, 5.0f});
             }
 
             SECTION("Queue<double>")
@@ -179,8 +168,7 @@ TEST_CASE("Queue<T>")
                 c.Enqueue(4.0f);
                 c.Enqueue(5.0);
                 REQUIRE(c.GetLength() == 5);
-                Queue<double> c2 = {1.0f, 2.0f, 3.0f, 4.0f, 5.0f};
-                REQUIRE(c == c2);
+                REQUIRE(c == Queue<double>{1.0f, 2.0f, 3.0f, 4.0f, 5.0f});
             }
         }
 
@@ -194,6 +182,7 @@ TEST_CASE("Queue<T>")
                 c.Enqueue("BRUNO");
                 c.Enqueue("FRUTUOZO");
                 REQUIRE(c.GetLength() == 3);
+                REQUIRE(c == Queue<const char*>{"ABC", "BRUNO", "FRUTUOZO"});
             }
         }
 
@@ -205,9 +194,8 @@ TEST_CASE("Queue<T>")
             REQUIRE(a == b);
             a.Enqueue(7);
             REQUIRE(a != b);
-            Queue<int> c{2, 3, 4, 5, 6, 7};
             REQUIRE(a.Dequeue() == 1);
-            REQUIRE(a == c);
+            REQUIRE(a == Queue<int>{2, 3, 4, 5, 6, 7});
             a.Dequeue();
             a.Enqueue(10);
             REQUIRE(a != b);
@@ -251,18 +239,12 @@ TEST_CASE("Queue<T>")
     {
         SECTION("Queue<T> == Queue<T>")
         {
-            Queue<int> a{1, 2, 3, 4, 5, 6};
-            Queue<int> b{1, 2, 3, 4, 5, 6};
-
-            REQUIRE(a == b);
+            REQUIRE(Queue<int>{1, 2, 3, 4, 5, 6} == Queue<int>{1, 2, 3, 4, 5, 6});
         }
 
         SECTION("Queue<T> != Queue<T>")
         {
-            Queue<int> a{1, 2, 3, 4, 5, 6};
-            Queue<int> b{1, 2, 3, 0, 5, 6};
-
-            REQUIRE(a != b);
+            REQUIRE(Queue<int>{1, 2, 3, 4, 5, 6} != Queue<int>{1, 2, 3, 0, 5, 6});
         }
     }
 
@@ -286,8 +268,7 @@ TEST_CASE("Queue<T>")
                 REQUIRE(c.GetLength() == 6);
                 REQUIRE(strcmp(c.Dequeue(), "A") == 0);
                 REQUIRE(c.GetLength() == 5);
-                Queue<const char *> final = {"TEST", "LOREM", "ABC", "DEF", "ZZZ"};
-                REQUIRE(c == final);
+                REQUIRE(c == Queue<const char *> {"TEST", "LOREM", "ABC", "DEF", "ZZZ"});
             }
 
             SECTION("Array of elements")
@@ -297,9 +278,9 @@ TEST_CASE("Queue<T>")
                 Array<const char *> a = c.Dequeue(3);
                 REQUIRE(a.GetLength() == 3);
                 REQUIRE(c.GetLength() == 3);
-                a[0] == "A";
-                a[1] == "TEST";
-                a[2] == "LOREM";
+                REQUIRE(strcmp(a[0], "A") == 0);
+                REQUIRE(strcmp(a[1], "TEST") == 0);
+                REQUIRE(strcmp(a[2], "LOREM") == 0);
             }
         }
     }
@@ -329,8 +310,7 @@ TEST_CASE("Queue<T>")
     {
         Queue<const char *> a{"ABC", "DEF", "GHIJKLM"};
         a.Clear();
-        Queue<const char *> b;
-        REQUIRE(a == b);
+        REQUIRE(a == Queue<const char*>{});
     }
 
     SECTION("Swap container")
@@ -354,35 +334,29 @@ TEST_CASE("Queue<T>")
     SECTION("Conversion to Array<T>") {
         Queue<int> a{1, 2, 3, 4, 5};
         Array<int> b = a.ToArray();
-        Queue<int> copy = a;
-        Array<int> comp{1, 2, 3, 4, 5};
-        REQUIRE(a == copy);
-        REQUIRE(b == comp);
+        REQUIRE(a == Queue<int>{1, 2, 3, 4, 5});
+        REQUIRE(b == Array<int>{1, 2, 3, 4, 5});
     }
 
     SECTION("CopyTo(Array<T>)") {
         Queue<int> a{1, 2, 3, 4, 5, 6};
         Array<int> b{0, 0, 0, 0, 0, 0, 0, 0};
-
         a.CopyTo(b, 2);
-        Array<int> res{0, 0, 1, 2, 3, 4, 5, 6};
-        REQUIRE(b == res);
+        REQUIRE(b == Array<int>{0, 0, 1, 2, 3, 4, 5, 6});
 
         Array<int> c;
         CHECK_THROWS(a.CopyTo(c, 0));
 
         Array<int> d{1, 2, 3};
         a.CopyTo(d, 2);
-        res = {1, 2, 1, 2, 3, 4, 5, 6};
-        REQUIRE(d == res);
+        REQUIRE(d == Array<int>{1, 2, 1, 2, 3, 4, 5, 6});
 
         Array<int> e{1};
         CHECK_THROWS(a.CopyTo(e, 1));
 
         Array<int> f{0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
         a.CopyTo(f, 2);
-        res = {0, 0, 1, 2, 3, 4, 5, 6, 0, 0};
-        REQUIRE(f == res);
+        REQUIRE(f == Array<int>{0, 0, 1, 2, 3, 4, 5, 6, 0, 0});
     }
 }
 

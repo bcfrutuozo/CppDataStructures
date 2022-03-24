@@ -225,7 +225,7 @@ TEST_CASE("Array<T>")
         SECTION("Copy assignment constructor")
         {
             Array<int> a{1, 2, 3, 4, 5, 6};
-            Array<int> b(a);
+            Array<int> b = a;
 
             REQUIRE(a == b);
             a.Add(7);
@@ -259,18 +259,12 @@ TEST_CASE("Array<T>")
     {
         SECTION("Array<T> == Array<T>")
         {
-            Array<int> a{1, 2, 3, 4, 5, 6};
-            Array<int> b{1, 2, 3, 4, 5, 6};
-
-            REQUIRE(a == b);
+            REQUIRE(Array<int>{1, 2, 3, 4, 5, 6} == Array<int>{1, 2, 3, 4, 5, 6});
         }
 
         SECTION("Array<T> != Array<T>")
         {
-            Array<int> a{1, 2, 3, 4, 5, 6};
-            Array<int> b{1, 2, 3, 0, 5, 6};
-
-            REQUIRE(a != b);
+            REQUIRE(Array<int>{1, 2, 3, 4, 5, 6} != Array<int>{1, 2, 3, 0, 5, 6});
         }
     }
 
@@ -287,9 +281,7 @@ TEST_CASE("Array<T>")
             cpArray.Add("NEW 3");
             REQUIRE(cpArray.GetLength() == 8);
             REQUIRE(cpArray.LastIndex() == 7);
-
-            Array<const char *> other = {"BRUNO", "FRUTUOZO", "ENGINEERING", "LOREM", "IPSUM", "NEW", "NEW 2", "NEW 3"};
-            REQUIRE(cpArray == other);
+            REQUIRE(cpArray == Array<const char *>{"BRUNO", "FRUTUOZO", "ENGINEERING", "LOREM", "IPSUM", "NEW", "NEW 2", "NEW 3"});
         }
 
         SECTION("Adding a collection of elements to the Array<T>")
@@ -312,73 +304,57 @@ TEST_CASE("Array<T>")
             REQUIRE(strcmp(cpArray[5], "Single New") == 0);
             REQUIRE(strcmp(cpArray[16], "ELEMENT 10") == 0);
 
-            Array<const char *> other = {"BRUNO", "FRUTUOZO", "ENGINEERING", "LOREM", "IPSUM",
-                                         "Single New",
-                                         "ELEMENT 1", "ELEMENT 2", "ELEMENT 3", "ELEMENT 4", "ELEMENT 5",
-                                         "C",
-                                         "ELEMENT 6", "ELEMENT 7", "ELEMENT 8", "ELEMENT 9", "ELEMENT 10"};
-
-            REQUIRE(cpArray == other);
+            REQUIRE(cpArray == Array<const char*>{"BRUNO", "FRUTUOZO", "ENGINEERING", "LOREM", "IPSUM",
+                                                   "Single New",
+                                                   "ELEMENT 1", "ELEMENT 2", "ELEMENT 3", "ELEMENT 4", "ELEMENT 5",
+                                                   "C",
+                                                   "ELEMENT 6", "ELEMENT 7", "ELEMENT 8", "ELEMENT 9", "ELEMENT 10"});
         }
 
         SECTION("Adding element at an empty instantiated Array<T>")
         {
             Array<int> emptyArrayForSingleInsertion;
-
             // Checking index and Size
             REQUIRE(emptyArrayForSingleInsertion.GetLength() == 0);
             REQUIRE(emptyArrayForSingleInsertion.LastIndex() == -1);
-
             emptyArrayForSingleInsertion.Add(10);
-
             // Checking index and Size
             REQUIRE(emptyArrayForSingleInsertion.GetLength() == 1);
             REQUIRE(emptyArrayForSingleInsertion.LastIndex() == 0);
-
             // Checking element contents
             REQUIRE(emptyArrayForSingleInsertion[0] == 10);
-            Array<int> other = {10};
-            REQUIRE(emptyArrayForSingleInsertion == other);
+            REQUIRE(emptyArrayForSingleInsertion == Array<int>{10});
         }
 
         SECTION("Adding a collection of element at an empty instantiated Array<T>")
         {
             Array<int> emptyArrayForRangeInsertion;
-
             // Checking index and Size
             REQUIRE(emptyArrayForRangeInsertion.GetLength() == 0);
             REQUIRE(emptyArrayForRangeInsertion.LastIndex() == -1);
-
             emptyArrayForRangeInsertion.Add({4, 6, 3, 1, 6, 6, 6, 19, 2, 164, 52231, 2, 1, 0, -132, -4, -7, 32, -999});
-
             // Checking index and Size
             REQUIRE(emptyArrayForRangeInsertion.GetLength() == 19);
             REQUIRE(emptyArrayForRangeInsertion.LastIndex() == 18);
-
             // Checking element contents
             REQUIRE(emptyArrayForRangeInsertion[0] == 4);
             REQUIRE(emptyArrayForRangeInsertion[7] == 19);
             REQUIRE(emptyArrayForRangeInsertion[16] == -7);
             REQUIRE(emptyArrayForRangeInsertion[18] == -999);
-
-            Array<int> other = {4, 6, 3, 1, 6, 6, 6, 19, 2, 164, 52231, 2, 1, 0, -132, -4, -7, 32, -999};
-            REQUIRE(emptyArrayForRangeInsertion == other);
+            REQUIRE(emptyArrayForRangeInsertion == Array<int>{4, 6, 3, 1, 6, 6, 6, 19, 2, 164, 52231, 2, 1, 0, -132, -4, -7, 32, -999});
         }
 
         SECTION("Adding element at to an specific index")
         {
             Array<char> a = {'1', '3', '4', '2', '8'};
             a.AddAtIndex('1', 2);
-            Array<char> b = {'1', '3', '1', '4', '2', '8'};
-            REQUIRE(a == b);
+            REQUIRE(a == Array<char>{'1', '3', '1', '4', '2', '8'});
             a.AddAtIndex('9', 5);
-            Array<char> c = {'1', '3', '1', '4', '2', '9', '8'};
-            REQUIRE(a == c);
+            REQUIRE(a == Array<char>{'1', '3', '1', '4', '2', '9', '8'});
 
             Array<int> d;
             d.AddAtIndex(1, 0);
-            Array<int> e = {1};
-            REQUIRE(d == e);
+            REQUIRE(d == Array<int>{1});
 
             Array<int> f(0);
             CHECK_THROWS(f.AddAtIndex(1, 1));
@@ -389,20 +365,17 @@ TEST_CASE("Array<T>")
             Array<char> a = {1, 3, -4, 2, 8};
             Array<char> b = {1, 3, 100, -4, 2, 8};
             a.AddAtIndex(b, 1);
-            Array<char> final = {1, 1, 3, 100, -4, 2, 8, 3, -4, 2, 8};
-            REQUIRE(a == final);
+            REQUIRE(a == Array<char>{1, 1, 3, 100, -4, 2, 8, 3, -4, 2, 8});
 
             Array<char> c = {1, 3, -4, 2, 8};
             Array<char> d = {1, 3, 100, -4, 2, 8};
             c.AddAtIndex(d, 0);
-            Array<char> final2 = {1, 3, 100, -4, 2, 8, 1, 3, -4, 2, 8};
-            REQUIRE(c == final2);
+            REQUIRE(c == Array<char>{1, 3, 100, -4, 2, 8, 1, 3, -4, 2, 8});
 
             Array<char> e = {1, 3, -4, 2, 8};
             Array<char> f = {1, 3, 100, -4, 2, 8};
             e.AddAtIndex(f, e.LastIndex());
-            Array<char> final3 = {1, 3, -4, 2, 1, 3, 100, -4, 2, 8, 8};
-            REQUIRE(e == final3);
+            REQUIRE(e == Array<char>{1, 3, -4, 2, 1, 3, 100, -4, 2, 8, 8});
         }
     }
 
@@ -437,9 +410,7 @@ TEST_CASE("Array<T>")
             REQUIRE(iArray.RemoveFront() == 2);
             REQUIRE(iArray.RemoveAt(0) == 8);
             REQUIRE(iArray.GetLength() == 3);
-
-            Array<int> other{45, -332, 1};
-            REQUIRE(iArray == other);
+            REQUIRE(iArray == Array<int>{45, -332, 1});
         }
     }
 
@@ -453,9 +424,7 @@ TEST_CASE("Array<T>")
             REQUIRE(iArray.GetLength() == 5);
             REQUIRE(iArray.RemoveAt(0) == 2);
             REQUIRE(iArray.GetLength() == 4);
-
-            Array<int> end{8, 45, -332, 1};
-            REQUIRE(iArray == end);
+            REQUIRE(iArray == Array<int>{8, 45, -332, 1});
         }
 
         SECTION("Remove in the middle of Array<T>")
@@ -466,8 +435,7 @@ TEST_CASE("Array<T>")
             REQUIRE(iArray.GetLength() == 5);
             REQUIRE(iArray.RemoveAt(2) == 8);
             REQUIRE(iArray.GetLength() == 4);
-            Array<int> end{0, 2, -332, 1};
-            REQUIRE(iArray == end);
+            REQUIRE(iArray == Array<int>{0, 2, -332, 1});
         }
 
         SECTION("Remove at the end of Array<T>")
@@ -478,9 +446,7 @@ TEST_CASE("Array<T>")
             REQUIRE(iArray.GetLength() == 5);
             REQUIRE(iArray.RemoveAt(4) == -332);
             REQUIRE(iArray.GetLength() == 4);
-
-            Array<int> end{0, 2, 8, 45};
-            REQUIRE(iArray == end);
+            REQUIRE(iArray == Array<int>{0, 2, 8, 45});
         }
     }
 
@@ -515,9 +481,7 @@ TEST_CASE("Array<T>")
             REQUIRE(iArray.RemoveBack() == -332);
             REQUIRE(iArray.RemoveAt(iArray.LastIndex()) == 45);
             REQUIRE(iArray.GetLength() == 3);
-
-            Array<int> other{0, 2, 8};
-            REQUIRE(iArray == other);
+            REQUIRE(iArray == Array<int>{0, 2, 8});
         }
     }
 
@@ -626,9 +590,8 @@ TEST_CASE("Array<T>")
     SECTION("Fill Array<T> with the same element")
     {
         Array<long> a{1, 1, 1, 1, 1, 1, 1, 1};
-        Array<long> b{0, 0, 0, 0, 0, 0, 0, 0};
         a.Fill(0);
-        REQUIRE(a == b);
+        REQUIRE(a == Array<long>{0, 0, 0, 0, 0, 0, 0, 0});
     }
 
     SECTION("Copy")
@@ -637,10 +600,8 @@ TEST_CASE("Array<T>")
         {
             Array<const char *> a{"ABC", "DEF", "GHI"};
             Array<const char *> b{"XYZ", "UYT", "PON"};
-            Array<const char *> out{"ABC", "DEF", "GHI"};
             Array<const char *>::Copy(a, b);
-
-            REQUIRE(b == out);
+            REQUIRE(b == Array<const char *>{"ABC", "DEF", "GHI"});
         }
 
         SECTION("Both source and destination providing indices")
@@ -648,21 +609,18 @@ TEST_CASE("Array<T>")
             // Block Source 0
             Array<const char *> a{"ABC", "DEF", "GHI"};
             Array<const char *> b{"XYZ", "UYT", "PON"};
-            Array<const char *> out{"ABC", "DEF", "GHI"};
             Array<const char *>::Copy(a, 0, b, 0);
-            REQUIRE(b == out);
+            REQUIRE(b == Array<const char *>{"ABC", "DEF", "GHI"});
 
             a = {"ABC", "DEF", "GHI"};
             b = {"XYZ", "UYT", "PON"};
-            out = {"XYZ", "ABC", "DEF", "GHI"};
             Array<const char *>::Copy(a, 0, b, 1);
-            REQUIRE(b == out);
+            REQUIRE(b == Array<const char*>{"XYZ", "ABC", "DEF", "GHI"});
 
             a = {"ABC", "DEF", "GHI"};
             b = {"XYZ", "UYT", "PON"};
-            out = {"XYZ", "UYT", "ABC", "DEF", "GHI"};
             Array<const char *>::Copy(a, 0, b, 2);
-            REQUIRE(b == out);
+            REQUIRE(b == Array<const char*>{"XYZ", "UYT", "ABC", "DEF", "GHI"});
 
             // Force exception
             a = {"ABC", "DEF", "GHI"};
@@ -670,21 +628,18 @@ TEST_CASE("Array<T>")
             CHECK_THROWS(Array<const char *>::Copy(a, 0, b, 3));
 
             // Block Source 1
-            out = {"DEF", "GHI", "PON"};
             Array<const char *>::Copy(a, 1, b, 0);
-            REQUIRE(b == out);
+            REQUIRE(b == Array<const char*>{"DEF", "GHI", "PON"});
 
             a = {"ABC", "DEF", "GHI"};
             b = {"XYZ", "UYT", "PON"};
-            out = {"XYZ", "DEF", "GHI"};
             Array<const char *>::Copy(a, 1, b, 1);
-            REQUIRE(b == out);
+            REQUIRE(b == Array<const char*>{"XYZ", "DEF", "GHI"});
 
             a = {"ABC", "DEF", "GHI"};
             b = {"XYZ", "UYT", "PON"};
-            out = {"XYZ", "UYT", "DEF", "GHI"};
             Array<const char *>::Copy(a, 1, b, 2);
-            REQUIRE(b == out);
+            REQUIRE(b == Array<const char*>{"XYZ", "UYT", "DEF", "GHI"});
 
             // Force exception
             a = {"ABC", "DEF", "GHI"};
@@ -692,21 +647,18 @@ TEST_CASE("Array<T>")
             CHECK_THROWS(Array<const char *>::Copy(a, 1, b, 3));
 
             // Block Source 2
-            out = {"GHI", "UYT", "PON"};
             Array<const char *>::Copy(a, 2, b, 0);
-            REQUIRE(b == out);
+            REQUIRE(b == Array<const char*>{"GHI", "UYT", "PON"});
 
             a = {"ABC", "DEF", "GHI"};
             b = {"XYZ", "UYT", "PON"};
-            out = {"XYZ", "GHI", "PON"};
             Array<const char *>::Copy(a, 2, b, 1);
-            REQUIRE(b == out);
+            REQUIRE(b == Array<const char*>{"XYZ", "GHI", "PON"});
 
             a = {"ABC", "DEF", "GHI"};
             b = {"XYZ", "UYT", "PON"};
-            out = {"XYZ", "UYT", "GHI"};
             Array<const char *>::Copy(a, 2, b, 2);
-            REQUIRE(b == out);
+            REQUIRE(b == Array<const char*>{"XYZ", "UYT", "GHI"});
 
             // Force exception
             a = {"ABC", "DEF", "GHI"};
@@ -723,10 +675,8 @@ TEST_CASE("Array<T>")
     SECTION("Reverse container")
     {
         Array<const char *> a{"ABC", "DEF", "G", "XY", "Z"};
-        Array<const char *> out{"Z", "XY", "G", "DEF", "ABC"};
-
         a.Reverse();
-        REQUIRE(a == out);
+        REQUIRE(a == Array<const char*>{"Z", "XY", "G", "DEF", "ABC"});
     }
 
     SECTION("Swap Array<T> with another one")
@@ -757,23 +707,19 @@ TEST_CASE("Array<T>")
 
         // Check if default pValue was set
         REQUIRE(a.Count(0) == 30);
-
         Array<int> b = {1, 2, 3, 4, 5, 6};
-        Array<int> c = {1, 2, 3, 4};
         Array<int>::Resize(b, 4);
 
         // Check if array is properly reduced keeping its elements
-        REQUIRE(b == c);
+        REQUIRE(b == Array<int>{1, 2, 3, 4});
 
         Array<int> d{1, 2, 3, 4};
-        Array<int> e = {1};
         Array<int>::Resize(d, 1);
-        REQUIRE(d == e);
+        REQUIRE(d == Array<int>{1});
 
         Array<int> f{1, 2, 3};
-        Array<int> g{};
         Array<int>::Resize(f, 0);
-        REQUIRE(f == g);
+        REQUIRE(f == Array<int>{});
     }
 
     SECTION("Iterators")

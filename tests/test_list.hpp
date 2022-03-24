@@ -26,8 +26,7 @@ TEST_CASE("List<T>")
                 c.Add(4u);
                 c.Add(5u);
                 REQUIRE(c.GetLength() == 5);
-                List<uint8_t> c2 = {1u, 2u, 3u, 4u, 5u};
-                REQUIRE(c == c2);
+                REQUIRE(c == List<uint8_t>{1u, 2u, 3u, 4u, 5u});
             }
 
             SECTION("List<uint16_t>")
@@ -40,8 +39,7 @@ TEST_CASE("List<T>")
                 c.Add(4u);
                 c.Add(5u);
                 REQUIRE(c.GetLength() == 5);
-                List<uint16_t> c2 = {1u, 2u, 3u, 4u, 5u};
-                REQUIRE(c == c2);
+                REQUIRE(c == List<uint16_t>{1u, 2u, 3u, 4u, 5u});
             }
 
             SECTION("List<uint32_t>")
@@ -54,8 +52,7 @@ TEST_CASE("List<T>")
                 c.Add(4u);
                 c.Add(5u);
                 REQUIRE(c.GetLength() == 5);
-                List<uint32_t> c2 = {1u, 2u, 3u, 4u, 5u};
-                REQUIRE(c == c2);
+                REQUIRE(c == List<uint32_t>{1u, 2u, 3u, 4u, 5u});
             }
 
             SECTION("List<uint64_t>")
@@ -68,8 +65,7 @@ TEST_CASE("List<T>")
                 c.Add(4ul);
                 c.Add(5ul);
                 REQUIRE(c.GetLength() == 5);
-                List<uint64_t> c2 = {1ul, 2ul, 3ul, 4ul, 5ul};
-                REQUIRE(c == c2);
+                REQUIRE(c == List<uint64_t>{1ul, 2ul, 3ul, 4ul, 5ul});
             }
 
             SECTION("List<int8_t>")
@@ -82,8 +78,7 @@ TEST_CASE("List<T>")
                 c.Add(4);
                 c.Add(5);
                 REQUIRE(c.GetLength() == 5);
-                List<int8_t> c2 = {1, 2, 3, 4, 5};
-                REQUIRE(c == c2);
+                REQUIRE(c == List<int8_t>{1, 2, 3, 4, 5});
             }
 
             SECTION("List<int16_t>")
@@ -96,8 +91,7 @@ TEST_CASE("List<T>")
                 c.Add(4);
                 c.Add(5);
                 REQUIRE(c.GetLength() == 5);
-                List<int16_t> c2 = {1, 2, 3, 4, 5};
-                REQUIRE(c == c2);
+                REQUIRE(c == List<int16_t>{1, 2, 3, 4, 5});
             }
 
             SECTION("List<int32_t>")
@@ -110,8 +104,7 @@ TEST_CASE("List<T>")
                 c.Add(4);
                 c.Add(5);
                 REQUIRE(c.GetLength() == 5);
-                List<int32_t> c2 = {1, 2, 3, 4, 5};
-                REQUIRE(c == c2);
+                REQUIRE(c == List<int32_t>{1, 2, 3, 4, 5});
             }
 
             SECTION("List<int64_t>")
@@ -124,8 +117,7 @@ TEST_CASE("List<T>")
                 c.Add(4l);
                 c.Add(5l);
                 REQUIRE(c.GetLength() == 5);
-                List<int64_t> c2 = {1l, 2l, 3l, 4l, 5l};
-                REQUIRE(c == c2);
+                REQUIRE(c == List<int64_t>{1l, 2l, 3l, 4l, 5l});
             }
 
             SECTION("List<char>")
@@ -138,8 +130,7 @@ TEST_CASE("List<T>")
                 c.Add('4');
                 c.Add('5');
                 REQUIRE(c.GetLength() == 5);
-                List<char> c2 = {'1', '2', '3', '4', '5'};
-                REQUIRE(c == c2);
+                REQUIRE(c == List<char>{'1', '2', '3', '4', '5'});
             }
 
             SECTION("List<unsigned char>")
@@ -152,8 +143,7 @@ TEST_CASE("List<T>")
                 c.Add('4');
                 c.Add('5');
                 REQUIRE(c.GetLength() == 5);
-                List<unsigned char> c2 = {'1', '2', '3', '4', '5'};
-                REQUIRE(c == c2);
+                REQUIRE(c == List<unsigned char>{'1', '2', '3', '4', '5'});
             }
 
             SECTION("List<float>")
@@ -166,8 +156,7 @@ TEST_CASE("List<T>")
                 c.Add(4.0f);
                 c.Add(5.0);
                 REQUIRE(c.GetLength() == 5);
-                List<float> c2 = {1.0f, 2.0f, 3.0f, 4.0f, 5.0f};
-                REQUIRE(c == c2);
+                REQUIRE(c == List<float>{1.0f, 2.0f, 3.0f, 4.0f, 5.0f});
             }
 
             SECTION("List<double>")
@@ -180,8 +169,7 @@ TEST_CASE("List<T>")
                 c.Add(4.0f);
                 c.Add(5.0);
                 REQUIRE(c.GetLength() == 5);
-                List<double> c2 = {1.0f, 2.0f, 3.0f, 4.0f, 5.0f};
-                REQUIRE(c == c2);
+                REQUIRE(c == List<double>{1.0f, 2.0f, 3.0f, 4.0f, 5.0f});
             }
         }
 
@@ -206,9 +194,8 @@ TEST_CASE("List<T>")
             REQUIRE(a == b);
             a.Add(7);
             REQUIRE(a != b);
-            List<int> c{2, 3, 4, 5, 6, 7};
             a.Remove(1);
-            REQUIRE(a == c);
+            REQUIRE(a == List<int>{2, 3, 4, 5, 6, 7});
             a.Remove(2);
             a.Add(10);
             REQUIRE(a != b);
@@ -218,13 +205,11 @@ TEST_CASE("List<T>")
         {
             List<int> a{1, 2, 3, 4, 5, 6};
             List<int> b = a;
-
             REQUIRE(a == b);
             a.Add(7);
             REQUIRE(a != b);
-            List<int> c{2, 3, 4, 5, 6, 7};
             a.Remove(1);
-            REQUIRE(a == c);
+            REQUIRE(a == List<int>{2, 3, 4, 5, 6, 7});
             a.Remove(2);
             a.Add(10);
             REQUIRE(a != b);
@@ -252,18 +237,12 @@ TEST_CASE("List<T>")
     {
         SECTION("List<T> == List<T>")
         {
-            List<int> a{1, 2, 3, 4, 5, 6};
-            List<int> b{1, 2, 3, 4, 5, 6};
-
-            REQUIRE(a == b);
+            REQUIRE(List<int>{1, 2, 3, 4, 5, 6} == List<int>{1, 2, 3, 4, 5, 6});
         }
 
         SECTION("List<T> != List<T>")
         {
-            List<int> a{1, 2, 3, 4, 5, 6};
-            List<int> b{1, 2, 3, 0, 5, 6};
-
-            REQUIRE(a != b);
+            REQUIRE(List<int>{1, 2, 3, 4, 5, 6} != List<int>{1, 2, 3, 0, 5, 6});
         }
     }
 
@@ -280,9 +259,7 @@ TEST_CASE("List<T>")
             cpList.Add("NEW 3");
             REQUIRE(cpList.GetLength() == 8);
             REQUIRE(cpList.LastIndex() == 7);
-
-            List<const char *> other = {"BRUNO", "FRUTUOZO", "ENGINEERING", "LOREM", "IPSUM", "NEW", "NEW 2", "NEW 3"};
-            REQUIRE(cpList == other);
+            REQUIRE(cpList == List<const char *>{"BRUNO", "FRUTUOZO", "ENGINEERING", "LOREM", "IPSUM", "NEW", "NEW 2", "NEW 3"});
         }
 
         SECTION("Adding a collection of elements to the List<T>")
@@ -304,30 +281,24 @@ TEST_CASE("List<T>")
             REQUIRE(cpList.IndexOf("ENGINEERING") == 2);
             REQUIRE(cpList.IndexOf("Single New") == 5);
             REQUIRE(cpList.IndexOf("ELEMENT 10") == 16);
-
-            List<const char *> other = {"BRUNO", "FRUTUOZO", "ENGINEERING", "LOREM", "IPSUM",
-                                        "Single New",
-                                        "ELEMENT 1", "ELEMENT 2", "ELEMENT 3", "ELEMENT 4", "ELEMENT 5",
-                                        "C",
-                                        "ELEMENT 6", "ELEMENT 7", "ELEMENT 8", "ELEMENT 9", "ELEMENT 10"};
-
-            REQUIRE(cpList == other);
+            REQUIRE(cpList == List<const char *>{"BRUNO", "FRUTUOZO", "ENGINEERING", "LOREM", "IPSUM",
+                                                          "Single New",
+                                                          "ELEMENT 1", "ELEMENT 2", "ELEMENT 3", "ELEMENT 4", "ELEMENT 5",
+                                                          "C",
+                                                          "ELEMENT 6", "ELEMENT 7", "ELEMENT 8", "ELEMENT 9", "ELEMENT 10"});
         }
 
         SECTION("Adding element to an specific index")
         {
             List<char> a = {'1', '3', '4', '2', '8'};
             a.AddAt('1', 2);
-            List<char> b = {'1', '3', '1', '4', '2', '8'};
-            REQUIRE(a == b);
+            REQUIRE(a ==  List<char>{'1', '3', '1', '4', '2', '8'});
             a.AddAt('9', 5);
-            List<char> c = {'1', '3', '1', '4', '2', '9', '8'};
-            REQUIRE(a == c);
+            REQUIRE(a == List<char>{'1', '3', '1', '4', '2', '9', '8'});
 
             List<int> d;
             d.AddAt(1, 0);
-            List<int> e = {1};
-            REQUIRE(d == e);
+            REQUIRE(d == List<int>{1});
 
             List<int> f;
             CHECK_THROWS(f.AddAt(1, 1));
@@ -338,20 +309,17 @@ TEST_CASE("List<T>")
             List<char> a = {1, 3, -4, 2, 8};
             List<char> b = {1, 3, 100, -4, 2, 8};
             a.AddRangeAt(b, 1);
-            List<char> final = {1, 1, 3, 100, -4, 2, 8, 3, -4, 2, 8};
-            REQUIRE(a == final);
+            REQUIRE(a == List<char>{1, 1, 3, 100, -4, 2, 8, 3, -4, 2, 8});
 
             List<char> c = {1, 3, -4, 2, 8};
             List<char> d = {1, 3, 100, -4, 2, 8};
             c.AddRangeAt(d, 0);
-            List<char> final2 = {1, 3, 100, -4, 2, 8, 1, 3, -4, 2, 8};
-            REQUIRE(c == final2);
+            REQUIRE(c == List<char>{1, 3, 100, -4, 2, 8, 1, 3, -4, 2, 8});
 
             List<char> e = {1, 3, -4, 2, 8};
             List<char> f = {1, 3, 100, -4, 2, 8};
             e.AddRangeAt(f, e.LastIndex());
-            List<char> final3 = {1, 3, -4, 2, 1, 3, 100, -4, 2, 8, 8};
-            REQUIRE(e == final3);
+            REQUIRE(e == List<char>{1, 3, -4, 2, 1, 3, 100, -4, 2, 8, 8});
         }
     }
 
@@ -365,9 +333,7 @@ TEST_CASE("List<T>")
             REQUIRE(il.GetLength() == 5);
             REQUIRE(il.RemoveAt(0) == 2);
             REQUIRE(il.GetLength() == 4);
-
-            List<int> end{8, 45, -332, 1};
-            REQUIRE(il == end);
+            REQUIRE(il == List<int>{8, 45, -332, 1});
         }
 
         SECTION("Remove in the middle of List<T>")
@@ -378,8 +344,7 @@ TEST_CASE("List<T>")
             REQUIRE(il.GetLength() == 5);
             REQUIRE(il.RemoveAt(2) == 8);
             REQUIRE(il.GetLength() == 4);
-            List<int> end{0, 2, -332, 1};
-            REQUIRE(il == end);
+            REQUIRE(il == List<int>{0, 2, -332, 1});
         }
 
         SECTION("Remove at the end of List<T>")
@@ -390,23 +355,18 @@ TEST_CASE("List<T>")
             REQUIRE(il.GetLength() == 5);
             REQUIRE(il.RemoveAt(4) == -332);
             REQUIRE(il.GetLength() == 4);
-
-            List<int> end{0, 2, 8, 45};
-            REQUIRE(il == end);
+            REQUIRE(il == List<int>{0, 2, 8, 45});
         }
 
         SECTION("Remove an specific element")
         {
             List<int> il{0, 1, 2, 3, 4, 5};
             il.Remove(3);
-            List<int> res = {0, 1, 2, 4, 5};
-            REQUIRE(il == res);
+            REQUIRE(il == List<int>{0, 1, 2, 4, 5});
             il.Remove(0);
-            res = {1, 2, 4, 5};
-            REQUIRE(il == res);
+            REQUIRE(il == List<int>{1, 2, 4, 5});
             il.Remove(5);
-            res = {1, 2, 4};
-            REQUIRE(il == res);
+            REQUIRE(il == List<int>{1, 2, 4});
             REQUIRE(il.Remove(100) == false);
         }
 
@@ -416,8 +376,7 @@ TEST_CASE("List<T>")
             REQUIRE(il.RemoveRange(1, 3) == Array<int>({2, 3, 4}));
             REQUIRE(il.RemoveRange(0, 2) == Array<int>({1, 5}));
             REQUIRE(il.RemoveRange(2, 2) == Array<int>({8, 9}));
-            List<int> finalState{6, 7};
-            REQUIRE(il == finalState);
+            REQUIRE(il == List<int>{6, 7});
             CHECK_THROWS(il.RemoveRange(0, 0));
             CHECK_THROWS(il.RemoveRange(0, 3));
             CHECK_THROWS(il.RemoveRange(2, 0));
@@ -428,8 +387,7 @@ TEST_CASE("List<T>")
     {
         List<const char *> a{"ABC", "DEF", "GHIJKLM"};
         a.Clear();
-        List<const char *> b;
-        REQUIRE(a == b);
+        REQUIRE(a == List<const char*>{});
     }
 
     SECTION("Obtain index information according to argument")
@@ -455,12 +413,9 @@ TEST_CASE("List<T>")
         SECTION("Find all indices ")
         {
             List<long> a{0l, -3321, 3218875l, -1l, 0l, 4005822, 0l, 0l, 3323411l, -3321, 97057l, 0l};
-            Array<size_t> indicesCheck1 = {0ul, 4ul, 6ul, 7ul, 11ul};
-            Array<size_t> indicesCheck2 = {1ul, 9ul};
-            Array<size_t> indicesCheck3 = {};
-            REQUIRE(indicesCheck1 == a.IndicesOf(0l));
-            REQUIRE(indicesCheck2 == a.IndicesOf(-3321));
-            REQUIRE(indicesCheck3 == a.IndicesOf(-4444));
+            REQUIRE(a.IndicesOf(0l) == Array<size_t>{0ul, 4ul, 6ul, 7ul, 11ul});
+            REQUIRE(a.IndicesOf(-3321) == Array<size_t>{1ul, 9ul});
+            REQUIRE(a.IndicesOf(-4444) == Array<size_t>{});
         }
     }
 
@@ -485,19 +440,17 @@ TEST_CASE("List<T>")
     {
         List<int> a{0, 1, 2, 3};
         List<int> b{9, 8, 7, 6};
-        List<int> empty;
-
         a.Swap(b);
         a.Remove(6);
         a.Remove(7);
         a.Remove(8);
         a.Remove(9);
-        REQUIRE(a == empty);
+        REQUIRE(a == List<int>{});
         b.Remove(3);
         b.Remove(2);
         b.Remove(1);
         b.Remove(0);
-        REQUIRE(b == empty);
+        REQUIRE(b == List<int>{});
     }
 
     SECTION("Head analysis")

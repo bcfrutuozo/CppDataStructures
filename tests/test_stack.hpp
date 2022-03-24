@@ -25,8 +25,7 @@ TEST_CASE("Stack<T>")
                 c.Push(4u);
                 c.Push(5u);
                 REQUIRE(c.GetLength() == 5);
-                Stack<uint8_t> c2 = {1u, 2u, 3u, 4u, 5u};
-                REQUIRE(c == c2);
+                REQUIRE(c == Stack<uint8_t>{1u, 2u, 3u, 4u, 5u});
             }
 
             SECTION("Stack<uint16_t>")
@@ -39,8 +38,7 @@ TEST_CASE("Stack<T>")
                 c.Push(4u);
                 c.Push(5u);
                 REQUIRE(c.GetLength() == 5);
-                Stack<uint16_t> c2 = {1u, 2u, 3u, 4u, 5u};
-                REQUIRE(c == c2);
+                REQUIRE(c == Stack<uint16_t>{1u, 2u, 3u, 4u, 5u});
             }
 
             SECTION("Stack<uint32_t>")
@@ -53,8 +51,7 @@ TEST_CASE("Stack<T>")
                 c.Push(4u);
                 c.Push(5u);
                 REQUIRE(c.GetLength() == 5);
-                Stack<uint32_t> c2 = {1u, 2u, 3u, 4u, 5u};
-                REQUIRE(c == c2);
+                REQUIRE(c == Stack<uint32_t>{1u, 2u, 3u, 4u, 5u});
             }
 
             SECTION("Stack<uint64_t>")
@@ -67,8 +64,7 @@ TEST_CASE("Stack<T>")
                 c.Push(4ul);
                 c.Push(5ul);
                 REQUIRE(c.GetLength() == 5);
-                Stack<uint64_t> c2 = {1ul, 2ul, 3ul, 4ul, 5ul};
-                REQUIRE(c == c2);
+                REQUIRE(c == Stack<uint64_t>{1ul, 2ul, 3ul, 4ul, 5ul});
             }
 
             SECTION("Stack<int8_t>")
@@ -81,8 +77,7 @@ TEST_CASE("Stack<T>")
                 c.Push(4);
                 c.Push(5);
                 REQUIRE(c.GetLength() == 5);
-                Stack<int8_t> c2 = {1, 2, 3, 4, 5};
-                REQUIRE(c == c2);
+                REQUIRE(c == Stack<int8_t>{1, 2, 3, 4, 5});
             }
 
             SECTION("Stack<int16_t>")
@@ -95,8 +90,7 @@ TEST_CASE("Stack<T>")
                 c.Push(4);
                 c.Push(5);
                 REQUIRE(c.GetLength() == 5);
-                Stack<int16_t> c2 = {1, 2, 3, 4, 5};
-                REQUIRE(c == c2);
+                REQUIRE(c == Stack<int16_t>{1, 2, 3, 4, 5});
             }
 
             SECTION("Stack<int32_t>")
@@ -109,8 +103,7 @@ TEST_CASE("Stack<T>")
                 c.Push(4);
                 c.Push(5);
                 REQUIRE(c.GetLength() == 5);
-                Stack<int32_t> c2 = {1, 2, 3, 4, 5};
-                REQUIRE(c == c2);
+                REQUIRE(c == Stack<int32_t>{1, 2, 3, 4, 5});
             }
 
             SECTION("Stack<int64_t>")
@@ -123,8 +116,7 @@ TEST_CASE("Stack<T>")
                 c.Push(4l);
                 c.Push(5l);
                 REQUIRE(c.GetLength() == 5);
-                Stack<int64_t> c2 = {1l, 2l, 3l, 4l, 5l};
-                REQUIRE(c == c2);
+                REQUIRE(c == Stack<int64_t>{1l, 2l, 3l, 4l, 5l});
             }
 
             SECTION("Stack<char>")
@@ -137,8 +129,7 @@ TEST_CASE("Stack<T>")
                 c.Push('4');
                 c.Push('5');
                 REQUIRE(c.GetLength() == 5);
-                Stack<char> c2 = {'1', '2', '3', '4', '5'};
-                REQUIRE(c == c2);
+                REQUIRE(c == Stack<char>{'1', '2', '3', '4', '5'});
             }
 
             SECTION("Stack<unsigned char>")
@@ -151,8 +142,7 @@ TEST_CASE("Stack<T>")
                 c.Push('4');
                 c.Push('5');
                 REQUIRE(c.GetLength() == 5);
-                Stack<unsigned char> c2 = {'1', '2', '3', '4', '5'};
-                REQUIRE(c == c2);
+                REQUIRE(c == Stack<unsigned char> {'1', '2', '3', '4', '5'});
             }
 
             SECTION("Stack<float>")
@@ -165,8 +155,7 @@ TEST_CASE("Stack<T>")
                 c.Push(4.0f);
                 c.Push(5.0);
                 REQUIRE(c.GetLength() == 5);
-                Stack<float> c2 = {1.0f, 2.0f, 3.0f, 4.0f, 5.0f};
-                REQUIRE(c == c2);
+                REQUIRE(c == Stack<float>{1.0f, 2.0f, 3.0f, 4.0f, 5.0f});
             }
 
             SECTION("Stack<double>")
@@ -179,8 +168,7 @@ TEST_CASE("Stack<T>")
                 c.Push(4.0f);
                 c.Push(5.0);
                 REQUIRE(c.GetLength() == 5);
-                Stack<double> c2 = {1.0f, 2.0f, 3.0f, 4.0f, 5.0f};
-                REQUIRE(c == c2);
+                REQUIRE(c == Stack<double>{1.0f, 2.0f, 3.0f, 4.0f, 5.0f});
             }
         }
 
@@ -194,6 +182,7 @@ TEST_CASE("Stack<T>")
                 c.Push("BRUNO");
                 c.Push("FRUTUOZO");
                 REQUIRE(c.GetLength() == 3);
+                REQUIRE(c == Stack<const char*>{"ABC", "BRUNO", "FRUTUOZO"});
             }
         }
 
@@ -249,18 +238,12 @@ TEST_CASE("Stack<T>")
     {
         SECTION("Stack<T> == Stack<T>")
         {
-            Stack<int> a{1, 2, 3, 4, 5, 6};
-            Stack<int> b{1, 2, 3, 4, 5, 6};
-
-            REQUIRE(a == b);
+            REQUIRE(Stack<int>{1, 2, 3, 4, 5, 6} == Stack<int>{1, 2, 3, 4, 5, 6});
         }
 
         SECTION("Stack<T> != Stack<T>")
         {
-            Stack<int> a{1, 2, 3, 4, 5, 6};
-            Stack<int> b{1, 2, 3, 0, 5, 6};
-
-            REQUIRE(a != b);
+            REQUIRE(Stack<int>{1, 2, 3, 4, 5, 6} != Stack<int>{1, 2, 3, 0, 5, 6});
         }
     }
 
@@ -282,8 +265,7 @@ TEST_CASE("Stack<T>")
             REQUIRE(c.GetLength() == 6);
             REQUIRE(strcmp(c.Pop(), "ZZZ") == 0);
             REQUIRE(c.GetLength() == 5);
-            Stack<const char *> final = {"A", "TEST", "LOREM", "ABC", "DEF"};
-            REQUIRE(c == final);
+            REQUIRE(c == Stack<const char*>{"A", "TEST", "LOREM", "ABC", "DEF"});
         }
     }
 
@@ -307,9 +289,9 @@ TEST_CASE("Stack<T>")
             Array<const char *> a = c.Pop(3);
             REQUIRE(a.GetLength() == 3);
             REQUIRE(c.GetLength() == 3);
-            a[0] == "TEST3";
-            a[1] == "TEST2";
-            a[2] == "TEST";
+            REQUIRE(strcmp(a[0], "TEST3") == 0);
+            REQUIRE(strcmp(a[1], "TEST2") == 0);
+            REQUIRE(strcmp(a[2], "TEST") == 0);
         }
     }
 
@@ -327,21 +309,7 @@ TEST_CASE("Stack<T>")
     {
         Stack<const char *> a{"ABC", "DEF", "GHIJKLM"};
         a.Clear();
-        Stack<const char *> b;
-        REQUIRE(a == b);
-    }
-
-    SECTION("Unload one Stack into another")
-    {
-        Stack<int> a = {1, 2, 3, 4, 5};
-        Stack<int> c = {4, 99, -37};
-
-        Stack<int>::UnloadInto(a, c
-        );
-        REQUIRE(a.GetLength() == 0);
-        REQUIRE(c.GetLength() == 8);
-        Stack<int> final = {4, 99, -37, 5, 4, 3, 2, 1};
-        REQUIRE(c == final);
+        REQUIRE(a == Stack<const char *>{});
     }
 
     SECTION("Swap container")
@@ -365,10 +333,8 @@ TEST_CASE("Stack<T>")
     SECTION("Conversion to Array<T>") {
         Stack<int> a{1, 2, 3, 4, 5};
         Array<int> b = a.ToArray();
-        Stack<int> copy = a;
-        Array<int> comp{1, 2, 3, 4, 5};
-        REQUIRE(a == copy);
-        REQUIRE(b == comp);
+        REQUIRE(a == Stack<int>{1, 2, 3, 4, 5});
+        REQUIRE(b == Array<int>{1, 2, 3, 4, 5});
     }
 
     SECTION("CopyTo(Array<T>)") {
@@ -376,24 +342,21 @@ TEST_CASE("Stack<T>")
         Array<int> b{0, 0, 0, 0, 0, 0, 0, 0};
 
         a.CopyTo(b, 2);
-        Array<int> res{0, 0, 1, 2, 3, 4, 5, 6};
-        REQUIRE(b == res);
+        REQUIRE(b == Array<int>{0, 0, 1, 2, 3, 4, 5, 6});
 
         Array<int> c;
         CHECK_THROWS(a.CopyTo(c, 0));
 
         Array<int> d{1, 2, 3};
         a.CopyTo(d, 2);
-        res = {1, 2, 1, 2, 3, 4, 5, 6};
-        REQUIRE(d == res);
+        REQUIRE(d == Array<int>{1, 2, 1, 2, 3, 4, 5, 6});
 
         Array<int> e{1};
         CHECK_THROWS(a.CopyTo(e, 1));
 
         Array<int> f{0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
         a.CopyTo(f, 2);
-        res = {0, 0, 1, 2, 3, 4, 5, 6, 0, 0};
-        REQUIRE(f == res);
+        REQUIRE(f == Array<int>{0, 0, 1, 2, 3, 4, 5, 6, 0, 0});
     }
 }
 
