@@ -1,4 +1,4 @@
-# CppDataStructures
+# Data Structures - C++
 
 ## Overview
 This repository is a education purpose of open-source implementation of a variety of algorithms implemented in C++ and licensed under MIT License.
