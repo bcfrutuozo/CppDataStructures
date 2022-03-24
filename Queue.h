@@ -5,12 +5,14 @@
 #ifndef CPPDATASTRUCTURES_QUEUE_H
 #define CPPDATASTRUCTURES_QUEUE_H
 
-#include <stdexcept>
-#include <iostream>
+#include "Platform.h"
 #include "Array.h"
 
+#include <stdexcept>
+#include <iostream>
+
 template<typename T>
-class Queue {
+class Queue : protected Container<T> {
 
 private:
 
@@ -118,7 +120,7 @@ public:
         auto r = Front;
         auto o = other.Front;
         while (r != nullptr) {
-            if (o->Data != r->Data) return false;
+            if (!Equals(o->Data, r->Data)) return false;
             r = r->Next;
             o = o->Next;
         }
@@ -137,7 +139,7 @@ public:
     constexpr bool Contains(const T &element) const noexcept {
         auto n = Front;
         while (n != nullptr) {
-            if (n->Data == element) return true;
+            if (Equals(n->Data, element)) return true;
             n = n->Next;
         }
         return false;

@@ -5,6 +5,7 @@
 #ifndef CPPDATASTRUCTURES_STRING_H
 #define CPPDATASTRUCTURES_STRING_H
 
+#include "Platform.h"
 #include "Array.h"
 
 #include <iostream>

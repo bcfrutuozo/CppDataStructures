@@ -5,6 +5,8 @@
 #ifndef CPPDATASTRUCTURES_TIMER_H
 #define CPPDATASTRUCTURES_TIMER_H
 
+#include "Platform.h"
+
 #include <chrono>
 
 class Timer {

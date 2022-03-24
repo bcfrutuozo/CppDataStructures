@@ -5,10 +5,12 @@
 #ifndef CPPDATASTRUCTURES_LINKEDLIST_H
 #define CPPDATASTRUCTURES_LINKEDLIST_H
 
+#include "Platform.h"
+
 #include <iterator>
 
 template<typename T>
-class LinkedList {
+class LinkedList : protected Container<T> {
 
 private:
 
@@ -76,7 +78,7 @@ private:
         };
 
         constexpr friend bool operator!=(const Iterator &a, const Iterator &b) noexcept {
-            return a.pElement != b.pElement;
+            return !(a == b);
         };
     };
 
@@ -129,7 +131,7 @@ private:
         };
 
         constexpr friend bool operator!=(const ConstIterator &a, const ConstIterator &b) noexcept {
-            return a.pElement != b.pElement;
+            return !(a == b);
         };
     };
 
@@ -182,7 +184,7 @@ private:
         };
 
         constexpr friend bool operator!=(const ReverseIterator &a, const ReverseIterator &b) noexcept {
-            return a.pElement != b.pElement;
+            return !(a == b);
         };
     };
 
@@ -235,7 +237,7 @@ private:
         };
 
         constexpr friend bool operator!=(const ConstReverseIterator &a, const ConstReverseIterator &b) noexcept {
-            return a.pElement != b.pElement;
+            return !(a == b);
         };
     };
     //</editor-fold>
@@ -263,7 +265,6 @@ public:
         while (n != nullptr) {
             if (Head == nullptr) {
                 Head = new Node(n->Data);
-                //begin = Head;
                 previous = Head;
                 Tail = Head;
             } else {
@@ -327,8 +328,7 @@ public:
         if (GetLength() != other.GetLength()) return false;
 
         for (auto itself = cbegin(), itother = other.cbegin(); itself != cend(); ++itself, ++itother)
-            if (*itself != *itother)
-                return false;
+            if (!Equals(*itself, *itother)) return false;
 
         return true;
     }
@@ -468,8 +468,7 @@ public:
         if (IsEmpty()) return false;
 
         for (auto it = cbegin(); it != cend(); ++it)
-            if (*it == other)
-                return true;
+            if (Equals(*it, other)) return true;
 
         return false;
     }
@@ -495,8 +494,7 @@ public:
     constexpr size_t Count(const T &element) const noexcept {
         size_t total = 0;
         for (auto it = cbegin(); it != cend(); ++it)
-            if (*it == element)
-                ++total;
+            if (Equals(*it, element)) ++total;
         return total;
     }
 
@@ -508,7 +506,7 @@ public:
         auto n = Head;
         size_t i = 0;
         while (n != nullptr) {
-            if (n->Data == element) return i;
+            if (Equals(n->Data, element)) return i;
             n = n->Next;
             ++i;
         }
@@ -523,7 +521,7 @@ public:
         size_t i = 0;
         Queue<size_t> indices;
         while (n != nullptr) {
-            if (n->Data == element) indices.Enqueue(i);
+            if (Equals(n->Data, element)) indices.Enqueue(i);
             n = n->Next;
             ++i;
         }
@@ -541,7 +539,7 @@ public:
         auto n = Tail;
         size_t i = LastIndex();
         while (n != nullptr) {
-            if (n->Data == element) return i;
+            if (Equals(n->Data, element)) return i;
             n = n->Previous;
             --i;
         }
@@ -553,7 +551,7 @@ public:
         auto n = Head;
         Node *previous = nullptr;
         while (n != nullptr) {
-            if (n->Data == element) {
+            if (Equals(n->Data, element)) {
                 if (Head != n) {
                     previous->Next = n->Next;
                     if (n->Next != nullptr) n->Next->Previous = previous;
@@ -577,7 +575,7 @@ public:
         auto n = Head;
         Node *previous = nullptr;
         while (n != nullptr) {
-            if (n->Data == element) {
+            if (Equals(n->Data, element)) {
                 if (Head != n) {
                     previous->Next = n->Next;
                     if (n->Next != nullptr) n->Next->Previous = previous;
@@ -650,7 +648,7 @@ public:
         auto n = Tail;
         Node *next = nullptr;
         while (n != nullptr) {
-            if (n->Data == element) {
+            if (Equals(n->Data, element)) {
                 if (Size == 1) Head = Tail = nullptr;
                 else {
                     if (n != Tail && n != Head) {

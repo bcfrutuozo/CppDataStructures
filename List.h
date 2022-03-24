@@ -5,12 +5,14 @@
 #ifndef CPPDATASTRUCTURES_LIST_H
 #define CPPDATASTRUCTURES_LIST_H
 
+#include "Platform.h"
 #include "Array.h"
 #include "Queue.h"
+
 #include <algorithm>
 
 template<typename T>
-class List {
+class List : protected Container<T>{
 private:
 
     struct ListNode {
@@ -59,7 +61,7 @@ private:
         };
 
         constexpr friend bool operator!=(const Iterator &a, const Iterator &b) noexcept {
-            return a.pElement != b.pElement;
+            return !(a == b);
         };
     };
 
@@ -99,7 +101,7 @@ private:
         };
 
         constexpr friend bool operator!=(const ConstIterator &a, const ConstIterator &b) noexcept {
-            return a.pElement != b.pElement;
+            return !(a == b);
         };
     };
     //</editor-fold>
@@ -194,7 +196,7 @@ public:
         if (GetLength() != other.GetLength()) return false;
 
         for (auto itself = cbegin(), itother = other.cbegin(); itself != cend(); ++itself, ++itother)
-            if (*itself != *itother)
+            if (!Equals(*itself, *itother))
                 return false;
 
         return true;
@@ -295,8 +297,7 @@ public:
         if (IsEmpty()) return false;
 
         for (auto it = cbegin(); it != cend(); ++it)
-            if (*it == other)
-                return true;
+            if (Equals(*it, other)) return true;
 
         return false;
     }
@@ -322,8 +323,7 @@ public:
     constexpr size_t Count(const T &element) const noexcept {
         size_t total = 0;
         for (auto it = cbegin(); it != cend(); ++it)
-            if (*it == element)
-                ++total;
+            if (Equals(*it, element)) ++total;
         return total;
     }
 
@@ -335,7 +335,7 @@ public:
         auto n = Head;
         size_t i = 0;
         while (n != nullptr) {
-            if (n->Data == element) return i;
+            if (Equals(n->Data, element)) return i;
             n = n->Next;
             ++i;
         }
@@ -350,7 +350,7 @@ public:
         size_t i = 0;
         Queue<size_t> indices;
         while (n != nullptr) {
-            if (n->Data == element) indices.Enqueue(i);
+            if (Equals(n->Data, element)) indices.Enqueue(i);
             n = n->Next;
             ++i;
         }
@@ -369,7 +369,7 @@ public:
         size_t i = 0;
         ssize_t idx = -1;
         while (n != nullptr) {
-            if (n->Data == element) idx = i;
+            if (Equals(n->Data, element)) idx = i;
             n = n->Next;
             ++i;
         }
@@ -381,7 +381,7 @@ public:
         auto n = Head;
         ListNode *previous = nullptr;
         while (n != nullptr) {
-            if (n->Data == element) {
+            if (Equals(n->Data, element)) {
                 if (Head != n) previous->Next = n->Next;
                 auto t = n;
                 if (Size == 1) Head = Tail = nullptr;
@@ -404,7 +404,7 @@ public:
         auto n = Head;
         ListNode *previous = nullptr;
         while (n != nullptr) {
-            if (n->Data == element) {
+            if (Equals(n->Data, element)) {
                 if (Head != n) previous->Next = n->Next;
                 auto t = n;
                 n = n->Next;

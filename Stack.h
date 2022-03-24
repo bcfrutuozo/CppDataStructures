@@ -5,13 +5,14 @@
 #ifndef CPPDATASTRUCTURES_STACK_H
 #define CPPDATASTRUCTURES_STACK_H
 
+#include "Platform.h"
+#include "Array.h"
+
 #include <stdexcept>
 #include <algorithm>
 
-#include "Array.h"
-
 template<typename T>
-class Stack {
+class Stack : protected Container<T> {
 private:
 
     struct StackNode {
@@ -106,8 +107,7 @@ public:
         auto b = other.Top;
 
         while (a != nullptr && b != nullptr) {
-            if (a->Data != b->Data) return false;
-
+            if (!Equals(a->Data, b->Data)) return false;
             a = a->Previous;
             b = b->Previous;
         }
@@ -126,7 +126,7 @@ public:
     constexpr bool Contains(const T &element) const noexcept {
         auto n = Top;
         while (n != nullptr) {
-            if (n->Data == element) return true;
+            if (Equals(n->Data, element)) return true;
             n = n->Previous;
         }
         return false;
