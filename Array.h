@@ -274,7 +274,7 @@ public:
 		auto it = begin();
 		auto itl = l.begin();
 		for(; it != end(); ++it, ++itl)
-			Equals(*it, *itl);
+			*it = *itl;
 	}
 
 	constexpr ~Array() noexcept
