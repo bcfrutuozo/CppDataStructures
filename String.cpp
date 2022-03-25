@@ -171,10 +171,6 @@ bool String::Contains(const char *c) const noexcept {
     return false;
 }
 
-bool String::Contains(const String &s) const noexcept {
-    return this->Contains(s.m_Data);
-}
-
 void String::Copy(char *c, size_t length, size_t pos) {
     for (size_t i = 0; i < length; ++i) {
         c[i] = m_Data[pos + i];
@@ -199,20 +195,12 @@ size_t String::Count(const char *c) const noexcept {
     return IndicesOf(c).GetLength();
 }
 
-size_t String::Count(const String &s) const noexcept {
-    return Count(s.GetPointer());
-}
-
 size_t String::IndexOf(const char c) const noexcept {
     return (size_t) (strchr(m_Data, c) - m_Data);
 }
 
 size_t String::IndexOf(const char *c) const noexcept {
     return (size_t) (strstr(m_Data, c) - m_Data);
-}
-
-size_t String::IndexOf(const String &s) const noexcept {
-    return IndexOf(s.GetPointer());
 }
 
 Array<size_t> String::IndicesOf(const char c) const noexcept {
@@ -234,12 +222,10 @@ Array<size_t> String::IndicesOf(const char *c) const noexcept {
 
     Queue<size_t> q;
     size_t subSize = strlen(c);
-    for (size_t i = 0; i < GetLength();)
-    {
+    for (size_t i = 0; i < GetLength();) {
         size_t j = 0;
         size_t subCount = 0;
-        while (m_Data[i] == c[j])
-        {
+        while (m_Data[i] == c[j]) {
             ++subCount;
             ++i;
             ++j;
@@ -249,10 +235,6 @@ Array<size_t> String::IndicesOf(const char *c) const noexcept {
     }
 
     return q.ToArray();
-}
-
-Array<size_t> String::IndicesOf(const String &s) const noexcept {
-    return IndicesOf(s.GetPointer());
 }
 
 size_t String::LastIndexOf(const char c) const noexcept {
@@ -274,31 +256,84 @@ size_t String::LastIndexOf(const char *c) const noexcept {
     }
 }
 
-size_t String::LastIndexOf(const String &s) const noexcept {
-    return LastIndexOf(s.GetPointer());
+Array<String> String::Split(char c, StringSplitOptions options) const noexcept {
+
 }
 
-Array<String> String::Split(const char *delimiter) const noexcept {
-    if (GetLength() == 0) return Array<String>{};
-    if (GetLength() == 1 && strcmp(m_Data, delimiter) == 0) return Array<String>{m_Data};
+Array<String> String::Split(const char *delimiter, StringSplitOptions options) const noexcept {
+
+    Array<String> arrayStr{};
+    if (GetLength() == 0) arrayStr;
+    if (GetLength() == 1) {
+        if(strcmp(m_Data, delimiter) == 0)
+            return Array<String>{m_Data};
+        else arrayStr;
+    }
 
     auto array = IndicesOf(delimiter);
-    Array<String> arrayStr(array.GetLength());
-    for (size_t i = 0; i < arrayStr.GetLength(); ++i) {
-        auto start = i + 1;
+    size_t length = strlen(delimiter);
+    Array<String>::Resize(arrayStr, array.GetLength());
+    for (ssize_t i = -1, j = 0; i < (ssize_t) arrayStr.GetLength(); ++i, ++j) {
+        auto start = i >= 0 ? length + array[i] : 0;
         size_t end;
 
-        if(array.GetLength() -1 == i){
-            end = GetLength() - 1;
+        if (array.GetLength() - 1 == i) {
+            end = GetLength();
         } else {
             end = array[i + 1];
         }
 
-        char buffer[end - start];
-        std::copy(m_Data, m_Data + end, buffer);
-        *(buffer + end) = '\0';
-        arrayStr[i] = buffer;
+        size_t charSize = end - start;
+        char buffer[charSize];
+        std::copy(m_Data + start, m_Data + end, buffer);
+        *(buffer + charSize) = '\0';
+        arrayStr[j] = buffer;
     }
 
     return arrayStr;
+}
+
+String String::TrimStart() const noexcept{
+    TrimStart(Space);
+}
+
+String String::TrimStart(char c) const noexcept{
+    auto p = m_Data;
+    size_t start = 0;
+
+    while(*p == c){
+        ++start;
+    }
+
+    return m_Data + start;
+}
+
+String String::TrimStart(const char* c) const noexcept{
+    auto index = strstr(m_Data, c) - m_Data;
+    return m_Data + index;
+
+    String s;
+}
+
+String String::TrimEnd() const noexcept{
+    TrimEnd(Space);
+}
+
+String String::TrimEnd(char c) const noexcept{
+    auto p = (m_Data + GetLength() - 2); // 1 for \0 and 1 for index
+    size_t end = 0;
+
+    while(*p == c){
+        --end;
+    }
+
+    char buffer[end + 1];
+    std::copy(m_Data, m_Data + end - 1, buffer);
+    buffer[end] = '\0';
+
+    return buffer;
+}
+
+String String::TrimEnd(const char* c) const noexcept{
+
 }
