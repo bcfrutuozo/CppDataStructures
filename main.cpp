@@ -12,6 +12,16 @@
 
 #include <iostream>
 
+#ifdef __linux__ 
+//linux code goes here
+#elif _WIN32
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#else
+
+#endif
+
 int main(int argc, char *argv[]) {
     Timer t;
 

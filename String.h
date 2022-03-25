@@ -89,18 +89,23 @@ public:
 
     Array<String> Split(const char *delimiter, StringSplitOptions options = StringSplitOptions::None) const noexcept;
 
-    String TrimStart() const noexcept;
+    String Trim() const noexcept;
 
-    String TrimStart(char c) const noexcept;
+    String Trim(char c) const noexcept;
 
-    String TrimStart(const char* c) const noexcept;
-
+    String Trim(const char* c) const noexcept;
+    
     String TrimEnd() const noexcept;
 
     String TrimEnd(char c) const noexcept;
 
     String TrimEnd(const char* c) const noexcept;
 
+    String TrimStart() const noexcept;
+
+    String TrimStart(char c) const noexcept;
+
+    String TrimStart(const char* c) const noexcept;
 
     friend std::ostream &operator<<(std::ostream &os, const String &s);
 };
