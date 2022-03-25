@@ -114,7 +114,7 @@ public:
         return *this;
     }
 
-    inline constexpr bool operator==(const Queue &other) const noexcept {
+    constexpr bool operator==(const Queue &other) const noexcept {
         if (GetLength() != other.GetLength()) return false;
 
         auto r = Front;
@@ -132,8 +132,9 @@ public:
         return !(*this == other);
     }
 
-    inline constexpr void Clear() noexcept {
-        while (!IsEmpty()) DeleteFront();
+    constexpr void Clear() noexcept {
+        while (!IsEmpty())
+            DeleteFront();
     }
 
     constexpr bool Contains(const T &element) const noexcept {
@@ -151,7 +152,7 @@ public:
 
         /* diff represents the amount of additional space the provided array needs to
          * successfully copy all data at the desired index. If its 0 or negative, means
-         * the array has plenty of space. Otherwise it represents the number of
+         * the array has plenty of space. Otherwise, it represents the number of
          * additional slots
         */
         ssize_t diff = GetLength() - (array.GetLength() - arrayIndex);
@@ -204,7 +205,7 @@ public:
 
     inline constexpr bool IsEmpty() const noexcept { return Size == 0; }
 
-    inline constexpr T Peek() const {
+    constexpr T Peek() const {
         if (IsEmpty()) throw std::out_of_range("Queue is empty. There's no element to check");
         return Front->Data;
     }

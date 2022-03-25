@@ -1,7 +1,10 @@
-#include <limits.h>
-#include <stddef.h>
-#include <inttypes.h>
-#include <stdint.h>
+#ifndef CPPDATASTRUCTURES_PLATFORM_H
+#define CPPDATASTRUCTURES_PLATFORM_H
+
+#include <climits>
+#include <cstddef>
+#include <cinttypes>
+#include <cstdint>
 #include <string_view>
 
 #if SIZE_MAX == UINT_MAX
@@ -27,3 +30,5 @@ typedef intmax_t ssize_t;  /* last resort, chux suggestion */
 #else
 #error platform has exotic SIZE_MAX
 #endif
+
+#endif // CPPDATASTRUCTURES_PLATFORM_H

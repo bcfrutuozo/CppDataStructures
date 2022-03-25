@@ -32,9 +32,9 @@ private:
 			pValue(value)
 		{}
 
-		constexpr operator T() const noexcept { return *pValue; }
+        inline constexpr operator T() const noexcept { return *pValue; }
 
-		constexpr void operator=(const T& val) noexcept { *pValue = val; }
+        inline constexpr void operator=(const T& val) noexcept { *pValue = val; }
 	};
 	//</editor-fold>
 
@@ -73,12 +73,12 @@ private:
 			return tmp;
 		}
 
-		constexpr friend bool operator==(const Iterator& a, const Iterator& b) noexcept
+        inline constexpr friend bool operator==(const Iterator& a, const Iterator& b) noexcept
 		{
 			return Equals(a.pElement, b.pElement);
 		};
 
-		constexpr friend bool operator!=(const Iterator& a, const Iterator& b) noexcept
+        inline constexpr friend bool operator!=(const Iterator& a, const Iterator& b) noexcept
 		{
 			return !(a == b);
 		};
@@ -118,12 +118,12 @@ private:
 			return tmp;
 		}
 
-		constexpr friend bool operator==(const ConstIterator& a, const ConstIterator& b) noexcept
+        inline constexpr friend bool operator==(const ConstIterator& a, const ConstIterator& b) noexcept
 		{
 			return Equals(a.pElement, b.pElement);
 		};
 
-		constexpr friend bool operator!=(const ConstIterator& a, const ConstIterator& b) noexcept
+        inline constexpr friend bool operator!=(const ConstIterator& a, const ConstIterator& b) noexcept
 		{
 			return !(a == b);
 		};
@@ -163,12 +163,12 @@ private:
 			return tmp;
 		}
 
-		constexpr friend bool operator==(const ReverseIterator& a, const ReverseIterator& b) noexcept
+        inline constexpr friend bool operator==(const ReverseIterator& a, const ReverseIterator& b) noexcept
 		{
 			return Equals(a.pElement, b.pElement);
 		};
 
-		constexpr friend bool operator!=(const ReverseIterator& a, const Iterator& b) noexcept
+        inline constexpr friend bool operator!=(const ReverseIterator& a, const Iterator& b) noexcept
 		{
 			return !(a == b);
 		};
@@ -208,12 +208,12 @@ private:
 			return tmp;
 		}
 
-		constexpr friend bool operator==(const ConstReverseIterator& a, const ConstReverseIterator& b) noexcept
+        inline constexpr friend bool operator==(const ConstReverseIterator& a, const ConstReverseIterator& b) noexcept
 		{
 			return Equals(a.pElement, b.pElement);
 		};
 
-		constexpr friend bool operator!=(const ConstReverseIterator& a, const ConstReverseIterator& b) noexcept
+        inline constexpr friend bool operator!=(const ConstReverseIterator& a, const ConstReverseIterator& b) noexcept
 		{
 			return !(a == b);
 		};
@@ -274,7 +274,7 @@ public:
 		auto it = begin();
 		auto itl = l.begin();
 		for(; it != end(); ++it, ++itl)
-			*it = *itl;
+			Equals(*it, *itl);
 	}
 
 	constexpr ~Array() noexcept
@@ -304,7 +304,6 @@ public:
 
 	constexpr Array& operator=(Array&& other) noexcept
 	{
-
 		// Self-assignment detection
 		if(&other == this) return *this;
 
@@ -318,7 +317,7 @@ public:
 		return *this;
 	}
 
-	inline constexpr bool operator==(const Array& other) const noexcept
+	constexpr bool operator==(const Array& other) const noexcept
 	{
 		if(Size != other.Size) return false;
 

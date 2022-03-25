@@ -202,7 +202,7 @@ public:
         return true;
     }
 
-    constexpr bool operator!=(const List &other) const noexcept {
+    inline constexpr bool operator!=(const List &other) const noexcept {
         return !(*this == other);
     }
 

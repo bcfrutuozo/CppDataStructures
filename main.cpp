@@ -7,31 +7,23 @@
 #include <forward_list>
 #include <array>
 #include <list>
+#include "String.h"
+#include <string>
 
 #include <iostream>
 
 int main(int argc, char *argv[]) {
     Timer t;
 
-    LinkedList<int> a{};
-    for (auto it = a.cbegin(); it != a.cend(); ++it)
-        std::cout << *it;
-    std::cout << " | ";
-    for (auto it = a.crbegin(); it != a.crend(); ++it)
-        std::cout << *it;
-    std::cout << std::endl;
+    String s = "ABCDEF ABCDEF ABC FED";
+    std::cout << s << std::endl;
+    std::cout << "Length: " << s.GetLength() << std::endl;
+    std::cout << "Count A: " << s.Count('A') << std::endl;
 
-    auto z = a.ToArray();
-//    for (auto it = a.cbegin(); it != a.cend(); ++it)
-//        std::cout << *it;
-//    std::cout << " | ";
-//    for (auto it = a.crbegin(); it != a.crend(); ++it)
-//        std::cout << *it;
-//    std::cout <<  std::endl;
+    auto z = s.Split("AB");
 
-    for (size_t i = 0; i < z.GetLength(); ++i)
-        std::cout << z[i];
-
+    for(size_t i = 0; i < z.GetLength(); ++i)
+        std::cout << z[i] << std::endl;
 
     return 0;
 }

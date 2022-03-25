@@ -1,3 +1,7 @@
+#ifndef CPPDATASTRUCTURES_CONTAINER_H
+#define CPPDATASTRUCTURES_CONTAINER_H
+
+
 #include <type_traits>
 
 template<typename T>
@@ -22,3 +26,5 @@ static inline constexpr typename std::enable_if<!std::is_same<T, const char*>::v
 {
 	return (a == b);
 }
+
+#endif //CPPDATASTRUCTURES_CONTAINER_H

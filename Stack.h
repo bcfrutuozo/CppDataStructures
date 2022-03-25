@@ -100,7 +100,7 @@ public:
         return *this;
     }
 
-    inline constexpr bool operator==(const Stack &other) const noexcept {
+    constexpr bool operator==(const Stack &other) const noexcept {
         if (GetLength() != other.GetLength()) return false;
 
         auto a = Top;
@@ -119,8 +119,9 @@ public:
         return !(*this == other);
     }
 
-    inline constexpr void Clear() noexcept {
-        while (!IsEmpty()) RemoveTop();
+    constexpr void Clear() noexcept {
+        while (!IsEmpty())
+            RemoveTop();
     }
 
     constexpr bool Contains(const T &element) const noexcept {
