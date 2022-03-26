@@ -219,17 +219,23 @@ size_t String::Count(char c) const noexcept
 
 size_t String::Count(const char* c) const noexcept
 {
+    if(GetLength() == 0) return 0;
+
 	return IndicesOf(c).GetLength();
 }
 
-size_t String::IndexOf(const char c) const noexcept
+ssize_t String::IndexOf(const char c) const noexcept
 {
-	return (size_t)(strchr(m_Data, c) - m_Data);
+    if(GetLength() == 0) return -1;
+
+	return (ssize_t)(strchr(m_Data, c) - m_Data);
 }
 
-size_t String::IndexOf(const char* c) const noexcept
+ssize_t String::IndexOf(const char* c) const noexcept
 {
-	return (size_t)(strstr(m_Data, c) - m_Data);
+    if(GetLength() == 0) return -1;
+
+	return (ssize_t)(strstr(m_Data, c) - m_Data);
 }
 
 Array<size_t> String::IndicesOf(const char c) const noexcept
@@ -237,12 +243,14 @@ Array<size_t> String::IndicesOf(const char c) const noexcept
 	if(GetLength() == 0) return Array<size_t>{};
 
 	Queue<size_t> q;
-	auto lastIndex = (size_t)m_Data;
-	while(lastIndex != 0)
+	for(size_t i = 0; ; ++i)
 	{
-		size_t a = (strchr((char*)lastIndex, c) - m_Data);
-		if(a != 0) q.Enqueue(a);
-		lastIndex = a + 1;
+		auto a = (strchr((char*)m_Data + i, c));
+		if(a != nullptr) {
+            auto idx = a - m_Data;
+            q.Enqueue(idx);
+            i = idx;
+        } else break;
 	}
 
 	return q.ToArray();
@@ -271,23 +279,27 @@ Array<size_t> String::IndicesOf(const char* c) const noexcept
 	return q.ToArray();
 }
 
-size_t String::LastIndexOf(const char c) const noexcept
+ssize_t String::LastIndexOf(const char c) const noexcept
 {
-	return (size_t)(strrchr(m_Data, c) - m_Data);
+    if(GetLength() == 0) return -1;
+
+	return (ssize_t)(strrchr(m_Data, c) - m_Data);
 }
 
-size_t String::LastIndexOf(const char* c) const noexcept
+ssize_t String::LastIndexOf(const char* c) const noexcept
 {
-	char* haystack;
+    if(GetLength() == 0) return -1;
+
+	char* haystack = m_Data;
 	char* r = nullptr;
 
 	if(!c[0])
-		return (size_t)(haystack + strlen(haystack));
+		return (ssize_t)(haystack + strlen(haystack));
 	while(true)
 	{
 		char* p = strstr(haystack, c);
 		if(!p)
-			return (size_t)(r - m_Data);
+			return (ssize_t)(r - m_Data);
 		r = p;
 		haystack = p + 1;
 	}
@@ -300,27 +312,14 @@ Array<String> String::Split(char c, StringSplitOptions options) const noexcept
 
 Array<String> String::Split(const char* delimiter, StringSplitOptions options) const noexcept
 {
-
 	Array<String> arrayStr{};
-	if(GetLength() == 0) arrayStr;
-	if(GetLength() == 1)
-	{
-		if(strcmp(m_Data, delimiter) == 0 && options != StringSplitOptions::RemoveEmptyEntries)
-		{
-			if(options == StringSplitOptions::TrimEntries)
-			{
-				return Array<String>{Trim()};
-			}
-			else
-			{
-				return Array<String>{ m_Data };
-			}
-		}
-		else arrayStr;
-	}
+	if(GetLength() == 0) return arrayStr;
 
 	auto array = IndicesOf(delimiter);
 	size_t length = strlen(delimiter);
+
+    if(array.GetLength() == 0) return Array<String> { m_Data };
+
 	Array<String>::Resize(arrayStr, array.GetLength());
 	for(ssize_t i = -1, j = 0; i < (ssize_t)arrayStr.GetLength(); ++i, ++j)
 	{
@@ -354,18 +353,22 @@ String String::Trim() const noexcept
 
 String String::Trim(char c) const noexcept
 {
-	auto start = (size_t)m_Data;
+    if(GetLength() == 0) return "";
+
+	size_t start = 0;
 
 	// Getting start pointer
-	while(*(char*)start == c) ++start;
+	while(*(m_Data + start) == c) ++start;
 
-	auto end = (size_t)(m_Data + GetLength() - 2); // 1 for \0 and 1 for index
+	auto end = (size_t)(GetLength() - 1); // 1 for \0 and 1 for index
 
-	while(*(char*)end == c) --end;
+	while(*(m_Data + end) == c) {
+        --end;
+    }
 
-	char* buffer = new char[end - start + 1];
-	std::copy(m_Data + start, m_Data + end - 1, buffer);
-	buffer[end] = '\0';
+	char* buffer = new char[end - start + 2];
+	std::copy(m_Data + start, m_Data + end + 1, buffer);
+	buffer[end - start + 1] = '\0';
 	String ret = buffer;
 	delete[] buffer;
 
@@ -374,6 +377,8 @@ String String::Trim(char c) const noexcept
 
 String String::Trim(const char* c) const noexcept
 {
+    if(GetLength() == 0) return "";
+
 	return "";
 }
 
@@ -384,14 +389,17 @@ String String::TrimEnd() const noexcept
 
 String String::TrimEnd(char c) const noexcept
 {
-	auto p = (m_Data + GetLength() - 2); // 1 for \0 and 1 for index
-	size_t end = GetLength() - 1;
+    if(GetLength() == 0) return "";
 
-	while(*p == c) --end;
+    size_t end = GetLength() - 1;
+
+	while(*(m_Data + end) == c) {
+        --end;
+    }
 
 	char* buffer = new char[end + 1];
-	std::copy(m_Data, m_Data + end - 1, buffer);
-	buffer[end] = '\0';
+	std::copy(m_Data, m_Data + end + 1, buffer);
+	buffer[end + 1] = '\0';
 	String ret = buffer;
 	delete[] buffer;
 
@@ -410,12 +418,15 @@ String String::TrimStart() const noexcept
 
 String String::TrimStart(char c) const noexcept
 {
+    if(GetLength() == 0) return "";
+
 	auto p = m_Data;
 	size_t start = 0;
 
 	while(*p == c)
 	{
 		++start;
+        ++p;
 	}
 
 	return m_Data + start;
@@ -423,6 +434,10 @@ String String::TrimStart(char c) const noexcept
 
 String String::TrimStart(const char* c) const noexcept
 {
+    if(GetLength() == 0) return "";
+
 	auto index = strstr(m_Data, c) - m_Data;
-	return m_Data + index;
+    if(index != 0) return m_Data;
+
+	return m_Data + strlen(c);
 }

@@ -51,8 +51,6 @@ public:
 
     String operator+(const String &s) noexcept;
 
-    inline constexpr operator const char const*() const noexcept { return m_Data; }
-
     char operator[](size_t index);
 
     bool operator==(const char *c) const noexcept;
@@ -71,9 +69,9 @@ public:
 
     size_t Count(const char *c) const noexcept;
 
-    size_t IndexOf(char c) const noexcept;
+    ssize_t IndexOf(char c) const noexcept;
 
-    size_t IndexOf(const char *c) const noexcept;
+    ssize_t IndexOf(const char *c) const noexcept;
 
     Array<size_t> IndicesOf(char c) const noexcept;
 
@@ -81,9 +79,9 @@ public:
 
     constexpr bool IsEmpty() const noexcept { return GetLength() == 0; }
 
-    size_t LastIndexOf(char c) const noexcept;
+    ssize_t LastIndexOf(char c) const noexcept;
 
-    size_t LastIndexOf(const char *c) const noexcept;
+    ssize_t LastIndexOf(const char *c) const noexcept;
 
     Array<String> Split(char c, StringSplitOptions options = StringSplitOptions::None) const noexcept;
 
