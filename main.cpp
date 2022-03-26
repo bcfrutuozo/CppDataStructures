@@ -25,7 +25,7 @@
 int main(int argc, char *argv[]) {
     Timer t;
 
-    String s = "A";
+    String s = "ABA";
     std::cout << s << std::endl;
     std::cout << "Length: " << s.GetLength() << std::endl; //OK
     std::cout << "Count A: " << s.Count('A') << std::endl; //OK
