@@ -18,26 +18,6 @@ class Array : protected Container<T>
 
 private:
 
-	//<editor-fold desc="Proxy to handle operator[] as Getter/Setter">
-	class ArrayValue
-	{
-	private:
-
-		T* pValue;
-
-	public:
-
-		explicit constexpr ArrayValue(T* value) noexcept
-			:
-			pValue(value)
-		{}
-
-        inline constexpr operator T() const noexcept { return *pValue; }
-
-        inline constexpr void operator=(const T& val) noexcept { *pValue = val; }
-	};
-	//</editor-fold>
-
 	//<editor-fold desc="Iterators implementation">
 	struct Iterator
 	{
@@ -287,12 +267,12 @@ public:
 	}
 
 	// Using proxy class ArrayValue to handle this function as Getter/Setter
-	constexpr ArrayValue operator[](size_t index)
+	constexpr T& operator[](size_t index)
 	{
 		if((ssize_t)index > LastIndex())
 			throw std::out_of_range("index is too large for the resized array");
 
-		return ArrayValue(Data + index);
+		return *(Data + index);
 	}
 
 	constexpr Array& operator=(const Array& other) noexcept

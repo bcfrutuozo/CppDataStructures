@@ -57,7 +57,7 @@ public:
 
     inline String& operator+=(const String& rhs) noexcept;
 
-    char operator[](size_t index);
+    char& operator[](size_t index);
 
     bool operator==(const char *c) const noexcept;
 

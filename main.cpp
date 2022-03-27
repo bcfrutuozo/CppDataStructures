@@ -48,7 +48,6 @@ int main(int argc, char *argv[]) {
     auto x = String::Join(',', { "A", "B", "CD" });
     std::cout << "String join test '" << block2 << "': " << x << std::endl;
 
-
 /*
  * BCDEF \0
  * BCEDF \0

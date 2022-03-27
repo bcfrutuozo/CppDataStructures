@@ -126,7 +126,7 @@ inline String& String::operator+=(const String& rhs) noexcept {
     return *this += rhs.m_Data;
 }
 
-char String::operator[](size_t index) {
+char& String::operator[](size_t index) {
     if (index > m_Length - 1) throw std::out_of_range("Out of string boundaries");
     return m_Data[index];
 }
