@@ -53,11 +53,19 @@ public:
 
     String operator+(const String &s) noexcept;
 
+    String& operator+=(const char* c) noexcept;
+
+    inline String& operator+=(const String& rhs) noexcept;
+
     char operator[](size_t index);
 
     bool operator==(const char *c) const noexcept;
 
     inline bool operator==(const String &rhs) const noexcept;
+
+    inline bool operator!=(const char* c) const noexcept;
+
+    inline bool operator!=(const String &rhs) const noexcept;
 
     bool Contains(char c) const noexcept;
 
@@ -80,6 +88,14 @@ public:
     Array<size_t> IndicesOf(const char *c) const noexcept;
 
     constexpr bool IsEmpty() const noexcept { return GetLength() == 0; }
+
+    static String Join(char separator, Array<String>& arrayString) noexcept;
+
+    static String Join(char separator, Array<String>&& arrayString) noexcept;
+
+    static String Join(const char* separator, Array<String>& arrayString) noexcept;
+
+    static String Join(const char* separator, Array<String>&& arrayString) noexcept;
 
     ssize_t LastIndexOf(char c) const noexcept;
 

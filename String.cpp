@@ -116,6 +116,16 @@ String String::operator+(const String &s) noexcept {
     return temp;
 }
 
+String& String::operator+=(const char* c) noexcept {
+    strcat(this->m_Data, c);
+    m_Length = strlen(this->m_Data);
+    return *this;
+}
+
+inline String& String::operator+=(const String& rhs) noexcept {
+    return *this += rhs.m_Data;
+}
+
 char String::operator[](size_t index) {
     if (index > m_Length - 1) throw std::out_of_range("Out of string boundaries");
     return m_Data[index];
@@ -125,16 +135,19 @@ bool String::operator==(const char *c) const noexcept {
     if (m_Length != strlen(c))
         return false;
 
-    for (size_t i = 0; i < m_Length; ++i) {
-        if (m_Data[i] != c[i])
-            return false;
-    }
-
-    return true;
+    return strcmp(m_Data, c) == 0;
 }
 
 inline bool String::operator==(const String &rhs) const noexcept {
     return *this == rhs.m_Data;
+}
+
+inline bool String::operator!=(const char* c) const noexcept{
+    return !(*this == c);
+}
+
+inline bool String::operator!=(const String &rhs) const noexcept{
+    return !(*this == rhs);
 }
 
 bool String::Contains(const char c) const noexcept {
@@ -332,6 +345,54 @@ Array<String> String::InternalSplit(const char* c, int count, Array<size_t>& arr
     return q.ToArray();
 }
 
+String String::Join(char separator, Array<String>& arrayString) noexcept{
+    char temp[2] = { separator, '\0'};
+    return String::Join(temp, arrayString);
+}
+
+String String::Join(char separator, Array<String>&& arrayString) noexcept{
+    char temp[2] = { separator, '\0'};
+    return String::Join(temp, arrayString);
+}
+
+String String::Join(const char* separator, Array<String>& arrayString) noexcept {
+
+    if(arrayString.GetLength() == 0) return String{};
+
+    size_t totalSize = 0;
+    for(const auto& x : arrayString)
+        totalSize += x.GetLength();
+
+    totalSize += arrayString.GetLength();
+
+    char* buffer = new char[totalSize];
+    size_t start = 0;
+    size_t end = 0;
+    size_t length = strlen(separator);
+
+    for(size_t i = 0 ; i < arrayString.GetLength(); ++i){
+        String stg = arrayString[i];
+        start = i == 0 ? 0 : end + length;
+        end = i == 0 ? stg.GetLength() : start + stg.GetLength();
+
+        std::copy(stg.GetPointer(), stg.GetPointer() + stg.GetLength(), buffer + start);
+
+        if(i == arrayString.GetLength() - 1)
+            *(buffer + end) = '\0';
+        else
+            std::copy(separator, separator + length, buffer + end);
+    }
+
+    String cat = buffer;
+    delete[] buffer;
+
+    return cat;
+}
+
+String String::Join(const char* separator, Array<String>&& arrayString) noexcept {
+    return String::Join(separator, arrayString);
+}
+
 ssize_t String::LastIndexOf(const char c) const noexcept {
     if (GetLength() == 0) return -1;
 
@@ -363,7 +424,8 @@ Array<String> String::Split(char delimiter, int count) {
     }
 
     auto array = IndicesOf(delimiter);
-    return IntervalSplit(&delimiter, count, array);
+    char temp[2] = { delimiter, '\0'} ;
+    return InternalSplit(temp, count, array);
 }
 
 Array<String> String::Split(const char* delimiter, int count){
@@ -374,7 +436,7 @@ Array<String> String::Split(const char* delimiter, int count){
     }
 
     auto array = IndicesOf(delimiter);
-    return IntervalSplit(delimiter, count, array);
+    return InternalSplit(delimiter, count, array);
 }
 
 Array<String> String::Split(char delimiter, StringSplitOptions options) const noexcept {
@@ -384,7 +446,8 @@ Array<String> String::Split(char delimiter, StringSplitOptions options) const no
     }
 
     auto array = IndicesOf(delimiter);
-    return IntervalSplit(&delimiter, array.GetLength(), array, options);
+    char temp[2] = { delimiter, '\0'} ;
+    return InternalSplit(temp, array.GetLength(), array, options);
 }
 
 Array<String> String::Split(const char *delimiter, StringSplitOptions options) const noexcept {
@@ -394,7 +457,7 @@ Array<String> String::Split(const char *delimiter, StringSplitOptions options) c
     }
 
     auto array = IndicesOf(delimiter);
-    return IntervalSplit(delimiter, array.GetLength(), array, options);
+    return InternalSplit(delimiter, array.GetLength(), array, options);
 }
 
 Array<String> String::Split(char delimiter, int count, StringSplitOptions options){
@@ -406,7 +469,7 @@ Array<String> String::Split(char delimiter, int count, StringSplitOptions option
     }
 
     auto array = IndicesOf(delimiter);
-    return IntervalSplit(&delimiter, count, array, options);
+    return InternalSplit(&delimiter, count, array, options);
 }
 
 Array<String> String::Split(const char* delimiter, int count, StringSplitOptions options){
@@ -418,7 +481,7 @@ Array<String> String::Split(const char* delimiter, int count, StringSplitOptions
     }
 
     auto array = IndicesOf(delimiter);
-    return IntervalSplit(delimiter, count, array, options);
+    return InternalSplit(delimiter, count, array, options);
 }
 
 String String::Trim() const noexcept {
