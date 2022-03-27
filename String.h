@@ -29,7 +29,7 @@ private:
     static constexpr char HorizontalTab = '\t';     // 0x09
     static constexpr char VerticalTab = '\v';       // 0x0b
 
-    Array<String> IntervalSplit(const char* c, int count, Array<size_t>& indices, StringSplitOptions options = StringSplitOptions::None) const noexcept;
+    Array<String> InternalSplit(const char* c, int count, Array<size_t>& indices, StringSplitOptions options = StringSplitOptions::None) const noexcept;
 
 public:
 

@@ -236,7 +236,7 @@ Array<size_t> String::IndicesOf(const char *c) const noexcept {
     return q.ToArray();
 }
 
-Array<String> String::IntervalSplit(const char* c, int count, Array<size_t>& array, StringSplitOptions options) const noexcept {
+Array<String> String::InternalSplit(const char* c, int count, Array<size_t>& array, StringSplitOptions options) const noexcept {
 
     if(count > array.GetLength()) count = array.GetLength();
 
