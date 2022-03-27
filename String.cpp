@@ -230,8 +230,104 @@ Array<size_t> String::IndicesOf(const char *c) const noexcept {
 
     Queue<size_t> q;
     const size_t inc = strlen(c);
-    for(auto p = strstr(m_Data, c); p != nullptr; p = strstr(p + inc, c))
+    for (auto p = strstr(m_Data, c); p != nullptr; p = strstr(p + inc, c))
         q.Enqueue(p - m_Data);
+
+    return q.ToArray();
+}
+
+Array<String> String::IntervalSplit(const char* c, int count, Array<size_t>& array, StringSplitOptions options) const noexcept {
+
+    if(count > array.GetLength()) count = array.GetLength();
+
+    size_t length = strlen(c);
+
+    //Handle the special case of no replaces and special count.
+    if (array.GetLength() == 0) {
+        return Array<String>{m_Data};
+    }
+
+    Queue<String> q;
+
+    size_t start = 0;
+    size_t end;
+    size_t charSize;
+
+    switch (options) {
+        case StringSplitOptions::RemoveEmptyEntries:
+            if (array[0] != 0)
+            {
+                if (count > 1)
+                    end = array[0] - 1;
+                else
+                    end = GetLength();
+                charSize = end - start;
+                char *buffer = new char[charSize + 1];
+                std::copy(m_Data + start, m_Data + end + 1, buffer);
+                *(buffer + charSize + 1) = '\0';
+                q.Enqueue(buffer);
+                delete[] buffer;
+            }
+
+            for (ssize_t i = 0; i < count; ++i) {
+
+                start = array[i] + length;
+
+                if (count - 1 > i)
+                    end = array[i + 1] - 1;
+                else
+                    end = GetLength();
+
+                if (start <= end) {
+                    charSize = end - start;
+                    char *buffer = new char[charSize + 1];
+                    std::copy(m_Data + start, m_Data + end + 1, buffer);
+                    *(buffer + charSize + 1) = '\0';
+                    q.Enqueue(buffer);
+                    delete[] buffer;
+                }
+            }
+
+            break;
+        default:
+
+            if (array[0] == 0)
+                q.Enqueue(String{});
+            else {
+                if (count > 1)
+                    end = array[0] - 1;
+                else
+                    end = GetLength();
+                charSize = end - start;
+                char *buffer = new char[charSize + 1];
+                std::copy(m_Data + start, m_Data + end + 1, buffer);
+                *(buffer + charSize + 1) = '\0';
+                q.Enqueue(buffer);
+                delete[] buffer;
+            }
+
+            for (ssize_t i = 0; i < count; ++i) {
+
+                start = array[i] + length;
+
+                if (count - 1 > i)
+                    end = array[i + 1] - 1;
+                else
+                    end = GetLength();
+
+                if (start > end) q.Enqueue(String{});
+                else {
+                    charSize = end - start;
+                    char *buffer = new char[charSize + 1];
+                    std::copy(m_Data + start, m_Data + end + 1, buffer);
+                    *(buffer + charSize + 1) = '\0';
+                    q.Enqueue(buffer);
+                    delete[] buffer;
+                }
+            }
+
+            break;
+    }
 
     return q.ToArray();
 }
@@ -259,94 +355,70 @@ ssize_t String::LastIndexOf(const char *c) const noexcept {
     }
 }
 
-Array<String> String::Split(char c, StringSplitOptions options) const noexcept {
-    return Array<String>{};
-}
+Array<String> String::Split(char delimiter, int count) {
+    if(count < 0) throw std::invalid_argument("count");
 
-Array<String> String::Split(const char *delimiter, StringSplitOptions options) const noexcept {
-    bool omitEmpty = options == StringSplitOptions::RemoveEmptyEntries;
-
-    if ((omitEmpty && GetLength() == 0)) {
-        return Array<String>{};
-    }
-
-    auto array = IndicesOf(delimiter);
-    size_t length = strlen(delimiter);
-
-    //Handle the special case of no replaces and special count.
-    if (array.GetLength() == 0) {
+    if ((GetLength() == 0)) {
         return Array<String>{m_Data};
     }
 
-    Queue<String> q;
-    switch (options) {
-        case StringSplitOptions::RemoveEmptyEntries:
-            for (ssize_t i = 0, j = 0; i < (ssize_t) array.GetLength(); ++i, ++j) {
+    auto array = IndicesOf(delimiter);
+    return IntervalSplit(&delimiter, count, array);
+}
 
-                // Means the string already begins with a delimiter
-                // So as we are dealing with RemoveEmptyEntries here, we should skip
-                if(array[i] == 0) {
-                    continue;
-                }
+Array<String> String::Split(const char* delimiter, int count){
+    if(count < 0) throw std::invalid_argument("count");
 
-                auto start = i >= 0 ? array[i - 1] + 1 : array[i] - 1;
-                size_t end;
-
-                if (array.GetLength() - 1 == i) {
-                    end = GetLength();
-                } else {
-                    end = array[i + 1];
-                }
-
-                size_t charSize = end - start;
-                char *buffer = new char[charSize];
-                std::copy(m_Data + start, m_Data + end, buffer);
-                *(buffer + charSize) = '\0';
-                q.Enqueue(buffer);
-                delete[] buffer;
-            }
-            break;
-        default:
-
-            size_t start = 0;
-            size_t end;
-            size_t charSize;
-
-            for (size_t i = 0, j = 0; i < array.GetLength(); ++i, ++j) {
-
-                start = i > 0 ? array[i - 1] + 1 : 0;
-
-                if (array.GetLength() == i) {
-                    end = GetLength();
-                } else {
-                    end = array[i] - 1;
-                }
-
-                charSize = end - start;
-                char *buffer = new char[charSize + 1];
-                std::copy(m_Data + start, m_Data + end + 1, buffer);
-                *(buffer + charSize + 1) = '\0';
-                q.Enqueue(buffer);
-                delete[] buffer;
-            }
-
-            start = array[array.GetLength() - 1] + 1;
-            end = GetLength();
-
-            if(start == end){
-                q.Enqueue(String{});
-            } else {
-                charSize = end - start;
-                char *buffer = new char[charSize + 1];
-                std::copy(m_Data + start, m_Data + end + 1, buffer);
-                *(buffer + charSize + 1) = '\0';
-                q.Enqueue(buffer);
-                delete[] buffer;
-            }
-            break;
+    if ((GetLength() == 0)) {
+        return Array<String>{m_Data};
     }
 
-    return q.ToArray();
+    auto array = IndicesOf(delimiter);
+    return IntervalSplit(delimiter, count, array);
+}
+
+Array<String> String::Split(char delimiter, StringSplitOptions options) const noexcept {
+    if (GetLength() == 0) {
+        if(options == StringSplitOptions::RemoveEmptyEntries) return Array<String>{};
+        else return Array<String>{m_Data};
+    }
+
+    auto array = IndicesOf(delimiter);
+    return IntervalSplit(&delimiter, array.GetLength(), array, options);
+}
+
+Array<String> String::Split(const char *delimiter, StringSplitOptions options) const noexcept {
+    if (GetLength() == 0) {
+        if(options == StringSplitOptions::RemoveEmptyEntries) return Array<String>{};
+        else return Array<String>{m_Data};
+    }
+
+    auto array = IndicesOf(delimiter);
+    return IntervalSplit(delimiter, array.GetLength(), array, options);
+}
+
+Array<String> String::Split(char delimiter, int count, StringSplitOptions options){
+    if(count < 0) throw std::invalid_argument("count");
+
+    if (GetLength() == 0) {
+        if(options == StringSplitOptions::RemoveEmptyEntries) return Array<String>{};
+        else return Array<String>{m_Data};
+    }
+
+    auto array = IndicesOf(delimiter);
+    return IntervalSplit(&delimiter, count, array, options);
+}
+
+Array<String> String::Split(const char* delimiter, int count, StringSplitOptions options){
+    if(count < 0) throw std::invalid_argument("count");
+
+    if (GetLength() == 0) {
+        if(options == StringSplitOptions::RemoveEmptyEntries) return Array<String>{};
+        else return Array<String>{m_Data};
+    }
+
+    auto array = IndicesOf(delimiter);
+    return IntervalSplit(delimiter, count, array, options);
 }
 
 String String::Trim() const noexcept {

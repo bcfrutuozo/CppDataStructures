@@ -25,7 +25,7 @@
 int main(int argc, char *argv[]) {
     Timer t;
 
-    String s = "ABCDEABCDA";
+    String s = "ABCDEABCDAAAABABZ";
     std::cout << s << std::endl;
     std::cout << "Length: " << s.GetLength() << std::endl; //OK
     std::cout << "Count A: " << s.Count('A') << std::endl; //OK
@@ -37,20 +37,10 @@ int main(int argc, char *argv[]) {
     std::cout << "LastIndex(A): " << s.LastIndexOf("A") << std::endl; //OK
     auto idx = s.IndicesOf('A');
 
-    for(size_t i = 0; i < idx.GetLength(); ++i)
-        std::cout << idx[i];
+    const char* block = "A";
+    auto z = s.Split(block);
 
-    std::cout << std::endl;
-    String strim = "  ABCDEF ABC ABCDEFG  ";
-    //String strim = " A ";
-    std::cout << strim << std::endl;
-    std::cout << "TrimStart(A): " << strim.TrimStart() << std::endl; //OK
-    std::cout << "TrimEnd(A): " << strim.TrimEnd() << std::endl; //OK
-    std::cout << "Trim(A): " << strim.Trim() << std::endl; //OK
-
-
-    auto z = s.Split("A");
-
+    std::cout << "String Split block with '" << block << "': " << std::endl;
     for(size_t i = 0; i < z.GetLength(); ++i)
         std::cout << z[i] << std::endl;
 

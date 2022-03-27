@@ -7,8 +7,7 @@
 
 enum class StringSplitOptions {
     None = 0x00,
-    RemoveEmptyEntries = 0x01,
-    TrimEntries = 0x02
+    RemoveEmptyEntries = 0x01
 };
 
 #endif //CPPDATASTRUCTURES_STRINGSPLITOPTIONS_H
