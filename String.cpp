@@ -229,13 +229,9 @@ Array<size_t> String::IndicesOf(const char *c) const noexcept {
     if (GetLength() == 0) return Array<size_t>{};
 
     Queue<size_t> q;
-    auto p = m_Data;
-    size_t idx = 0;
-    while(strstr(p, c) != nullptr){
-        q.Enqueue(p - m_Data + idx);
-        ++p;
-        ++idx;
-    }
+    const size_t inc = strlen(c);
+    for(auto p = strstr(m_Data, c); p != nullptr; p = strstr(p + inc, c))
+        q.Enqueue(p - m_Data);
 
     return q.ToArray();
 }
@@ -289,11 +285,11 @@ Array<String> String::Split(const char *delimiter, StringSplitOptions options) c
 
                 // Means the string already begins with a delimiter
                 // So as we are dealing with RemoveEmptyEntries here, we should skip
-                if(array[0] == 0) {
+                if(array[i] == 0) {
                     continue;
                 }
 
-                auto start = i >= 0 ? length + array[i] : 0;
+                auto start = i >= 0 ? array[i - 1] + 1 : array[i] - 1;
                 size_t end;
 
                 if (array.GetLength() - 1 == i) {
@@ -312,32 +308,41 @@ Array<String> String::Split(const char *delimiter, StringSplitOptions options) c
             break;
         default:
 
-            for (ssize_t i = 0, j = 0; i < (ssize_t) array.GetLength(); ++i, ++j) {
+            size_t start = 0;
+            size_t end;
+            size_t charSize;
 
-                // Means the string already begins with a delimiter
-                // So as we are dealing with default workflow, push an empty string at index 0
-                if(array[0] == 0) {
-                    q.Enqueue(String{});
-                    continue;
-                }
+            for (size_t i = 0, j = 0; i < array.GetLength(); ++i, ++j) {
 
-                auto start = i >= 0 ? length + array[i] : 0;
-                size_t end;
+                start = i > 0 ? array[i - 1] + 1 : 0;
 
-                if (array.GetLength() - 1 == i) {
+                if (array.GetLength() == i) {
                     end = GetLength();
                 } else {
-                    end = array[i + 1];
+                    end = array[i] - 1;
                 }
 
-                size_t charSize = end - start;
-                char *buffer = new char[charSize];
-                std::copy(m_Data + start, m_Data + end, buffer);
-                *(buffer + charSize) = '\0';
+                charSize = end - start;
+                char *buffer = new char[charSize + 1];
+                std::copy(m_Data + start, m_Data + end + 1, buffer);
+                *(buffer + charSize + 1) = '\0';
                 q.Enqueue(buffer);
                 delete[] buffer;
             }
 
+            start = array[array.GetLength() - 1] + 1;
+            end = GetLength();
+
+            if(start == end){
+                q.Enqueue(String{});
+            } else {
+                charSize = end - start;
+                char *buffer = new char[charSize + 1];
+                std::copy(m_Data + start, m_Data + end + 1, buffer);
+                *(buffer + charSize + 1) = '\0';
+                q.Enqueue(buffer);
+                delete[] buffer;
+            }
             break;
     }
 
