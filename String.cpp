@@ -469,7 +469,8 @@ Array<String> String::Split(char delimiter, int count, StringSplitOptions option
     }
 
     auto array = IndicesOf(delimiter);
-    return InternalSplit(&delimiter, count, array, options);
+    char temp[2] = {delimiter, '\0'};
+    return InternalSplit(temp, count, array, options);
 }
 
 Array<String> String::Split(const char* delimiter, int count, StringSplitOptions options){
