@@ -53,8 +53,8 @@ int main(int argc, char *argv[]) {
         std::cout << *it << std::endl;
     }
 
-    String y = "ABCDEF";
-    String z2 = y.TrimEnd("");
+    String y = "      ABCABCABCDEFBA          ";
+    String z2 = y.TrimEnd();
     std::cout << z2 << std::endl;
 
 /*

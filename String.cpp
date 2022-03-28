@@ -490,32 +490,42 @@ String String::Trim() const noexcept {
 }
 
 String String::Trim(char c) const noexcept {
-    if (GetLength() == 0) return "";
-
-    size_t start = 0;
-
-    // Getting start pointer
-    while (*(m_Data + start) == c) ++start;
-
-    auto end = (size_t) (GetLength() - 1); // 1 for \0 and 1 for index
-
-    while (*(m_Data + end) == c) {
-        --end;
-    }
-
-    char *buffer = new char[end - start + 2];
-    std::copy(m_Data + start, m_Data + end + 1, buffer);
-    buffer[end - start + 1] = '\0';
-    String ret = buffer;
-    delete[] buffer;
-
-    return ret;
+    char temp[2] = { c, '\0'};
+    return Trim(temp);
 }
 
 String String::Trim(const char *c) const noexcept {
     if (GetLength() == 0) return "";
+    if(strcmp(c, "") == 0) return m_Data;
 
-    return "";
+    auto p = m_Data;
+    size_t start = 0;
+    const size_t length = strlen(c);
+    size_t start2 = 0;
+    while (*p == *(c + start2)) {
+        ++start;
+        ++p;
+        ++start2;
+        if(start2 == length) start2 = 0;
+    }
+
+    size_t end = GetLength() - 1;;
+    p = m_Data + end;
+    ssize_t end2 = length - 1;
+    while (*p == *(c + end2)) {
+        --end;
+        --p;
+        --end2;
+        if(end2 == -1) end2 = length - 1;
+    }
+
+    end = (size_t)(m_Data + end) - (size_t)m_Data;
+    char* temp = new char[end - start + 1];
+    std::copy(m_Data + start, m_Data + end + 1, temp);
+    temp[end - start + 1] = '\0';
+    String ret = temp;
+    delete[] temp;
+    return ret;
 }
 
 String String::TrimEnd() const noexcept {
@@ -523,36 +533,26 @@ String String::TrimEnd() const noexcept {
 }
 
 String String::TrimEnd(char c) const noexcept {
-    if (GetLength() == 0) return "";
-
-    size_t start = 0;
-
-    // Getting start pointer
-    while (*(m_Data + start) == c) ++start;
-
-    auto end = (size_t) (GetLength() - 1); // 1 for \0 and 1 for index
-
-    while (*(m_Data + end) == c) {
-        --end;
-    }
-
-    char *buffer = new char[end - start + 2];
-    std::copy(m_Data + start, m_Data + end + 1, buffer);
-    buffer[end - start + 1] = '\0';
-    String ret = buffer;
-    delete[] buffer;
-
-    return ret;
+    char temp[2] = { c, '\0' };
+    return Trim(temp);
 }
 
 String String::TrimEnd(const char *c) const noexcept {
     if(GetLength() == 0) return "";
     if(strcmp(c, "") == 0) return m_Data;
 
-    size_t end = GetLength() - 1;
-    size_t length = strlen(c);
+    size_t end = GetLength() - 1;;
+    auto p = m_Data + end;
+    const size_t length = strlen(c);
+    ssize_t start2 = length - 1;
+    while (*p == *(c + start2)) {
+        --end;
+        --p;
+        --start2;
+        if(start2 == -1) start2 = length - 1;
+    }
 
-    end = (size_t)(m_Data + end - length) - (size_t)m_Data;
+    end = (size_t)(m_Data + end) - (size_t)m_Data;
     char* temp = new char[end + 1];
     std::copy(m_Data, m_Data + end + 1, temp);
     temp[end + 1] = '\0';
@@ -566,24 +566,24 @@ String String::TrimStart() const noexcept {
 }
 
 String String::TrimStart(char c) const noexcept {
-    if (GetLength() == 0) return "";
-
-    auto p = m_Data;
-    size_t start = 0;
-
-    while (*p == c) {
-        ++start;
-        ++p;
-    }
-
-    return m_Data + start;
+    char temp[2] = { c, '\0' };
+    return TrimStart(temp);
 }
 
 String String::TrimStart(const char *c) const noexcept {
     if (GetLength() == 0) return "";
+    if(strcmp(c, "") == 0) return m_Data;
 
-    auto index = strstr(m_Data, c) - m_Data;
-    if (index != 0) return m_Data;
+    auto p = m_Data;
+    size_t start = 0;
+    const size_t length = strlen(c);
+    size_t start2 = 0;
+    while (*p == *(c + start2)) {
+        ++start;
+        ++p;
+        ++start2;
+        if(start2 == length) start2 = 0;
+    }
 
-    return m_Data + strlen(c);
+    return m_Data + start;
 }
