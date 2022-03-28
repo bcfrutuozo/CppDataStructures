@@ -525,15 +525,20 @@ String String::TrimEnd() const noexcept {
 String String::TrimEnd(char c) const noexcept {
     if (GetLength() == 0) return "";
 
-    size_t end = GetLength() - 1;
+    size_t start = 0;
+
+    // Getting start pointer
+    while (*(m_Data + start) == c) ++start;
+
+    auto end = (size_t) (GetLength() - 1); // 1 for \0 and 1 for index
 
     while (*(m_Data + end) == c) {
         --end;
     }
 
-    char *buffer = new char[end + 1];
-    std::copy(m_Data, m_Data + end + 1, buffer);
-    buffer[end + 1] = '\0';
+    char *buffer = new char[end - start + 2];
+    std::copy(m_Data + start, m_Data + end + 1, buffer);
+    buffer[end - start + 1] = '\0';
     String ret = buffer;
     delete[] buffer;
 
@@ -541,7 +546,19 @@ String String::TrimEnd(char c) const noexcept {
 }
 
 String String::TrimEnd(const char *c) const noexcept {
-    return "";
+    if(GetLength() == 0) return "";
+    if(strcmp(c, "") == 0) return m_Data;
+
+    size_t end = GetLength() - 1;
+    size_t length = strlen(c);
+
+    end = (size_t)(m_Data + end - length) - (size_t)m_Data;
+    char* temp = new char[end + 1];
+    std::copy(m_Data, m_Data + end + 1, temp);
+    temp[end + 1] = '\0';
+    String ret = temp;
+    delete[] temp;
+    return ret;
 }
 
 String String::TrimStart() const noexcept {

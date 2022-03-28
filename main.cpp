@@ -48,6 +48,15 @@ int main(int argc, char *argv[]) {
     auto x = String::Join(',', { "A", "B", "CD" });
     std::cout << "String join test '" << block2 << "': " << x << std::endl;
 
+    std::cout << "Testing Iterator: " << std::endl;
+    for(auto it = x.begin(); it != x.end(); ++it){
+        std::cout << *it << std::endl;
+    }
+
+    String y = "ABCDEF";
+    String z2 = y.TrimEnd("");
+    std::cout << z2 << std::endl;
+
 /*
  * BCDEF \0
  * BCEDF \0

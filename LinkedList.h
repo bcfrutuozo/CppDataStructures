@@ -31,7 +31,6 @@ private:
     //<editor-fold desc="Iterators implementation">
     struct Iterator {
 
-        // Aliases to handle const and non-const iterators
         using iterator_category = std::bidirectional_iterator_tag;
         using difference_type = std::ptrdiff_t;
         using value_type = T;
@@ -84,7 +83,6 @@ private:
 
     struct ConstIterator {
 
-        // Aliases to handle const and non-const iterators
         using iterator_category = std::bidirectional_iterator_tag;
         using difference_type = std::ptrdiff_t;
         using value_type = const T;
@@ -137,7 +135,6 @@ private:
 
     struct ReverseIterator {
 
-        // Aliases to handle const and non-const iterators
         using iterator_category = std::bidirectional_iterator_tag;
         using difference_type = std::ptrdiff_t;
         using value_type = T;
@@ -190,7 +187,6 @@ private:
 
     struct ConstReverseIterator {
 
-        // Aliases to handle const and non-const iterators
         using iterator_category = std::bidirectional_iterator_tag;
         using difference_type = std::ptrdiff_t;
         using value_type = const T;
@@ -793,19 +789,19 @@ public:
 
     constexpr Iterator begin() noexcept { return Head; }
 
-    constexpr Iterator end() noexcept { return (Tail == nullptr) ? nullptr : Tail->Next; }
+    constexpr Iterator end() noexcept { return nullptr; }
 
     constexpr ConstIterator cbegin() const noexcept { return Head; }
 
-    constexpr ConstIterator cend() const noexcept { return (Tail == nullptr) ? nullptr : Tail->Next; }
+    constexpr ConstIterator cend() const noexcept { return nullptr; }
 
     constexpr ReverseIterator rbegin() noexcept { return Tail; }
 
-    constexpr ReverseIterator rend() noexcept { return (Head == nullptr) ? nullptr : Head->Previous; }
+    constexpr ReverseIterator rend() noexcept { return nullptr; }
 
     constexpr ConstReverseIterator crbegin() const noexcept { return Tail; }
 
-    constexpr ConstReverseIterator crend() const noexcept { return (Head == nullptr) ? nullptr : Head->Previous; }
+    constexpr ConstReverseIterator crend() const noexcept { return nullptr; }
 
 };
 

@@ -17,6 +17,240 @@ class String : Container<const char *> {
 
 private:
 
+    //<editor-fold desc="Iterators implementation">
+    struct Iterator
+    {
+        using iterator_category = std::bidirectional_iterator_tag;
+        using difference_type = std::ptrdiff_t;
+        using value_type = char;
+        using pointer = char*;  // or also value_type*
+        using reference = char&;  // or also value_type&
+
+        // Pointer field representation
+        pointer pElement = nullptr;
+
+        constexpr Iterator(pointer ptr) noexcept : pElement(ptr) {}
+
+        constexpr reference operator*() const { return *pElement; }
+
+        constexpr pointer operator->() const { return pElement; }
+
+        // Prefix increment
+        constexpr Iterator& operator++()
+        {
+            this->pElement++;
+            return *this;
+        }
+
+        // Postfix increment
+        constexpr Iterator operator++(int)
+        {
+            Iterator tmp = *this;
+            ++(*this);
+            return tmp;
+        }
+
+        // Prefix decrement
+        constexpr Iterator& operator--()
+        {
+            this->pElement--;
+            return *this;
+        }
+
+        // Postfix decrement
+        constexpr Iterator operator--(int)
+        {
+            Iterator tmp = *this;
+            --(*this);
+            return tmp;
+        }
+
+        inline constexpr friend bool operator==(const Iterator& a, const Iterator& b) noexcept
+        {
+            return a.pElement == b.pElement;
+        };
+
+        inline constexpr friend bool operator!=(const Iterator& a, const Iterator& b) noexcept
+        {
+            return !(a == b);
+        };
+    };
+
+    struct ConstIterator
+    {
+        using iterator_category = std::bidirectional_iterator_tag;
+        using difference_type = std::ptrdiff_t;
+        using value_type = const char;
+        using pointer = const char*;  // or also value_type*
+        using reference = const char&;  // or also value_type&
+
+        // Pointer field representation
+        pointer pElement = nullptr;
+
+        constexpr ConstIterator(pointer ptr) noexcept : pElement(ptr) {}
+
+        constexpr reference operator*() const { return *pElement; }
+
+        constexpr pointer operator->() const { return pElement; }
+
+        // Prefix increment
+        constexpr ConstIterator& operator++()
+        {
+            this->pElement++;
+            return *this;
+        }
+
+        // Postfix increment
+        constexpr ConstIterator operator++(int)
+        {
+            ConstIterator tmp = *this;
+            ++(*this);
+            return tmp;
+        }
+
+        // Prefix decrement
+        constexpr ConstIterator& operator--()
+        {
+            this->pElement--;
+            return *this;
+        }
+
+        // Postfix decrement
+        constexpr ConstIterator operator--(int)
+        {
+            ConstIterator tmp = *this;
+            --(*this);
+            return tmp;
+        }
+
+        inline constexpr friend bool operator==(const ConstIterator& a, const ConstIterator& b) noexcept
+        {
+            return a.pElement == b.pElement;
+        };
+
+        inline constexpr friend bool operator!=(const ConstIterator& a, const ConstIterator& b) noexcept
+        {
+            return !(a == b);
+        };
+    };
+
+    struct ReverseIterator
+    {
+        using iterator_category = std::bidirectional_iterator_tag;
+        using difference_type = std::ptrdiff_t;
+        using value_type = char;
+        using pointer = char*;  // or also value_type*
+        using reference = char&;  // or also value_type&
+
+        // Pointer field representation
+        pointer pElement = nullptr;
+
+        constexpr ReverseIterator(pointer ptr) noexcept : pElement(ptr) {}
+
+        constexpr reference operator*() const { return *pElement; }
+
+        constexpr pointer operator->() const { return pElement; }
+
+        // Prefix increment
+        constexpr ReverseIterator& operator++()
+        {
+            this->pElement--;
+            return *this;
+        }
+
+        // Postfix increment
+        constexpr ReverseIterator operator++(int)
+        {
+            ReverseIterator tmp = *this;
+            --(*this);
+            return tmp;
+        }
+
+        // Prefix decrement
+        constexpr ReverseIterator& operator--()
+        {
+            this->pElement++;
+            return *this;
+        }
+
+        // Postfix decrement
+        constexpr ReverseIterator operator--(int)
+        {
+            ReverseIterator tmp = *this;
+            ++(*this);
+            return tmp;
+        }
+
+        inline constexpr friend bool operator==(const ReverseIterator& a, const ReverseIterator& b) noexcept
+        {
+            return a.pElement ==  b.pElement;
+        };
+
+        inline constexpr friend bool operator!=(const ReverseIterator& a, const ReverseIterator& b) noexcept
+        {
+            return !(a == b);
+        };
+    };
+
+    struct ConstReverseIterator
+    {
+        using iterator_category = std::bidirectional_iterator_tag;
+        using difference_type = std::ptrdiff_t;
+        using value_type = const char;
+        using pointer = const char*;  // or also value_type*
+        using reference = const char&;  // or also value_type&
+
+        constexpr reference operator*() const { return *pElement; }
+
+        constexpr pointer operator->() const { return pElement; }
+
+        // Pointer field representation
+        pointer pElement = nullptr;
+
+        constexpr ConstReverseIterator(pointer ptr) noexcept : pElement(ptr) {}
+
+        // Prefix increment
+        constexpr ConstReverseIterator& operator++()
+        {
+            this->pElement--;
+            return *this;
+        }
+
+        // Postfix increment
+        constexpr ConstReverseIterator operator++(int)
+        {
+            ConstReverseIterator tmp = *this;
+            --(*this);
+            return tmp;
+        }
+
+        // Prefix increment
+        constexpr ConstReverseIterator& operator--()
+        {
+            this->pElement++;
+            return *this;
+        }
+
+        // Postfix increment
+        constexpr ConstReverseIterator operator--(int)
+        {
+            ConstReverseIterator tmp = *this;
+            ++(*this);
+            return tmp;
+        }
+
+        inline constexpr friend bool operator==(const ConstReverseIterator& a, const ConstReverseIterator& b) noexcept
+        {
+            return a.pElement == b.pElement;
+        };
+
+        inline constexpr friend bool operator!=(const ConstReverseIterator& a, const ConstReverseIterator& b) noexcept
+        {
+            return !(a == b);
+        };
+    };
+    //</editor-fold>
+
     size_t m_Length;
     char *m_Data;
 
@@ -97,6 +331,8 @@ public:
 
     static String Join(const char* separator, Array<String>&& arrayString) noexcept;
 
+    inline constexpr ssize_t LastIndex() const noexcept { return m_Length - 1; }
+
     ssize_t LastIndexOf(char c) const noexcept;
 
     ssize_t LastIndexOf(const char *c) const noexcept;
@@ -132,6 +368,22 @@ public:
     String TrimStart(const char* c) const noexcept;
 
     friend std::ostream &operator<<(std::ostream &os, const String &s);
+
+    constexpr Iterator begin() noexcept { return m_Data; }
+
+    constexpr Iterator end() noexcept { return m_Data + m_Length; }
+
+    constexpr ConstIterator cbegin() const noexcept { return m_Data; }
+
+    constexpr ConstIterator cend() const noexcept { return m_Data + m_Length; }
+
+    constexpr ReverseIterator rbegin() noexcept { return m_Data + LastIndex(); }
+
+    constexpr ReverseIterator rend() noexcept { return m_Data - 1; }
+
+    constexpr ConstReverseIterator crbegin() const noexcept { return m_Data + LastIndex(); }
+
+    constexpr ConstReverseIterator crend() const noexcept { return m_Data - 1; }
 };
 
 inline std::ostream &operator<<(std::ostream &os, const String &s) {

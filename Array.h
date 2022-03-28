@@ -21,10 +21,8 @@ private:
 	//<editor-fold desc="Iterators implementation">
 	struct Iterator
 	{
-
-		// Aliases to handle const and non-const iterators
-		using iterator_category = std::forward_iterator_tag;
-		using difference_type = std::ptrdiff_t;
+        using iterator_category = std::bidirectional_iterator_tag;
+        using difference_type = std::ptrdiff_t;
 		using value_type = T;
 		using pointer = T*;  // or also value_type*
 		using reference = T&;  // or also value_type&
@@ -32,7 +30,7 @@ private:
 		// Pointer field representation
 		pointer pElement = nullptr;
 
-		constexpr Iterator(T* ptr) noexcept : pElement(ptr) {}
+		constexpr Iterator(pointer ptr) noexcept : pElement(ptr) {}
 
 		constexpr reference operator*() const { return *pElement; }
 
@@ -53,6 +51,21 @@ private:
 			return tmp;
 		}
 
+        // Prefix decrement
+        constexpr Iterator& operator--()
+        {
+            this->pElement--;
+            return *this;
+        }
+
+        // Postfix decrement
+        constexpr Iterator operator--(int)
+        {
+            Iterator tmp = *this;
+            --(*this);
+            return tmp;
+        }
+
         inline constexpr friend bool operator==(const Iterator& a, const Iterator& b) noexcept
 		{
 			return Equals(a.pElement, b.pElement);
@@ -66,10 +79,8 @@ private:
 
 	struct ConstIterator
 	{
-
-		// Aliases to handle const and non-const iterators
-		using iterator_category = std::forward_iterator_tag;
-		using difference_type = std::ptrdiff_t;
+        using iterator_category = std::bidirectional_iterator_tag;
+        using difference_type = std::ptrdiff_t;
 		using value_type = const T;
 		using pointer = const T*;  // or also value_type*
 		using reference = const T&;  // or also value_type&
@@ -77,7 +88,7 @@ private:
 		// Pointer field representation
 		pointer pElement = nullptr;
 
-		constexpr ConstIterator(const T* ptr) noexcept : pElement(ptr) {}
+		constexpr ConstIterator(const pointer ptr) noexcept : pElement(ptr) {}
 
 		constexpr reference operator*() const { return *pElement; }
 
@@ -98,6 +109,21 @@ private:
 			return tmp;
 		}
 
+        // Prefix decrement
+        constexpr ConstIterator& operator--()
+        {
+            this->pElement--;
+            return *this;
+        }
+
+        // Postfix decrement
+        constexpr ConstIterator operator--(int)
+        {
+            Iterator tmp = *this;
+            --(*this);
+            return tmp;
+        }
+
         inline constexpr friend bool operator==(const ConstIterator& a, const ConstIterator& b) noexcept
 		{
 			return Equals(a.pElement, b.pElement);
@@ -111,10 +137,8 @@ private:
 
 	struct ReverseIterator
 	{
-
-		// Aliases to handle const and non-const iterators
-		using iterator_category = std::forward_iterator_tag;
-		using difference_type = std::ptrdiff_t;
+        using iterator_category = std::bidirectional_iterator_tag;
+        using difference_type = std::ptrdiff_t;
 		using value_type = T;
 		using pointer = T*;  // or also value_type*
 		using reference = T&;  // or also value_type&
@@ -122,7 +146,7 @@ private:
 		// Pointer field representation
 		pointer pElement = nullptr;
 
-		constexpr ReverseIterator(T* ptr) noexcept : pElement(ptr) {}
+		constexpr ReverseIterator(pointer ptr) noexcept : pElement(ptr) {}
 
 		constexpr reference operator*() const { return *pElement; }
 
@@ -143,12 +167,27 @@ private:
 			return tmp;
 		}
 
+        // Prefix decrement
+        constexpr ReverseIterator& operator--()
+        {
+            this->pElement++;
+            return *this;
+        }
+
+        // Postfix decrement
+        constexpr ReverseIterator operator--(int)
+        {
+            Iterator tmp = *this;
+            ++(*this);
+            return tmp;
+        }
+
         inline constexpr friend bool operator==(const ReverseIterator& a, const ReverseIterator& b) noexcept
 		{
 			return Equals(a.pElement, b.pElement);
 		};
 
-        inline constexpr friend bool operator!=(const ReverseIterator& a, const Iterator& b) noexcept
+        inline constexpr friend bool operator!=(const ReverseIterator& a, const ReverseIterator& b) noexcept
 		{
 			return !(a == b);
 		};
@@ -156,10 +195,8 @@ private:
 
 	struct ConstReverseIterator
 	{
-
-		// Aliases to handle const and non-const iterators
-		using iterator_category = std::forward_iterator_tag;
-		using difference_type = std::ptrdiff_t;
+        using iterator_category = std::bidirectional_iterator_tag;
+        using difference_type = std::ptrdiff_t;
 		using value_type = const T;
 		using pointer = const T*;  // or also value_type*
 		using reference = const T&;  // or also value_type&
@@ -171,7 +208,7 @@ private:
 		// Pointer field representation
 		pointer pElement = nullptr;
 
-		constexpr ConstReverseIterator(const T* ptr) noexcept : pElement(ptr) {}
+		constexpr ConstReverseIterator(pointer ptr) noexcept : pElement(ptr) {}
 
 		// Prefix increment
 		constexpr ConstReverseIterator& operator++()
@@ -187,6 +224,21 @@ private:
 			--(*this);
 			return tmp;
 		}
+
+        // Prefix decrement
+        constexpr ConstReverseIterator& operator--()
+        {
+            this->pElement++;
+            return *this;
+        }
+
+        // Postfix decrement
+        constexpr ConstReverseIterator operator--(int)
+        {
+            Iterator tmp = *this;
+            ++(*this);
+            return tmp;
+        }
 
         inline constexpr friend bool operator==(const ConstReverseIterator& a, const ConstReverseIterator& b) noexcept
 		{

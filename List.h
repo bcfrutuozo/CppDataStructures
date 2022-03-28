@@ -27,7 +27,6 @@ private:
     //<editor-fold desc="Iterators implementation">
     struct Iterator {
 
-        // Aliases to handle const and non-const iterators
         using iterator_category = std::forward_iterator_tag;
         using difference_type = std::ptrdiff_t;
         using value_type = T;
@@ -67,7 +66,6 @@ private:
 
     struct ConstIterator {
 
-        // Aliases to handle const and non-const iterators
         using iterator_category = std::forward_iterator_tag;
         using difference_type = std::ptrdiff_t;
         using value_type = const T;
@@ -494,11 +492,11 @@ public:
 
     constexpr Iterator begin() noexcept { return Head; }
 
-    constexpr Iterator end() noexcept { return (Tail == nullptr ? nullptr : Tail->Next); }
+    constexpr Iterator end() noexcept { return nullptr; }
 
     constexpr ConstIterator cbegin() const noexcept { return Head; }
 
-    constexpr ConstIterator cend() const noexcept { return (Tail == nullptr ? nullptr : Tail->Next); }
+    constexpr ConstIterator cend() const noexcept { return nullptr; }
 };
 
 #endif //CPPDATASTRUCTURES_LIST_H
