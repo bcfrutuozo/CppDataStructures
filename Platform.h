@@ -66,7 +66,7 @@ static char *strnrstr(const char *str, const char *sub, int len) {
         if (!strncmp(pstr, sub, sl))
             return (char *) pstr;
     }
-    return NULL;
+    return nullptr;
 }
 
 static char *strrstr(const char *str, const char *sub) { return strnrstr(str, sub, strlen(str)); }
@@ -117,7 +117,7 @@ static char *strnstri(const char *str, const char *sub, int len) {
         if (!strnicmp(pstr, sub, sl))
             return (char *) pstr;
     }
-    return NULL;
+    return nullptr;
 }
 
 static char *strstri(const char *str, const char *sub) { return strnstri(str, sub, strlen(str)); }

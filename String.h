@@ -266,6 +266,7 @@ private:
     ssize_t InternalIndexOf(const char* c, int startIndex, int count) const noexcept;
     ssize_t InternalIndexOfAny(const char array[], int startIndex, int count) const noexcept;
     ssize_t InternalLastIndexOf(const char* c, int startIndex, int count) const noexcept;
+    ssize_t InternalLastIndexOfAny(const char array[], int startIndex, int count) const noexcept;
     Array<String> InternalSplit(const char* c, int count, Array<size_t>& indices, StringSplitOptions options = StringSplitOptions::None) const noexcept;
 
 public:
@@ -370,6 +371,12 @@ public:
     ssize_t LastIndexOf(const char *c, int startIndex) const noexcept;
 
     ssize_t LastIndexOf(const char *c, int startIndex, int count) const noexcept;
+
+    ssize_t LastIndexOfAny(const char array[]) const noexcept;
+
+    ssize_t LastIndexOfAny(const char array[], int startIndex) const noexcept;
+
+    ssize_t LastIndexOfAny(const char array[], int startIndex, int count) const noexcept;
 
     Array<String> Split(char c, int count);
 

@@ -298,7 +298,7 @@ ssize_t String::InternalIndexOfAny(const char array[], int startIndex, int count
     size_t arrLength = strlen(array);
     if (arrLength == 0 || GetLength() == 0) return -1;
 
-    size_t ret = -1;
+    ssize_t ret = -1;
     for (size_t i = 0; i < arrLength; ++i) {
         char *p;
         if (count == 0) p = strchr(m_Data + startIndex, *(array + i));
@@ -316,31 +316,63 @@ ssize_t String::InternalLastIndexOf(const char *c, int startIndex, int count) co
     if (GetLength() == 0) return -1;
 
     // To avoid wrong pointer operation
-    if(count > GetLength()) count = GetLength();
+    if (count > GetLength()) {
+        count = GetLength() - startIndex;
+    }
 
-    size_t ret = -1;
-    char *reversed;
-    char* temp;
-    if(count > 0) {
-        reversed = new char[count];
-        for (size_t i = 0; i < count; i++) {
-            reversed[i] = m_Data[GetLength() - startIndex - count + i];
+    size_t end = GetLength() - startIndex;
+    size_t start = count > end ? 0 : end - count;
+
+    if(start == 0 && end == GetLength()) {
+        auto ch = strrstr(m_Data, c);
+        if(ch != nullptr) return ch - m_Data;
+    }
+    else{
+        char* ch = new char[end - start];
+        for(size_t i = 0, j = start; j < end; ++i, ++j){
+            ch[i] = m_Data[j];
         }
-    }
-    else reversed = m_Data;
 
-    if (count == 0) {
-        temp = strrstr(m_Data + startIndex, c);
-    } else {
-        temp = strnrstr(reversed + startIndex, c, count);
+        size_t ret = 0;
+        auto pos = strrstr(ch, c);
+        if(pos != nullptr) {
+            ret = pos - ch + (GetLength() - startIndex - count);
+            delete[] ch;
+            return ret;
+        }
+        delete[] ch;
     }
 
-    if(count > 0 ) delete[] reversed;
+    return -1;
+}
 
-    if(temp != nullptr){
-        if(count > 0) ret = (temp - reversed) + (GetLength() - count);
-        else ret = temp - reversed;
+ssize_t String::InternalLastIndexOfAny(const char array[], int startIndex, int count) const noexcept {
+    if (startIndex > LastIndex()) throw std::out_of_range("startIndex");
+    size_t arrLength = strlen(array);
+    if (arrLength == 0 || GetLength() == 0) return -1;
+    if (count > GetLength()) count = GetLength();
+
+    char *c;
+    if (count > 0 || startIndex > 0) {
+        // If count is not same, means we have to instantiate a new temporary string in the heap
+        // Copying all the contents until the desired index
+
+        c = new char[count];
+        for (size_t i = 0; i < count; i++) {
+            c[i] = m_Data[GetLength() - startIndex - count + i];
+        }
+    } else c = m_Data;
+
+    ssize_t ret = -1;
+    for (size_t i = 0; i < arrLength; ++i) {
+        char *p;
+        if (count == 0) p = strrchr(c + startIndex, *(array + i));
+        else p = (char *) strnrstr(c, (array + i), count);
+
+        size_t newFound = count == 0 ? p - c : (p - c) + (GetLength() - count);
+        if (p != nullptr && newFound > (ret == -1 ? 0 : ret)) ret = newFound;
     }
+    if (count > 0) delete[] c;
 
     return ret;
 }
@@ -490,30 +522,42 @@ String String::Join(const char *separator, Array<String> &&arrayString) noexcept
 }
 
 ssize_t String::LastIndexOf(char c) const noexcept {
-    char temp[2] = { c, '\0'};
-    return InternalLastIndexOf(temp, 0, 0);
+    char temp[2] = {c, '\0'};
+    return InternalLastIndexOf(temp, 0, GetLength());
 }
 
 ssize_t String::LastIndexOf(char c, int startIndex) const noexcept {
-    char temp[2] = { c, '\0'};
-    return InternalLastIndexOf(temp, startIndex, 0);
+    char temp[2] = {c, '\0'};
+    return InternalLastIndexOf(temp, startIndex, GetLength());
 }
 
 ssize_t String::LastIndexOf(char c, int startIndex, int count) const noexcept {
-    char temp[2] = { c, '\0'};
+    char temp[2] = {c, '\0'};
     return InternalLastIndexOf(temp, startIndex, count);
 }
 
 ssize_t String::LastIndexOf(const char *c) const noexcept {
-    return InternalLastIndexOf(c, 0, 0);
+    return InternalLastIndexOf(c, 0, GetLength());
 }
 
 ssize_t String::LastIndexOf(const char *c, int startIndex) const noexcept {
-    return InternalLastIndexOf(c, startIndex, 0);
+    return InternalLastIndexOf(c, startIndex, GetLength());
 }
 
 ssize_t String::LastIndexOf(const char *c, int startIndex, int count) const noexcept {
     return InternalLastIndexOf(c, startIndex, count);
+}
+
+ssize_t String::LastIndexOfAny(const char array[]) const noexcept {
+    return InternalLastIndexOfAny(array, 0, 0);
+}
+
+ssize_t String::LastIndexOfAny(const char array[], int startIndex) const noexcept {
+    return InternalLastIndexOfAny(array, startIndex, 0);
+}
+
+ssize_t String::LastIndexOfAny(const char array[], int startIndex, int count) const noexcept {
+    return InternalLastIndexOfAny(array, startIndex, count);
 }
 
 Array<String> String::Split(char delimiter, int count) {
