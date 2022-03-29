@@ -263,6 +263,9 @@ private:
     static constexpr char HorizontalTab = '\t';     // 0x09
     static constexpr char VerticalTab = '\v';       // 0x0b
 
+    ssize_t InternalIndexOf(const char* c, int startIndex, int count) const noexcept;
+    ssize_t InternalIndexOfAny(const char array[], int startIndex, int count) const noexcept;
+    ssize_t InternalLastIndexOf(const char* c, int startIndex, int count) const noexcept;
     Array<String> InternalSplit(const char* c, int count, Array<size_t>& indices, StringSplitOptions options = StringSplitOptions::None) const noexcept;
 
 public:
@@ -315,13 +318,36 @@ public:
 
     ssize_t IndexOf(char c) const noexcept;
 
+    ssize_t IndexOf(char c, int startIndex) const noexcept;
+
+    ssize_t IndexOf(char c, int startIndex, int count) const noexcept;
+
     ssize_t IndexOf(const char *c) const noexcept;
+
+    ssize_t IndexOf(const char *c, int startIndex) const noexcept;
+
+    ssize_t IndexOf(const char *c, int startIndex, int count) const noexcept;
+
+    ssize_t IndexOfAny(const char array[]) const noexcept;
+
+    ssize_t IndexOfAny(const char array[], int startIndex) const noexcept;
+
+    ssize_t IndexOfAny(const char array[], int startIndex, int count) const noexcept;
 
     Array<size_t> IndicesOf(char c) const noexcept;
 
     Array<size_t> IndicesOf(const char *c) const noexcept;
 
-    constexpr bool IsEmpty() const noexcept { return GetLength() == 0; }
+    inline constexpr bool IsEmpty() const noexcept { return GetLength() == 0; }
+
+    constexpr bool IsWhiteSpace() const noexcept {
+        if(GetLength() == 0) return true;
+
+        for(size_t i = 0; i < GetLength(); ++i)
+            if(m_Data[i] != ' ') return false;
+
+        return true;
+    }
 
     static String Join(char separator, Array<String>& arrayString) noexcept;
 
@@ -335,7 +361,15 @@ public:
 
     ssize_t LastIndexOf(char c) const noexcept;
 
+    ssize_t LastIndexOf(char c, int startIndex) const noexcept;
+
+    ssize_t LastIndexOf(char c, int startIndex, int count) const noexcept;
+
     ssize_t LastIndexOf(const char *c) const noexcept;
+
+    ssize_t LastIndexOf(const char *c, int startIndex) const noexcept;
+
+    ssize_t LastIndexOf(const char *c, int startIndex, int count) const noexcept;
 
     Array<String> Split(char c, int count);
 
@@ -345,16 +379,22 @@ public:
 
     Array<String> Split(const char *delimiter, StringSplitOptions options = StringSplitOptions::None) const noexcept;
 
-    Array<String> Split(char c, int count, StringSplitOptions options);
+    Array<String> Split(char c, int count, StringSplitOptions options) const;
 
-    Array<String> Split(const char* c, int count, StringSplitOptions options);
+    Array<String> Split(const char* c, int count, StringSplitOptions options) const;
+
+    String Substring(int startIndex) const;
+
+    String Substring(int startIndex, int length) const;
+
+    Array<char> ToCharArray() const noexcept;
 
     String Trim() const noexcept;
 
     String Trim(char c) const noexcept;
 
     String Trim(const char* c) const noexcept;
-    
+
     String TrimEnd() const noexcept;
 
     String TrimEnd(char c) const noexcept;

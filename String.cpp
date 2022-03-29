@@ -6,8 +6,9 @@
 #include "Queue.h"
 
 #include <iostream>
-#include <string>
+#include <cstring>
 #include <cstdio>
+#include <string.h>
 
 String::String() noexcept
         :
@@ -116,17 +117,17 @@ String String::operator+(const String &s) noexcept {
     return temp;
 }
 
-String& String::operator+=(const char* c) noexcept {
+String &String::operator+=(const char *c) noexcept {
     strcat(this->m_Data, c);
     m_Length = strlen(this->m_Data);
     return *this;
 }
 
-inline String& String::operator+=(const String& rhs) noexcept {
+inline String &String::operator+=(const String &rhs) noexcept {
     return *this += rhs.m_Data;
 }
 
-char& String::operator[](size_t index) {
+char &String::operator[](size_t index) {
     if (index > m_Length - 1) throw std::out_of_range("Out of string boundaries");
     return m_Data[index];
 }
@@ -142,11 +143,11 @@ inline bool String::operator==(const String &rhs) const noexcept {
     return *this == rhs.m_Data;
 }
 
-inline bool String::operator!=(const char* c) const noexcept{
+inline bool String::operator!=(const char *c) const noexcept {
     return !(*this == c);
 }
 
-inline bool String::operator!=(const String &rhs) const noexcept{
+inline bool String::operator!=(const String &rhs) const noexcept {
     return !(*this == rhs);
 }
 
@@ -210,16 +211,43 @@ size_t String::Count(const char *c) const noexcept {
     return IndicesOf(c).GetLength();
 }
 
-ssize_t String::IndexOf(const char c) const noexcept {
-    if (GetLength() == 0) return -1;
+ssize_t String::IndexOf(char c) const noexcept {
+    char temp[2] = {c, '\0'};
+    return InternalIndexOf(temp, 0, 0);
+}
 
-    return (ssize_t) (strchr(m_Data, c) - m_Data);
+ssize_t String::IndexOf(char c, int startIndex) const noexcept {
+    char temp[2] = {c, '\0'};
+    return InternalIndexOf(temp, startIndex, 0);
+}
+
+ssize_t String::IndexOf(char c, int startIndex, int count) const noexcept {
+    char temp[2] = {c, '\0'};
+    return InternalIndexOf(temp, startIndex, count);
 }
 
 ssize_t String::IndexOf(const char *c) const noexcept {
-    if (GetLength() == 0) return -1;
+    return InternalIndexOf(c, 0, 0);
+}
 
-    return (ssize_t) (strstr(m_Data, c) - m_Data);
+ssize_t String::IndexOf(const char *c, int startIndex) const noexcept {
+    return InternalIndexOf(c, startIndex, 0);
+}
+
+ssize_t String::IndexOf(const char *c, int startIndex, int count) const noexcept {
+    return InternalIndexOf(c, startIndex, count);
+}
+
+ssize_t String::IndexOfAny(const char array[]) const noexcept {
+    return InternalIndexOfAny(array, 0, GetLength());
+}
+
+ssize_t String::IndexOfAny(const char array[], int startIndex) const noexcept {
+    return InternalIndexOfAny(array, startIndex, 0);
+}
+
+ssize_t String::IndexOfAny(const char array[], int startIndex, int count) const noexcept {
+    return InternalIndexOfAny(array, startIndex, count);
 }
 
 Array<size_t> String::IndicesOf(const char c) const noexcept {
@@ -249,9 +277,78 @@ Array<size_t> String::IndicesOf(const char *c) const noexcept {
     return q.ToArray();
 }
 
-Array<String> String::InternalSplit(const char* c, int count, Array<size_t>& array, StringSplitOptions options) const noexcept {
+ssize_t String::InternalIndexOf(const char *c, int startIndex, int count) const noexcept {
+    if (startIndex > LastIndex()) throw std::out_of_range("startIndex");
+    if (GetLength() == 0) return -1;
 
-    if(count > array.GetLength()) count = array.GetLength();
+    char *ret;
+    if (count == 0) {
+        ret = strstr(m_Data + startIndex, c);
+    } else {
+        ret = strnstr(m_Data + startIndex, c, count);
+
+    }
+
+    if (ret == nullptr) return -1;
+    else return ret - m_Data;
+}
+
+ssize_t String::InternalIndexOfAny(const char array[], int startIndex, int count) const noexcept {
+    if (startIndex > LastIndex()) throw std::out_of_range("startIndex");
+    size_t arrLength = strlen(array);
+    if (arrLength == 0 || GetLength() == 0) return -1;
+
+    size_t ret = -1;
+    for (size_t i = 0; i < arrLength; ++i) {
+        char *p;
+        if (count == 0) p = strchr(m_Data + startIndex, *(array + i));
+        else p = (char *) memchr(m_Data + startIndex, *(array + i), count);
+
+        size_t newFound = p - m_Data;
+        if (p != nullptr && newFound < ret) ret = newFound;
+    }
+
+    return ret;
+}
+
+ssize_t String::InternalLastIndexOf(const char *c, int startIndex, int count) const noexcept {
+    if (startIndex > LastIndex()) throw std::out_of_range("startIndex");
+    if (GetLength() == 0) return -1;
+
+    // To avoid wrong pointer operation
+    if(count > GetLength()) count = GetLength();
+
+    size_t ret = -1;
+    char *reversed;
+    char* temp;
+    if(count > 0) {
+        reversed = new char[count];
+        for (size_t i = 0; i < count; i++) {
+            reversed[i] = m_Data[GetLength() - startIndex - count + i];
+        }
+    }
+    else reversed = m_Data;
+
+    if (count == 0) {
+        temp = strrstr(m_Data + startIndex, c);
+    } else {
+        temp = strnrstr(reversed + startIndex, c, count);
+    }
+
+    if(count > 0 ) delete[] reversed;
+
+    if(temp != nullptr){
+        if(count > 0) ret = (temp - reversed) + (GetLength() - count);
+        else ret = temp - reversed;
+    }
+
+    return ret;
+}
+
+Array<String>
+String::InternalSplit(const char *c, int count, Array<size_t> &array, StringSplitOptions options) const noexcept {
+
+    if (count > array.GetLength()) count = array.GetLength();
 
     size_t length = strlen(c);
 
@@ -268,8 +365,7 @@ Array<String> String::InternalSplit(const char* c, int count, Array<size_t>& arr
 
     switch (options) {
         case StringSplitOptions::RemoveEmptyEntries:
-            if (array[0] != 0)
-            {
+            if (array[0] != 0) {
                 if (count > 1)
                     end = array[0] - 1;
                 else
@@ -345,39 +441,39 @@ Array<String> String::InternalSplit(const char* c, int count, Array<size_t>& arr
     return q.ToArray();
 }
 
-String String::Join(char separator, Array<String>& arrayString) noexcept{
-    char temp[2] = { separator, '\0'};
+String String::Join(char separator, Array<String> &arrayString) noexcept {
+    char temp[2] = {separator, '\0'};
     return String::Join(temp, arrayString);
 }
 
-String String::Join(char separator, Array<String>&& arrayString) noexcept{
-    char temp[2] = { separator, '\0'};
+String String::Join(char separator, Array<String> &&arrayString) noexcept {
+    char temp[2] = {separator, '\0'};
     return String::Join(temp, arrayString);
 }
 
-String String::Join(const char* separator, Array<String>& arrayString) noexcept {
+String String::Join(const char *separator, Array<String> &arrayString) noexcept {
 
-    if(arrayString.GetLength() == 0) return String{};
+    if (arrayString.GetLength() == 0) return String{};
 
     size_t totalSize = 0;
-    for(const auto& x : arrayString)
+    for (const auto &x: arrayString)
         totalSize += x.GetLength();
 
     totalSize += arrayString.GetLength();
 
-    char* buffer = new char[totalSize];
+    char *buffer = new char[totalSize];
     size_t start = 0;
     size_t end = 0;
     size_t length = strlen(separator);
 
-    for(size_t i = 0 ; i < arrayString.GetLength(); ++i){
+    for (size_t i = 0; i < arrayString.GetLength(); ++i) {
         String stg = arrayString[i];
         start = i == 0 ? 0 : end + length;
         end = i == 0 ? stg.GetLength() : start + stg.GetLength();
 
         std::copy(stg.GetPointer(), stg.GetPointer() + stg.GetLength(), buffer + start);
 
-        if(i == arrayString.GetLength() - 1)
+        if (i == arrayString.GetLength() - 1)
             *(buffer + end) = '\0';
         else
             std::copy(separator, separator + length, buffer + end);
@@ -389,47 +485,51 @@ String String::Join(const char* separator, Array<String>& arrayString) noexcept 
     return cat;
 }
 
-String String::Join(const char* separator, Array<String>&& arrayString) noexcept {
+String String::Join(const char *separator, Array<String> &&arrayString) noexcept {
     return String::Join(separator, arrayString);
 }
 
-ssize_t String::LastIndexOf(const char c) const noexcept {
-    if (GetLength() == 0) return -1;
+ssize_t String::LastIndexOf(char c) const noexcept {
+    char temp[2] = { c, '\0'};
+    return InternalLastIndexOf(temp, 0, 0);
+}
 
-    return (ssize_t) (strrchr(m_Data, c) - m_Data);
+ssize_t String::LastIndexOf(char c, int startIndex) const noexcept {
+    char temp[2] = { c, '\0'};
+    return InternalLastIndexOf(temp, startIndex, 0);
+}
+
+ssize_t String::LastIndexOf(char c, int startIndex, int count) const noexcept {
+    char temp[2] = { c, '\0'};
+    return InternalLastIndexOf(temp, startIndex, count);
 }
 
 ssize_t String::LastIndexOf(const char *c) const noexcept {
-    if (GetLength() == 0) return -1;
+    return InternalLastIndexOf(c, 0, 0);
+}
 
-    char *haystack = m_Data;
-    char *r = nullptr;
+ssize_t String::LastIndexOf(const char *c, int startIndex) const noexcept {
+    return InternalLastIndexOf(c, startIndex, 0);
+}
 
-    if (!c[0])
-        return (ssize_t) (haystack + strlen(haystack));
-    while (true) {
-        char *p = strstr(haystack, c);
-        if (!p)
-            return (ssize_t) (r - m_Data);
-        r = p;
-        haystack = p + 1;
-    }
+ssize_t String::LastIndexOf(const char *c, int startIndex, int count) const noexcept {
+    return InternalLastIndexOf(c, startIndex, count);
 }
 
 Array<String> String::Split(char delimiter, int count) {
-    if(count < 0) throw std::invalid_argument("count");
+    if (count < 0) throw std::invalid_argument("count");
 
     if ((GetLength() == 0)) {
         return Array<String>{m_Data};
     }
 
     auto array = IndicesOf(delimiter);
-    char temp[2] = { delimiter, '\0'} ;
+    char temp[2] = {delimiter, '\0'};
     return InternalSplit(temp, count, array);
 }
 
-Array<String> String::Split(const char* delimiter, int count){
-    if(count < 0) throw std::invalid_argument("count");
+Array<String> String::Split(const char *delimiter, int count) {
+    if (count < 0) throw std::invalid_argument("count");
 
     if ((GetLength() == 0)) {
         return Array<String>{m_Data};
@@ -441,18 +541,18 @@ Array<String> String::Split(const char* delimiter, int count){
 
 Array<String> String::Split(char delimiter, StringSplitOptions options) const noexcept {
     if (GetLength() == 0) {
-        if(options == StringSplitOptions::RemoveEmptyEntries) return Array<String>{};
+        if (options == StringSplitOptions::RemoveEmptyEntries) return Array<String>{};
         else return Array<String>{m_Data};
     }
 
     auto array = IndicesOf(delimiter);
-    char temp[2] = { delimiter, '\0'} ;
+    char temp[2] = {delimiter, '\0'};
     return InternalSplit(temp, array.GetLength(), array, options);
 }
 
 Array<String> String::Split(const char *delimiter, StringSplitOptions options) const noexcept {
     if (GetLength() == 0) {
-        if(options == StringSplitOptions::RemoveEmptyEntries) return Array<String>{};
+        if (options == StringSplitOptions::RemoveEmptyEntries) return Array<String>{};
         else return Array<String>{m_Data};
     }
 
@@ -460,11 +560,11 @@ Array<String> String::Split(const char *delimiter, StringSplitOptions options) c
     return InternalSplit(delimiter, array.GetLength(), array, options);
 }
 
-Array<String> String::Split(char delimiter, int count, StringSplitOptions options){
-    if(count < 0) throw std::invalid_argument("count");
+Array<String> String::Split(char delimiter, int count, StringSplitOptions options) const {
+    if (count < 0) throw std::invalid_argument("count");
 
     if (GetLength() == 0) {
-        if(options == StringSplitOptions::RemoveEmptyEntries) return Array<String>{};
+        if (options == StringSplitOptions::RemoveEmptyEntries) return Array<String>{};
         else return Array<String>{m_Data};
     }
 
@@ -473,11 +573,11 @@ Array<String> String::Split(char delimiter, int count, StringSplitOptions option
     return InternalSplit(temp, count, array, options);
 }
 
-Array<String> String::Split(const char* delimiter, int count, StringSplitOptions options){
-    if(count < 0) throw std::invalid_argument("count");
+Array<String> String::Split(const char *delimiter, int count, StringSplitOptions options) const {
+    if (count < 0) throw std::invalid_argument("count");
 
     if (GetLength() == 0) {
-        if(options == StringSplitOptions::RemoveEmptyEntries) return Array<String>{};
+        if (options == StringSplitOptions::RemoveEmptyEntries) return Array<String>{};
         else return Array<String>{m_Data};
     }
 
@@ -485,18 +585,50 @@ Array<String> String::Split(const char* delimiter, int count, StringSplitOptions
     return InternalSplit(delimiter, count, array, options);
 }
 
+String String::Substring(int startIndex) const {
+    return Substring(startIndex, GetLength() - startIndex);
+}
+
+String String::Substring(int startIndex, int length) const {
+    if (startIndex < 0) throw std::out_of_range("startIndex");
+    if (startIndex > GetLength()) throw std::out_of_range("startIndex");
+    if (length < 0) throw std::out_of_range("length");
+    if (startIndex > GetLength() - length) throw std::out_of_range("length");
+
+    if (length == 0) return String{};
+    if (startIndex == 0 && length == GetLength()) return String{m_Data};
+
+    size_t size = length - startIndex;
+    char *c = new char[size];
+    strncpy(c, m_Data + startIndex, length);
+    String ret = c;
+    delete[] c;
+    return ret;
+}
+
+Array<char> String::ToCharArray() const noexcept {
+    if (GetLength() == 0) return Array<char>{};
+
+    Array<char> array(GetLength());
+    for (size_t i = 0; i < array.GetLength(); ++i) {
+        array[i] = m_Data[i];
+    }
+
+    return array;
+}
+
 String String::Trim() const noexcept {
     return Trim(Space);
 }
 
 String String::Trim(char c) const noexcept {
-    char temp[2] = { c, '\0'};
+    char temp[2] = {c, '\0'};
     return Trim(temp);
 }
 
 String String::Trim(const char *c) const noexcept {
     if (GetLength() == 0) return "";
-    if(strcmp(c, "") == 0) return m_Data;
+    if (strcmp(c, "") == 0) return m_Data;
 
     auto p = m_Data;
     size_t start = 0;
@@ -506,7 +638,7 @@ String String::Trim(const char *c) const noexcept {
         ++start;
         ++p;
         ++start2;
-        if(start2 == length) start2 = 0;
+        if (start2 == length) start2 = 0;
     }
 
     size_t end = GetLength() - 1;;
@@ -516,11 +648,11 @@ String String::Trim(const char *c) const noexcept {
         --end;
         --p;
         --end2;
-        if(end2 == -1) end2 = length - 1;
+        if (end2 == -1) end2 = length - 1;
     }
 
-    end = (size_t)(m_Data + end) - (size_t)m_Data;
-    char* temp = new char[end - start + 1];
+    end = (size_t) (m_Data + end) - (size_t) m_Data;
+    char *temp = new char[end - start + 1];
     std::copy(m_Data + start, m_Data + end + 1, temp);
     temp[end - start + 1] = '\0';
     String ret = temp;
@@ -533,13 +665,13 @@ String String::TrimEnd() const noexcept {
 }
 
 String String::TrimEnd(char c) const noexcept {
-    char temp[2] = { c, '\0' };
+    char temp[2] = {c, '\0'};
     return Trim(temp);
 }
 
 String String::TrimEnd(const char *c) const noexcept {
-    if(GetLength() == 0) return "";
-    if(strcmp(c, "") == 0) return m_Data;
+    if (GetLength() == 0) return "";
+    if (strcmp(c, "") == 0) return m_Data;
 
     size_t end = GetLength() - 1;;
     auto p = m_Data + end;
@@ -549,11 +681,11 @@ String String::TrimEnd(const char *c) const noexcept {
         --end;
         --p;
         --start2;
-        if(start2 == -1) start2 = length - 1;
+        if (start2 == -1) start2 = length - 1;
     }
 
-    end = (size_t)(m_Data + end) - (size_t)m_Data;
-    char* temp = new char[end + 1];
+    end = (size_t) (m_Data + end) - (size_t) m_Data;
+    char *temp = new char[end + 1];
     std::copy(m_Data, m_Data + end + 1, temp);
     temp[end + 1] = '\0';
     String ret = temp;
@@ -566,13 +698,13 @@ String String::TrimStart() const noexcept {
 }
 
 String String::TrimStart(char c) const noexcept {
-    char temp[2] = { c, '\0' };
+    char temp[2] = {c, '\0'};
     return TrimStart(temp);
 }
 
 String String::TrimStart(const char *c) const noexcept {
     if (GetLength() == 0) return "";
-    if(strcmp(c, "") == 0) return m_Data;
+    if (strcmp(c, "") == 0) return m_Data;
 
     auto p = m_Data;
     size_t start = 0;
@@ -582,7 +714,7 @@ String String::TrimStart(const char *c) const noexcept {
         ++start;
         ++p;
         ++start2;
-        if(start2 == length) start2 = 0;
+        if (start2 == length) start2 = 0;
     }
 
     return m_Data + start;

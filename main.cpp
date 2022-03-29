@@ -31,31 +31,11 @@ int main(int argc, char *argv[]) {
     std::cout << "Count A: " << s.Count('A') << std::endl; //OK
     std::cout << "TrimStart(A): " << s.TrimStart('A') << std::endl; //OK
     std::cout << "TrimStart(A): " << s.TrimStart("A") << std::endl; //OK
-    std::cout << "IndexOf(A): " << s.IndexOf('A') << std::endl; //OK
+    std::cout << "IndexOf(A): " << s.IndexOf("AB", 1, 8) << std::endl; //OK
+    std::cout << "IndexOfAny(QD): " << s.IndexOfAny("QWHUA", 15, 6) << std::endl;
     std::cout << "IndexOf(A): " << s.IndexOf("A") << std::endl; //OK
-    std::cout << "LastIndex(A): " << s.LastIndexOf('A') << std::endl; //OK
+    std::cout << "LastIndex(A): " << s.LastIndexOf("AN", 8, 80) << std::endl; //OK
     std::cout << "LastIndex(A): " << s.LastIndexOf("A") << std::endl; //OK
-    auto idx = s.IndicesOf('A');
-
-    const char block = 'A';
-    auto z = s.Split(block);
-
-    std::cout << "String Split block with '" << block << "': " << std::endl;
-    for(size_t i = 0; i < z.GetLength(); ++i)
-        std::cout << z[i] << std::endl;
-
-    const char* block2 = ",";
-    auto x = String::Join(',', { "A", "B", "CD" });
-    std::cout << "String join test '" << block2 << "': " << x << std::endl;
-
-    std::cout << "Testing Iterator: " << std::endl;
-    for(auto it = x.begin(); it != x.end(); ++it){
-        std::cout << *it << std::endl;
-    }
-
-    String y = "      ABCABCABCDEFBA          ";
-    String z2 = y.TrimEnd();
-    std::cout << z2 << std::endl;
 
 /*
  * BCDEF \0
