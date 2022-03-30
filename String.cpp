@@ -632,22 +632,26 @@ String String::Replace(const char *oldValue, const char *newValue) const noexcep
     Array<size_t> idx = IndicesOf(oldValue);
     if (idx.GetLength() == 0) return m_Data;
 
-    char *ch = new char[GetLength() + diff];
-    char* temp;
+    size_t newcpSize = GetLength() + diff * (idx.GetLength());
+    char *ch = new char[newcpSize];
 
-    // Means we already need to push the new value at the beginning
-    if (idx[0] == 0) std::copy(newValue, newValue + newSize, ch);
-    for (size_t i = 0; i < idx.GetLength(); ++i) {
-
-        if (idx[i] == 0) continue;  // Skip it because we already pushed 0 before the loop
+    for(size_t i = 0, j = 0, l = 0; i < newcpSize;){
+        if(j < idx.GetLength() && idx[j] == i - (diff * (int)j))
+        {
+            for(size_t k = 0; k < newSize; ++i, ++k) {
+                ch[i] = newValue[k];
+            }
+            l += oldSize;
+            ++j;
+        }
         else {
-            std::copy(m_Data, m_Data + idx[i], i == 0 ? ch : ch + idx[i - 1]);
-            temp = std::copy(newValue, newValue + newSize, ch + idx[i]);
+            ch[i] = m_Data[l];
+            ++i;
+            ++l;
         }
     }
 
-    const size_t lastIndex = idx.LastIndex();
-    std::copy(m_Data + GetLength() + diff, m_Data + GetLength(), temp);
+    ch[newcpSize] = '\0';
     String ret = ch;
     delete[] ch;
     return ret;

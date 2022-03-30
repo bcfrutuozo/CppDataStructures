@@ -32,8 +32,8 @@ int main(int argc, char *argv[]) {
     std::cout << "LastIndex(PN): " << s.LastIndexOfAny("AP", 1, 3) << std::endl; //OK
 
 
-    String a = { "1111BC111" };
-    String b = a.Replace("BC", "A");
+    String a = { "BCZZZ" };
+    String b = a.Replace("CZ", "11111");
 
     std::cout << b << std::endl;
 
