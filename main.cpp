@@ -29,7 +29,7 @@ int main(int argc, char *argv[]) {
     std::cout << s << std::endl;
     std::cout << "Length: " << s.GetLength() << std::endl; //OK
     std::cout << "Count A: " << s.Count('A') << std::endl; //OK
-    std::cout << "LastIndex(PN): " << s.LastIndexOf("WD", 11, 400) << std::endl; //OK
+    std::cout << "LastIndex(PN): " << s.LastIndexOfAny("AP", 1, 3) << std::endl; //OK
     //std::cout << "LastIndexOfAny(QWHU): " << s.LastIndexOfAny("AQWHU", 1) << std::endl;
 
     return 0;

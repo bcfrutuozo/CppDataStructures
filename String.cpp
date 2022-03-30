@@ -348,33 +348,44 @@ ssize_t String::InternalLastIndexOf(const char *c, int startIndex, int count) co
 
 ssize_t String::InternalLastIndexOfAny(const char array[], int startIndex, int count) const noexcept {
     if (startIndex > LastIndex()) throw std::out_of_range("startIndex");
-    size_t arrLength = strlen(array);
-    if (arrLength == 0 || GetLength() == 0) return -1;
-    if (count > GetLength()) count = GetLength();
+    size_t arrayLength = strlen(array);
+    if (GetLength() == 0 || arrayLength == 0) return -1;
 
-    char *c;
-    if (count > 0 || startIndex > 0) {
-        // If count is not same, means we have to instantiate a new temporary string in the heap
-        // Copying all the contents until the desired index
-
-        c = new char[count];
-        for (size_t i = 0; i < count; i++) {
-            c[i] = m_Data[GetLength() - startIndex - count + i];
-        }
-    } else c = m_Data;
-
-    ssize_t ret = -1;
-    for (size_t i = 0; i < arrLength; ++i) {
-        char *p;
-        if (count == 0) p = strrchr(c + startIndex, *(array + i));
-        else p = (char *) strnrstr(c, (array + i), count);
-
-        size_t newFound = count == 0 ? p - c : (p - c) + (GetLength() - count);
-        if (p != nullptr && newFound > (ret == -1 ? 0 : ret)) ret = newFound;
+    // To avoid wrong pointer operation
+    if (count > GetLength()) {
+        count = GetLength() - startIndex;
     }
-    if (count > 0) delete[] c;
 
-    return ret;
+    size_t end = GetLength() - startIndex;
+    size_t start = count > end ? 0 : end - count;
+
+    if(start == 0 && end == GetLength()) {
+        for(size_t i = 0; i < arrayLength; ++i) {
+            auto ch = strrchr(m_Data, *(array + i));
+            if (ch != nullptr) return ch - m_Data;
+        }
+    }
+    else{
+        char* ch = new char[end - start];
+        for(size_t i = 0, j = start; j < end; ++i, ++j){
+            ch[i] = m_Data[j];
+        }
+
+        size_t ret = 0;
+
+        for(size_t i = 0; i < arrayLength; ++i) {
+            auto pos = strrchr(ch, *(array + i));
+            if (pos != nullptr) {
+                ret = pos - ch + (GetLength() - startIndex - count);
+                delete[] ch;
+                return ret;
+            }
+        }
+
+        delete[] ch;
+    }
+
+    return -1;
 }
 
 Array<String>
@@ -549,11 +560,11 @@ ssize_t String::LastIndexOf(const char *c, int startIndex, int count) const noex
 }
 
 ssize_t String::LastIndexOfAny(const char array[]) const noexcept {
-    return InternalLastIndexOfAny(array, 0, 0);
+    return InternalLastIndexOfAny(array, 0, GetLength());
 }
 
 ssize_t String::LastIndexOfAny(const char array[], int startIndex) const noexcept {
-    return InternalLastIndexOfAny(array, startIndex, 0);
+    return InternalLastIndexOfAny(array, startIndex, GetLength());
 }
 
 ssize_t String::LastIndexOfAny(const char array[], int startIndex, int count) const noexcept {
