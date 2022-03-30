@@ -342,6 +342,10 @@ public:
 
     Array<size_t> IndicesOf(const char *c) const noexcept;
 
+    String Insert(int startIndex, char c) const noexcept;
+
+    String Insert(int startIndex, const char* c) const noexcept;
+
     inline constexpr bool IsEmpty() const noexcept { return GetLength() == 0; }
 
     constexpr bool IsWhiteSpace() const noexcept {
@@ -412,6 +416,12 @@ public:
     String Substring(int startIndex, int length) const;
 
     Array<char> ToCharArray() const noexcept;
+
+    // We are not dealing yet with UTF8. This will come at the future
+    String ToLower() const noexcept;
+
+    // We are not dealing yet with UTF8. This will come at the future
+    String ToUpper() const noexcept;
 
     String Trim() const noexcept;
 

@@ -269,6 +269,14 @@ Array<size_t> String::IndicesOf(const char *c) const noexcept {
     return q.ToArray();
 }
 
+String String::Insert(int startIndex, char c) const noexcept {
+
+}
+
+String String::Insert(int startIndex, const char* c) const noexcept{
+
+}
+
 ssize_t String::InternalIndexOf(const char *c, int startIndex, int count) const noexcept {
     if (startIndex > LastIndex()) throw std::out_of_range("startIndex");
     if (GetLength() == 0) return -1;
@@ -757,6 +765,30 @@ Array<char> String::ToCharArray() const noexcept {
     }
 
     return array;
+}
+
+String String::ToLower() const noexcept{
+    char* ch = new char[GetLength()];
+
+    for(size_t i = 0; i < GetLength(); ++i) {
+        ch[i] = tolower((unsigned char)m_Data[i]);
+    }
+
+    String ret = ch;
+    delete[] ch;
+    return ret;
+}
+
+String String::ToUpper() const noexcept{
+    char* ch = new char[GetLength()];
+
+    for(size_t i = 0; i < GetLength(); ++i) {
+        ch[i] = toupper((unsigned char)m_Data[i]);
+    }
+
+    String ret = ch;
+    delete[] ch;
+    return ret;
 }
 
 String String::Trim() const noexcept {
