@@ -8,4 +8,4 @@ add_subdirectory(dependencies)
 enable_testing()
 add_subdirectory(tests)
 
-add_executable(CppDataStructures main.cpp String.h String.cpp Array.h Stack.h Queue.h Timer.cpp Timer.h List.h BidirectionalIterator.h LinkedList.h "Container.hpp" StringSplitOptions.h)
+add_executable(CppDataStructures main.cpp String.h String.cpp Array.h Stack.h Queue.h Timer.cpp Timer.h List.h BidirectionalIterator.h LinkedList.h "Container.hpp" StringSplitOptions.h StringComparison.h)

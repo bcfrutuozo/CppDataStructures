@@ -30,7 +30,12 @@ int main(int argc, char *argv[]) {
     std::cout << "Length: " << s.GetLength() << std::endl; //OK
     std::cout << "Count A: " << s.Count('A') << std::endl; //OK
     std::cout << "LastIndex(PN): " << s.LastIndexOfAny("AP", 1, 3) << std::endl; //OK
-    //std::cout << "LastIndexOfAny(QWHU): " << s.LastIndexOfAny("AQWHU", 1) << std::endl;
+
+
+    String a = { "1111BC111" };
+    String b = a.Replace("BC", "A");
+
+    std::cout << b << std::endl;
 
     return 0;
 }

@@ -9,6 +9,7 @@
 #include "Container.hpp"
 #include "Array.h"
 #include "StringSplitOptions.h"
+#include "StringComparison.h"
 
 #include <iostream>
 #include <cstring>
@@ -317,6 +318,8 @@ public:
 
     size_t Count(const char *c) const noexcept;
 
+    bool EndsWith(const char* c, StringComparison options = StringComparison::CaseSensitive) const noexcept;
+
     ssize_t IndexOf(char c) const noexcept;
 
     ssize_t IndexOf(char c, int startIndex) const noexcept;
@@ -378,6 +381,18 @@ public:
 
     ssize_t LastIndexOfAny(const char array[], int startIndex, int count) const noexcept;
 
+    String PadLeft(size_t width) const noexcept;
+
+    String PadLeft(size_t width, char padding) const noexcept;
+
+    String PadRight(size_t width) const noexcept;
+
+    String PadRight(size_t width, char padding) const noexcept;
+
+    String Replace(char oldValue, char newValue) const noexcept;
+
+    String Replace(const char* oldValue, const char* newValue) const noexcept;
+
     Array<String> Split(char c, int count);
 
     Array<String> Split(const char* c, int count);
@@ -389,6 +404,8 @@ public:
     Array<String> Split(char c, int count, StringSplitOptions options) const;
 
     Array<String> Split(const char* c, int count, StringSplitOptions options) const;
+
+    bool StartsWith(const char* c, StringComparison options = StringComparison::CaseSensitive) const noexcept;
 
     String Substring(int startIndex) const;
 

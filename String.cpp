@@ -152,37 +152,16 @@ inline bool String::operator!=(const String &rhs) const noexcept {
 }
 
 bool String::Contains(const char c) const noexcept {
-    for (size_t i = 0; i < m_Length; ++i)
-        if (*(m_Data + i) == c)
-            return true;
-
-    return false;
+    auto p = strchr(m_Data, c);
+    if (p == nullptr) return false;
+    return true;
 }
 
 bool String::Contains(const char *c) const noexcept {
 
-    size_t cSize = strlen(c);
-
-    if (cSize > m_Length) return false;
-
-    auto lastBlock = reinterpret_cast<size_t>(m_Data + m_Length);
-
-    for (size_t i = 0; i < m_Length && reinterpret_cast<size_t>(m_Data + i) <= lastBlock; ++i) {
-
-        //ifdef IS_DEBUG
-        std::cout << "Comparing ";
-
-        for (size_t start = i; start < i + cSize; ++start)
-            std::cout << *(m_Data + start);
-
-        std::cout << " with " << c << std::endl;
-        //#endif
-
-        if (memcmp((m_Data + i), c, cSize) == 0)
-            return true;
-    }
-
-    return false;
+    auto p = strstr(m_Data, c);
+    if (p == nullptr) return false;
+    return true;
 }
 
 void String::Copy(char *c, size_t length, size_t pos) {
@@ -209,6 +188,19 @@ size_t String::Count(const char *c) const noexcept {
     if (GetLength() == 0) return 0;
 
     return IndicesOf(c).GetLength();
+}
+
+bool String::EndsWith(const char *c, StringComparison options) const noexcept {
+    const size_t s = strlen(c);
+    switch (options) {
+        case StringComparison::CaseSensitive:
+            if (strncmp(m_Data + GetLength() - s, c, s) == 0) return true;
+            break;
+        case StringComparison::CaseInsensitive:
+            if (strnicmp(m_Data + GetLength() - s, c, s) == 0) return true;
+            break;
+    }
+    return false;
 }
 
 ssize_t String::IndexOf(char c) const noexcept {
@@ -323,19 +315,18 @@ ssize_t String::InternalLastIndexOf(const char *c, int startIndex, int count) co
     size_t end = GetLength() - startIndex;
     size_t start = count > end ? 0 : end - count;
 
-    if(start == 0 && end == GetLength()) {
+    if (start == 0 && end == GetLength()) {
         auto ch = strrstr(m_Data, c);
-        if(ch != nullptr) return ch - m_Data;
-    }
-    else{
-        char* ch = new char[end - start];
-        for(size_t i = 0, j = start; j < end; ++i, ++j){
+        if (ch != nullptr) return ch - m_Data;
+    } else {
+        char *ch = new char[end - start];
+        for (size_t i = 0, j = start; j < end; ++i, ++j) {
             ch[i] = m_Data[j];
         }
 
         size_t ret = 0;
         auto pos = strrstr(ch, c);
-        if(pos != nullptr) {
+        if (pos != nullptr) {
             ret = pos - ch + (GetLength() - startIndex - count);
             delete[] ch;
             return ret;
@@ -359,21 +350,20 @@ ssize_t String::InternalLastIndexOfAny(const char array[], int startIndex, int c
     size_t end = GetLength() - startIndex;
     size_t start = count > end ? 0 : end - count;
 
-    if(start == 0 && end == GetLength()) {
-        for(size_t i = 0; i < arrayLength; ++i) {
+    if (start == 0 && end == GetLength()) {
+        for (size_t i = 0; i < arrayLength; ++i) {
             auto ch = strrchr(m_Data, *(array + i));
             if (ch != nullptr) return ch - m_Data;
         }
-    }
-    else{
-        char* ch = new char[end - start];
-        for(size_t i = 0, j = start; j < end; ++i, ++j){
+    } else {
+        char *ch = new char[end - start];
+        for (size_t i = 0, j = start; j < end; ++i, ++j) {
             ch[i] = m_Data[j];
         }
 
         size_t ret = 0;
 
-        for(size_t i = 0; i < arrayLength; ++i) {
+        for (size_t i = 0; i < arrayLength; ++i) {
             auto pos = strrchr(ch, *(array + i));
             if (pos != nullptr) {
                 ret = pos - ch + (GetLength() - startIndex - count);
@@ -583,6 +573,86 @@ Array<String> String::Split(char delimiter, int count) {
     return InternalSplit(temp, count, array);
 }
 
+String String::PadLeft(size_t width) const noexcept {
+    return PadLeft(width, ' ');
+}
+
+String String::PadLeft(size_t width, char padding) const noexcept {
+
+    // Avoids the user to push \0 at the beginning of the string
+    if (padding == '\0') padding = '0';
+
+    if (width <= GetLength()) return m_Data;
+    char *c = new char[width];
+    for (size_t i = 0; i < width - GetLength(); ++i) c[i] = padding;
+    for (size_t i = 0; i < GetLength(); ++i) c[i + width - GetLength()] = m_Data[i];
+    String ret = c;
+    delete[] c;
+    return ret;
+}
+
+String String::PadRight(size_t width) const noexcept {
+    return PadRight(width, ' ');
+}
+
+String String::PadRight(size_t width, char padding) const noexcept {
+    // Avoids the user to push \0 at the end of the string
+    if (padding == '\0') padding = '0';
+
+    if (width <= GetLength()) return m_Data;
+    char *c = new char[width];
+    for (size_t i = 0; i < GetLength(); ++i) c[i] = m_Data[i];
+    for (size_t i = 0; i < width - GetLength(); ++i) c[i + GetLength()] = padding;
+    String ret = c;
+    delete[] c;
+    return ret;
+}
+
+String String::Replace(char oldValue, char newValue) const noexcept {
+    String s(*this);
+
+    for (size_t i = 0; i < GetLength(); ++i) {
+        if (m_Data[i] == oldValue) s[i] = newValue;
+        else s[i] = m_Data[i];
+    }
+
+    return s;
+}
+
+String String::Replace(const char *oldValue, const char *newValue) const noexcept {
+    const size_t oldSize = strlen(oldValue);
+    const size_t newSize = strlen(newValue);
+
+    // diff < 0 = OLD IS LARGER
+    // diff > 0 = NEW IS LARGER
+    const int diff = newSize - oldSize;
+
+    if (oldSize == 0) return m_Data;
+
+    Array<size_t> idx = IndicesOf(oldValue);
+    if (idx.GetLength() == 0) return m_Data;
+
+    char *ch = new char[GetLength() + diff];
+    char* temp;
+
+    // Means we already need to push the new value at the beginning
+    if (idx[0] == 0) std::copy(newValue, newValue + newSize, ch);
+    for (size_t i = 0; i < idx.GetLength(); ++i) {
+
+        if (idx[i] == 0) continue;  // Skip it because we already pushed 0 before the loop
+        else {
+            std::copy(m_Data, m_Data + idx[i], i == 0 ? ch : ch + idx[i - 1]);
+            temp = std::copy(newValue, newValue + newSize, ch + idx[i]);
+        }
+    }
+
+    const size_t lastIndex = idx.LastIndex();
+    std::copy(m_Data + GetLength() + diff, m_Data + GetLength(), temp);
+    String ret = ch;
+    delete[] ch;
+    return ret;
+}
+
 Array<String> String::Split(const char *delimiter, int count) {
     if (count < 0) throw std::invalid_argument("count");
 
@@ -638,6 +708,19 @@ Array<String> String::Split(const char *delimiter, int count, StringSplitOptions
 
     auto array = IndicesOf(delimiter);
     return InternalSplit(delimiter, count, array, options);
+}
+
+bool String::StartsWith(const char *c, StringComparison options) const noexcept {
+    const size_t s = strlen(c);
+    switch (options) {
+        case StringComparison::CaseSensitive:
+            if (strncmp(m_Data, c, s) == 0) return true;
+            break;
+        case StringComparison::CaseInsensitive:
+            if (strnicmp(m_Data, c, s) == 0) return true;
+            break;
+    }
+    return false;
 }
 
 String String::Substring(int startIndex) const {
