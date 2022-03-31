@@ -232,31 +232,31 @@ bool String::EndsWith(const char *c, StringComparison options) const noexcept {
     return false;
 }
 
-ssize_t String::IndexOf(char c) const noexcept {
+ssize_t String::IndexOf(char c, StringComparison options) const noexcept {
     char temp[2] = {c, '\0'};
-    return InternalIndexOf(temp, 0, 0);
+    return InternalIndexOf(temp, 0, 0, options);
 }
 
-ssize_t String::IndexOf(char c, int startIndex) const noexcept {
+ssize_t String::IndexOf(char c, int startIndex, StringComparison options) const noexcept {
     char temp[2] = {c, '\0'};
-    return InternalIndexOf(temp, startIndex, 0);
+    return InternalIndexOf(temp, startIndex, 0, options);
 }
 
-ssize_t String::IndexOf(char c, int startIndex, int count) const noexcept {
+ssize_t String::IndexOf(char c, int startIndex, int count, StringComparison options) const noexcept {
     char temp[2] = {c, '\0'};
-    return InternalIndexOf(temp, startIndex, count);
+    return InternalIndexOf(temp, startIndex, count, options);
 }
 
-ssize_t String::IndexOf(const char *c) const noexcept {
-    return InternalIndexOf(c, 0, 0);
+ssize_t String::IndexOf(const char *c, StringComparison options) const noexcept {
+    return InternalIndexOf(c, 0, 0, options);
 }
 
-ssize_t String::IndexOf(const char *c, int startIndex) const noexcept {
-    return InternalIndexOf(c, startIndex, 0);
+ssize_t String::IndexOf(const char *c, int startIndex, StringComparison options) const noexcept {
+    return InternalIndexOf(c, startIndex, 0, options);
 }
 
-ssize_t String::IndexOf(const char *c, int startIndex, int count) const noexcept {
-    return InternalIndexOf(c, startIndex, count);
+ssize_t String::IndexOf(const char *c, int startIndex, int count, StringComparison options) const noexcept {
+    return InternalIndexOf(c, startIndex, count, options);
 }
 
 ssize_t String::IndexOfAny(const char array[]) const noexcept {
@@ -326,15 +326,15 @@ String String::Insert(size_t index, const char* c) const {
     return ret;
 }
 
-ssize_t String::InternalIndexOf(const char *c, int startIndex, int count) const noexcept {
+ssize_t String::InternalIndexOf(const char *c, int startIndex, int count, StringComparison options) const noexcept {
     if (startIndex > LastIndex()) throw std::out_of_range("startIndex");
     if (GetLength() == 0) return -1;
 
     char *ret;
     if (count == 0) {
-        ret = strstr(m_Data + startIndex, c);
+        ret = options == StringComparison::CaseSensitive ? strstr(m_Data + startIndex, c) : strcasestr(m_Data + startIndex, c);
     } else {
-        ret = strnstr(m_Data + startIndex, c, count);
+        ret = options == StringComparison::CaseSensitive ? strnstr(m_Data + startIndex, c, count) : strnstri(m_Data + startIndex, c, count);
 
     }
 
@@ -360,7 +360,7 @@ ssize_t String::InternalIndexOfAny(const char array[], int startIndex, int count
     return ret;
 }
 
-ssize_t String::InternalLastIndexOf(const char *c, int startIndex, int count) const noexcept {
+ssize_t String::InternalLastIndexOf(const char *c, int startIndex, int count, StringComparison options) const noexcept {
     if (startIndex > LastIndex()) throw std::out_of_range("startIndex");
     if (GetLength() == 0) return -1;
 
@@ -373,7 +373,7 @@ ssize_t String::InternalLastIndexOf(const char *c, int startIndex, int count) co
     size_t start = count > end ? 0 : end - count;
 
     if (start == 0 && end == GetLength()) {
-        auto ch = strrstr(m_Data, c);
+        auto ch = options == StringComparison::CaseSensitive ? strrstr(m_Data, c) : strrstri(m_Data, c);
         if (ch != nullptr) return ch - m_Data;
     } else {
         char *ch = new char[end - start];
@@ -382,7 +382,7 @@ ssize_t String::InternalLastIndexOf(const char *c, int startIndex, int count) co
         }
 
         size_t ret = 0;
-        auto pos = strrstr(ch, c);
+        auto pos = options == StringComparison::CaseSensitive ? strrstr(ch, c) : strrstri(m_Data, c);
         if (pos != nullptr) {
             ret = pos - ch + (GetLength() - startIndex - count);
             delete[] ch;
@@ -579,31 +579,31 @@ String String::Join(const char *separator, Array<String> &&arrayString) noexcept
     return String::Join(separator, arrayString);
 }
 
-ssize_t String::LastIndexOf(char c) const noexcept {
+ssize_t String::LastIndexOf(char c, StringComparison options) const noexcept {
     char temp[2] = {c, '\0'};
-    return InternalLastIndexOf(temp, 0, GetLength());
+    return InternalLastIndexOf(temp, 0, GetLength(), options);
 }
 
-ssize_t String::LastIndexOf(char c, int startIndex) const noexcept {
+ssize_t String::LastIndexOf(char c, int startIndex, StringComparison options) const noexcept {
     char temp[2] = {c, '\0'};
-    return InternalLastIndexOf(temp, startIndex, GetLength());
+    return InternalLastIndexOf(temp, startIndex, GetLength(), options);
 }
 
-ssize_t String::LastIndexOf(char c, int startIndex, int count) const noexcept {
+ssize_t String::LastIndexOf(char c, int startIndex, int count, StringComparison options) const noexcept {
     char temp[2] = {c, '\0'};
-    return InternalLastIndexOf(temp, startIndex, count);
+    return InternalLastIndexOf(temp, startIndex, count, options);
 }
 
-ssize_t String::LastIndexOf(const char *c) const noexcept {
-    return InternalLastIndexOf(c, 0, GetLength());
+ssize_t String::LastIndexOf(const char *c, StringComparison options) const noexcept {
+    return InternalLastIndexOf(c, 0, GetLength(), options);
 }
 
-ssize_t String::LastIndexOf(const char *c, int startIndex) const noexcept {
-    return InternalLastIndexOf(c, startIndex, GetLength());
+ssize_t String::LastIndexOf(const char *c, int startIndex, StringComparison options) const noexcept {
+    return InternalLastIndexOf(c, startIndex, GetLength(), options);
 }
 
-ssize_t String::LastIndexOf(const char *c, int startIndex, int count) const noexcept {
-    return InternalLastIndexOf(c, startIndex, count);
+ssize_t String::LastIndexOf(const char *c, int startIndex, int count, StringComparison options) const noexcept {
+    return InternalLastIndexOf(c, startIndex, count, options);
 }
 
 ssize_t String::LastIndexOfAny(const char array[]) const noexcept {
@@ -665,12 +665,31 @@ String String::PadRight(size_t width, char padding) const noexcept {
     return ret;
 }
 
-String String::Remove(int startIndex) const noexcept {
-
+String String::Remove(int startIndex) const {
+    return Remove(startIndex, startIndex);
 }
 
-String String::Remove(int startIndex, int count) const noexcept {
+String String::Remove(int startIndex, int count) const {
+    if(startIndex < 0) throw std::invalid_argument("startIndex");
+    if(count < 0) throw std::invalid_argument("count");
+    if(count == 0) return m_Data;
+    if(count > GetLength() - startIndex) count = GetLength() - startIndex;
 
+    if(count == GetLength() && startIndex == 0) return "";
+
+    size_t newSize = GetLength() - count;
+    char* ch = new char[newSize];
+    for(size_t i = 0; i < startIndex; ++i)
+        ch[i] = m_Data[i];
+
+    for(size_t i = startIndex + count, j = startIndex; j < newSize; ++i, ++j)
+        ch[j] = m_Data[i];
+
+    ch[newSize] = '\0';
+
+    String ret = ch;
+    delete[] ch;
+    return ret;
 }
 
 String String::Replace(char oldValue, char newValue) const noexcept {

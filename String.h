@@ -264,9 +264,9 @@ private:
     static constexpr char HorizontalTab = '\t';     // 0x09
     static constexpr char VerticalTab = '\v';       // 0x0b
 
-    ssize_t InternalIndexOf(const char* c, int startIndex, int count) const noexcept;
+    ssize_t InternalIndexOf(const char* c, int startIndex, int count, StringComparison options) const noexcept;
     ssize_t InternalIndexOfAny(const char array[], int startIndex, int count) const noexcept;
-    ssize_t InternalLastIndexOf(const char* c, int startIndex, int count) const noexcept;
+    ssize_t InternalLastIndexOf(const char* c, int startIndex, int count, StringComparison options) const noexcept;
     ssize_t InternalLastIndexOfAny(const char array[], int startIndex, int count) const noexcept;
     Array<String> InternalSplit(const char* c, int count, Array<size_t>& indices, StringSplitOptions options = StringSplitOptions::None) const noexcept;
 
@@ -324,17 +324,17 @@ public:
 
     bool EndsWith(const char* c, StringComparison options = StringComparison::CaseSensitive) const noexcept;
 
-    ssize_t IndexOf(char c) const noexcept;
+    ssize_t IndexOf(char c, StringComparison options = StringComparison::CaseSensitive) const noexcept;
 
-    ssize_t IndexOf(char c, int startIndex) const noexcept;
+    ssize_t IndexOf(char c, int startIndex, StringComparison options = StringComparison::CaseSensitive) const noexcept;
 
-    ssize_t IndexOf(char c, int startIndex, int count) const noexcept;
+    ssize_t IndexOf(char c, int startIndex, int count, StringComparison options = StringComparison::CaseSensitive) const noexcept;
 
-    ssize_t IndexOf(const char *c) const noexcept;
+    ssize_t IndexOf(const char *c, StringComparison options = StringComparison::CaseSensitive) const noexcept;
 
-    ssize_t IndexOf(const char *c, int startIndex) const noexcept;
+    ssize_t IndexOf(const char *c, int startIndex, StringComparison options = StringComparison::CaseSensitive) const noexcept;
 
-    ssize_t IndexOf(const char *c, int startIndex, int count) const noexcept;
+    ssize_t IndexOf(const char *c, int startIndex, int count, StringComparison options = StringComparison::CaseSensitive) const noexcept;
 
     ssize_t IndexOfAny(const char array[]) const noexcept;
 
@@ -371,17 +371,17 @@ public:
 
     inline constexpr ssize_t LastIndex() const noexcept { return m_Length - 1; }
 
-    ssize_t LastIndexOf(char c) const noexcept;
+    ssize_t LastIndexOf(char c, StringComparison options = StringComparison::CaseSensitive) const noexcept;
 
-    ssize_t LastIndexOf(char c, int startIndex) const noexcept;
+    ssize_t LastIndexOf(char c, int startIndex, StringComparison options = StringComparison::CaseSensitive) const noexcept;
 
-    ssize_t LastIndexOf(char c, int startIndex, int count) const noexcept;
+    ssize_t LastIndexOf(char c, int startIndex, int count, StringComparison options = StringComparison::CaseSensitive) const noexcept;
 
-    ssize_t LastIndexOf(const char *c) const noexcept;
+    ssize_t LastIndexOf(const char *c, StringComparison options = StringComparison::CaseSensitive) const noexcept;
 
-    ssize_t LastIndexOf(const char *c, int startIndex) const noexcept;
+    ssize_t LastIndexOf(const char *c, int startIndex, StringComparison options = StringComparison::CaseSensitive) const noexcept;
 
-    ssize_t LastIndexOf(const char *c, int startIndex, int count) const noexcept;
+    ssize_t LastIndexOf(const char *c, int startIndex, int count, StringComparison options = StringComparison::CaseSensitive) const noexcept;
 
     ssize_t LastIndexOfAny(const char array[]) const noexcept;
 
@@ -397,9 +397,9 @@ public:
 
     String PadRight(size_t width, char padding) const noexcept;
 
-    String Remove(int startIndex) const noexcept;
+    String Remove(int startIndex) const;
 
-    String Remove(int startIndex, int count) const noexcept;
+    String Remove(int startIndex, int count) const;
 
     String Replace(char oldValue, char newValue) const noexcept;
 
