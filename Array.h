@@ -324,7 +324,7 @@ public:
 		if((ssize_t)index > LastIndex())
 			throw std::out_of_range("index is too large for the resized array");
 
-		return *(Data + index);
+		return Data[index];
 	}
 
 	constexpr Array& operator=(const Array& other) noexcept

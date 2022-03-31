@@ -25,6 +25,7 @@
 int main(int argc, char *argv[]) {
     Timer t;
 
+    String b = "123";
     String s = "ABCDEABCDAAAABAÁŚDOQIUQHUDQIUHHUVNNMLKAJKOBALASPJOASUBDYUQIUOQWIWDAPNA";
     std::cout << s << std::endl;
     std::cout << "Length: " << s.GetLength() << std::endl; //OK
@@ -32,10 +33,10 @@ int main(int argc, char *argv[]) {
     std::cout << "LastIndex(PN): " << s.LastIndexOfAny("AP", 1, 3) << std::endl; //OK
 
 
-    String x = "abCDEfasuughquw443123A@SWWWçÇ]äà";
-    String b = x.ToLower();
 
-    std::cout << b << std::endl;
+    auto z = String::Concat(b, s);
+
+    std::cout << z << std::endl;
 
     return 0;
 }

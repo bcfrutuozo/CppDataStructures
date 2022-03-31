@@ -312,6 +312,10 @@ public:
 
     constexpr size_t GetLength() const noexcept { return m_Length; }
 
+    static String Concat(String& a, String& b) noexcept;
+
+    String Concat(Array<String>& array) const noexcept;
+
     void Copy(char c[], size_t length, size_t pos);
 
     size_t Count(char c) const noexcept;
@@ -342,9 +346,9 @@ public:
 
     Array<size_t> IndicesOf(const char *c) const noexcept;
 
-    String Insert(int startIndex, char c) const noexcept;
+    String Insert(size_t index, char c) const;
 
-    String Insert(int startIndex, const char* c) const noexcept;
+    String Insert(size_t index, const char* c) const;
 
     inline constexpr bool IsEmpty() const noexcept { return GetLength() == 0; }
 
@@ -392,6 +396,10 @@ public:
     String PadRight(size_t width) const noexcept;
 
     String PadRight(size_t width, char padding) const noexcept;
+
+    String Remove(int startIndex) const noexcept;
+
+    String Remove(int startIndex, int count) const noexcept;
 
     String Replace(char oldValue, char newValue) const noexcept;
 

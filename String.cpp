@@ -164,6 +164,35 @@ bool String::Contains(const char *c) const noexcept {
     return true;
 }
 
+String String::Concat(String& a, String& b) noexcept {
+    return a + b;
+}
+
+String String::Concat(Array<String>& array) const noexcept {
+
+    size_t totalSize = 0;
+    for(auto it = array.cbegin(); it != array.cend(); ++it) totalSize += it->GetLength();
+
+    // Push what we already have
+    char* ch = new char[GetLength() + totalSize];
+    strcpy(ch, m_Data);
+
+    size_t offset = GetLength();
+    for(size_t i = 0; i < array.GetLength(); ++i) {
+        auto s = array[i].GetLength();
+
+        for(size_t c = 0; c < s; ++c) {
+            ch[c + offset] = array[i][c];
+        }
+
+        offset += s;
+    }
+
+    String ret = ch;
+    delete[] ch;
+    return ret;
+}
+
 void String::Copy(char *c, size_t length, size_t pos) {
     for (size_t i = 0; i < length; ++i) {
         c[i] = m_Data[pos + i];
@@ -269,12 +298,32 @@ Array<size_t> String::IndicesOf(const char *c) const noexcept {
     return q.ToArray();
 }
 
-String String::Insert(int startIndex, char c) const noexcept {
-
+String String::Insert(size_t index, char c) const {
+    char temp[2] = { c, '\0' };
+    return Insert(index, temp);
 }
 
-String String::Insert(int startIndex, const char* c) const noexcept{
+String String::Insert(size_t index, const char* c) const {
+    if(index > GetLength()) throw std::out_of_range("index");
 
+    size_t length = strlen(c);
+    char* ch = new char[GetLength() + length];
+
+    if(index == 0){
+        strcpy(ch, c);
+        strcpy(ch + length, m_Data);
+    } else if (index == GetLength()) {
+        strcpy(ch, m_Data);
+        strcpy(ch + index, c);
+    } else {
+        strncpy(ch, m_Data, index);
+        strcpy(ch + index, c);
+        strcpy(ch + index + length, m_Data + index);
+    }
+
+    String ret = ch;
+    delete[] ch;
+    return ret;
 }
 
 ssize_t String::InternalIndexOf(const char *c, int startIndex, int count) const noexcept {
@@ -614,6 +663,14 @@ String String::PadRight(size_t width, char padding) const noexcept {
     String ret = c;
     delete[] c;
     return ret;
+}
+
+String String::Remove(int startIndex) const noexcept {
+
+}
+
+String String::Remove(int startIndex, int count) const noexcept {
+
 }
 
 String String::Replace(char oldValue, char newValue) const noexcept {
