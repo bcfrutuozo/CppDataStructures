@@ -12,14 +12,10 @@
 
 #include <iostream>
 
-#ifdef __linux__ 
-//linux code goes here
-#elif _WIN32
+#ifdef _WIN32
 #define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>
 #include <crtdbg.h>
-#else
-
 #endif
 
 int main(int argc, char *argv[]) {
@@ -32,7 +28,9 @@ int main(int argc, char *argv[]) {
     std::cout << "Count A: " << s.Count('A') << std::endl; //OK
     std::cout << "LastIndex(PN): " << s.LastIndexOfAny("AP", 1, 3) << std::endl; //OK
 
-
+#ifdef _WIN32
+    _CrtDumpMemoryLeaks();
+#endif
 
     return 0;
 }

@@ -7,29 +7,15 @@
 #include <cstdint>
 #include <string_view>
 
-#if SIZE_MAX == UINT_MAX
-typedef int ssize_t;        /* common 32 bit case */
-#define SSIZE_MIN  INT_MIN
-#define SSIZE_MAX  INT_MAX
-#elif SIZE_MAX == ULONG_MAX
-typedef long ssize_t;       /* linux 64 bits */
-#define SSIZE_MIN  LONG_MIN
-#define SSIZE_MAX  LONG_MAX
-#elif SIZE_MAX == ULLONG_MAX
-typedef long long ssize_t;  /* windows 64 bits */
+#if _WIN32
+typedef long long ssize_t;  /* Windows */
 #define SSIZE_MIN  LLONG_MIN
 #define SSIZE_MAX  LLONG_MAX
 #define strcasestr(c, check) strstri(c, check)
-#elif SIZE_MAX == USHRT_MAX
-typedef short ssize_t;      /* is this even possible? */
-#define SSIZE_MIN  SHRT_MIN
-#define SSIZE_MAX  SHRT_MAX
-#elif SIZE_MAX == UINTMAX_MAX
-typedef intmax_t ssize_t;  /* last resort, chux suggestion */
-#define SSIZE_MIN  INTMAX_MIN
-#define SSIZE_MAX  INTMAX_MAX
-#else
-#error platform has exotic SIZE_MAX
+#elif __linux__
+typedef long ssize_t;       /* Linux */
+#define SSIZE_MIN  LONG_MIN
+#define SSIZE_MAX  LONG_MAX
 #endif
 
 #include <stdio.h>
@@ -58,7 +44,7 @@ static char *strnstr(const char *haystack, const char *needle, size_t length) {
     return ((char *) haystack);
 }
 
-// Case sensitive
+// Case-sensitive
 static char *strnrstr(const char *str, const char *sub, int len) {
     const char *pend = str + len;
     const char *pstr;
@@ -71,32 +57,34 @@ static char *strnrstr(const char *str, const char *sub, int len) {
 }
 //
 static char *strrstr(const char *str, const char *sub) { return strnrstr(str, sub, strlen(str)); }
-//
-////case Insensitive
-//static int strnicmp(char const *s1, char const *s2, size_t len) {
-//    unsigned char c1 = '\0';
-//    unsigned char c2 = '\0';
-//    if (len > 0) {
-//        do {
-//            c1 = *s1;
-//            c2 = *s2;
-//            s1++;
-//            s2++;
-//            if (!c1)
-//                break;
-//            if (!c2)
-//                break;
-//            if (c1 == c2)
-//                continue;
-//            c1 = tolower(c1);
-//            c2 = tolower(c2);
-//            if (c1 != c2)
-//                break;
-//        } while (--len);
-//    }
-//    return (int) c1 - (int) c2;
-//}
-//
+
+// Case-insensitive
+#ifdef __linux__
+static int strnicmp(char const *s1, char const *s2, size_t len) {
+    unsigned char c1 = '\0';
+    unsigned char c2 = '\0';
+    if (len > 0) {
+        do {
+            c1 = *s1;
+            c2 = *s2;
+            s1++;
+            s2++;
+            if (!c1)
+                break;
+            if (!c2)
+                break;
+            if (c1 == c2)
+                continue;
+            c1 = tolower(c1);
+            c2 = tolower(c2);
+            if (c1 != c2)
+                break;
+        } while (--len);
+    }
+    return (int) c1 - (int) c2;
+}
+#endif
+
 static char *strnrstri(const char *str, const char *sub, int len) {
     const char *pend = str + len;
     const char *pstr;
@@ -107,9 +95,8 @@ static char *strnrstri(const char *str, const char *sub, int len) {
     }
     return nullptr;
 }
-//
+
 static char *strrstri(const char *str, const char *sub) { return strnrstri(str, sub, strlen(str)); }
-//
 
 static char *strnstri(const char *str, const char *sub, int len) {
     const char *pend = str + len;
@@ -121,7 +108,7 @@ static char *strnstri(const char *str, const char *sub, int len) {
     }
     return nullptr;
 }
-//
+
 static char* strstri(const char* str, const char* sub) { return strnstri(str, sub, strlen(str)); }
 
 
