@@ -9,6 +9,8 @@
 #include <list>
 #include "String.h"
 #include <string>
+#include "Char.h"
+#include "Int32.h"
 
 #include <iostream>
 
@@ -27,6 +29,10 @@ int main(int argc, char *argv[]) {
     std::cout << "Length: " << s.GetLength() << std::endl; //OK
     std::cout << "Count A: " << s.Count('A') << std::endl; //OK
     std::cout << "LastIndex(PN): " << s.LastIndexOfAny("AP", 1, 3) << std::endl; //OK
+
+    Int32 a = 8;
+    Char c(a);
+
 
 #ifdef _WIN32
     _CrtDumpMemoryLeaks();
