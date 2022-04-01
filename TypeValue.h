@@ -9,55 +9,55 @@
 #include <iostream>
 
 template<typename T>
-struct is_promotion : std::false_type {
+struct is_promotion_primitive : std::false_type {
 };
 template<>
-struct is_promotion<int> : std::true_type {
+struct is_promotion_primitive<int> : std::true_type {
 };
 template<>
-struct is_promotion<unsigned int> : std::true_type {
+struct is_promotion_primitive<unsigned int> : std::true_type {
 };
 template<>
-struct is_promotion<long> : std::true_type {
+struct is_promotion_primitive<long> : std::true_type {
 };
 template<>
-struct is_promotion<short> : std::true_type {
+struct is_promotion_primitive<short> : std::true_type {
 };
 template<>
-struct is_promotion<char> : std::true_type {
+struct is_promotion_primitive<char> : std::true_type {
 };
 template<>
-struct is_promotion<unsigned char> : std::true_type {
+struct is_promotion_primitive<unsigned char> : std::true_type {
 };
 template<>
-struct is_promotion<unsigned short> : std::true_type {
+struct is_promotion_primitive<unsigned short> : std::true_type {
 };
 template<>
-struct is_promotion<signed char> : std::true_type {
+struct is_promotion_primitive<signed char> : std::true_type {
 };
 template<>
-struct is_promotion<unsigned long> : std::true_type {
+struct is_promotion_primitive<unsigned long> : std::true_type {
 };
 template<>
-struct is_promotion<double> : std::true_type {
+struct is_promotion_primitive<double> : std::true_type {
 };
 template<>
-struct is_promotion<float> : std::true_type {
+struct is_promotion_primitive<float> : std::true_type {
 };
 template<>
-struct is_promotion<bool> : std::true_type {
+struct is_promotion_primitive<bool> : std::true_type {
 };
 
+// Forward declaration of all wrappers
 class Char;
 class Int32;
 
-template<>
-struct is_promotion<Char> : std::true_type {
-};
+template<typename T>
+struct is_promotion_wrapper : std::false_type {};
 
 template<>
-struct is_promotion<Int32> : std::true_type {
-};
-
+struct is_promotion_wrapper<Char> : std::true_type {};
+template<>
+struct is_promotion_wrapper<Int32> : std::true_type {};
 
 #endif //CPPDATASTRUCTURES_TYPEVALUE_H

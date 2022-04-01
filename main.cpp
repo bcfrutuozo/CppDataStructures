@@ -31,7 +31,10 @@ int main(int argc, char *argv[]) {
     std::cout << "LastIndex(PN): " << s.LastIndexOfAny("AP", 1, 3) << std::endl; //OK
 
     Int32 a = 8;
-    Char c(a);
+    Char c = a;
+    int ooo = c;
+    Int32 abc = c;
+    a = c;
 
 
 #ifdef _WIN32

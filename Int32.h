@@ -18,11 +18,31 @@ public:
 
     constexpr Int32() : Value() {};
 
-    template<typename U>
-    constexpr Int32(U value) noexcept requires(is_promotion<U>::value) : Value(static_cast<U>(value)) {}
+    template<typename T, std::enable_if_t<is_promotion_primitive<T>::value, bool> = true>
+    constexpr Int32(T value) noexcept requires(is_promotion_primitive<T>::value) : Value((value)) {}
 
-    template<typename U>
-    constexpr operator U() const noexcept requires(is_promotion<U>::value) { return static_cast<U>(Value); }
+    template<typename T, std::enable_if_t<is_promotion_wrapper<T>::value, bool> = true>
+    constexpr explicit Int32(T value) noexcept requires(is_promotion_wrapper<T>::value) : Value((value)) {}
+
+    Int32(Int32 const &) = default;
+
+    Int32(Int32 &&) = default;
+
+    Int32 &operator=(Int32 const &) = default;
+
+    Int32 &operator=(Int32 &&) = default;
+
+    template<typename T, std::enable_if_t<is_promotion_primitive<T>::value, bool> = true>
+    constexpr Int32 operator=(T value) noexcept requires(is_promotion_primitive<T>::value) { return Value = value; };
+
+    template<typename T, std::enable_if_t<is_promotion_wrapper<T>::value, bool> = true>
+    constexpr Int32 operator=(T value) noexcept requires(is_promotion_wrapper<T>::value) { return Value = value; };
+
+    template<typename T, std::enable_if_t<is_promotion_primitive<T>::value, bool> = true>
+    constexpr operator T() noexcept requires(is_promotion_primitive<T>::value) { return Value; };
+
+    template<typename T, std::enable_if_t<is_promotion_wrapper<T>::value, bool> = true>
+    constexpr operator T() noexcept requires(is_promotion_wrapper<T>::value) { return Value; };
 };
 
 #endif //CPPDATASTRUCTURES_INT32_H
