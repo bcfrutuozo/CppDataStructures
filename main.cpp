@@ -30,11 +30,12 @@ int main(int argc, char *argv[]) {
     std::cout << "Count A: " << s.Count('A') << std::endl; //OK
     std::cout << "LastIndex(PN): " << s.LastIndexOfAny("AP", 1, 3) << std::endl; //OK
 
-    Int32 a = 8;
-    Char c = a;
-    int ooo = c;
-    Int32 abc = c;
-    a = c;
+    constexpr Int32 a = 8;
+    constexpr Char c = 8;
+    constexpr int ooo = 8;
+    constexpr Int32 abc = 8;
+
+    static_assert(c == (char)8);
 
 
 #ifdef _WIN32

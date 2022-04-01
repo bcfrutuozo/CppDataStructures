@@ -15,6 +15,8 @@
 
 class Char {
 
+    friend class Int32;
+
 private:
 
     char Value;
@@ -216,6 +218,8 @@ private:
 
 public:
 
+    using value_type = char;
+
     constexpr Char() : Value() {};
 
     template<typename T, std::enable_if_t<is_promotion_primitive<T>::value, bool> = true>
@@ -243,6 +247,16 @@ public:
 
     template<typename T, std::enable_if_t<is_promotion_wrapper<T>::value, bool> = true>
     constexpr operator T() noexcept requires(is_promotion_wrapper<T>::value) { return Value; };
+
+    template<typename T, std::enable_if_t<is_promotion_primitive<T>::value, bool> = true>
+    friend inline constexpr bool operator==(Char const& lhs, T const& rhs) noexcept requires(is_promotion_primitive<T>::value) { return lhs.Value == rhs; }
+
+    template<typename T, std::enable_if_t<is_promotion_wrapper<T>::value, bool> = true>
+    friend inline constexpr bool operator==(Char const& lhs, T const& rhs) noexcept requires(is_promotion_wrapper<T>::value) { return lhs.Value == rhs.Value; }
+
+    template<typename T, std::enable_if_t<is_promotion_primitive<T>::value, bool> = true>
+    friend inline constexpr bool operator==(T const& lhs, Char const& rhs) noexcept requires(is_promotion_wrapper<T>::value) { return lhs == rhs.Value; }
+
 
     constexpr int GetHashCode() const noexcept { return (int) Value | ((int) Value << 16); }
 
