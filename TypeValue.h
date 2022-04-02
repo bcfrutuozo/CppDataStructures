@@ -107,4 +107,43 @@ struct is_promotion_wrapper<UInt32> : std::true_type {};
 template<>
 struct is_promotion_wrapper<UInt64> : std::true_type {};
 
+template<typename T>
+struct is_wrapper_integral : std::false_type {};
+
+template<>
+struct is_wrapper_integral<Boolean> : std::true_type {};
+
+template<>
+struct is_wrapper_integral<Byte> : std::true_type {};
+
+template<>
+struct is_wrapper_integral<Char> : std::true_type {};
+
+template<>
+struct is_wrapper_integral<Int16> : std::true_type {};
+
+template<>
+struct is_wrapper_integral<Int32> : std::true_type {};
+
+template<>
+struct is_wrapper_integral<Int64> : std::true_type {};
+
+template<>
+struct is_wrapper_integral<Double> : std::false_type {};
+
+template<>
+struct is_wrapper_integral<Float> : std::false_type {};
+
+template<>
+struct is_wrapper_integral<SByte> : std::true_type {};
+
+template<>
+struct is_wrapper_integral<UInt16> : std::true_type {};
+
+template<>
+struct is_wrapper_integral<UInt32> : std::true_type {};
+
+template<>
+struct is_wrapper_integral<UInt64> : std::true_type {};
+
 #endif //CPPDATASTRUCTURES_TYPEVALUE_H

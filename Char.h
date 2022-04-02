@@ -253,6 +253,9 @@ public:
     template<typename T, std::enable_if_t<is_promotion_primitive<T>::value, bool> = true>
     constexpr operator T() noexcept requires(is_promotion_primitive<T>::value) { return Value; };
 
+    template<typename T, std::enable_if_t<is_promotion_wrapper<T>::value, bool> = true>
+    constexpr operator T() noexcept requires(is_promotion_wrapper<T>::value) { return Value; };
+
     template<typename T, std::enable_if_t<is_promotion_primitive<T>::value, bool> = true>
     friend inline constexpr bool operator==(Char const& lhs, T const& rhs) noexcept requires(is_promotion_primitive<T>::value) { return lhs.Value == rhs; }
 
@@ -261,6 +264,18 @@ public:
 
     template<typename T, std::enable_if_t<is_promotion_primitive<T>::value, bool> = true>
     friend inline constexpr bool operator==(T const& lhs, Char const& rhs) noexcept requires(is_promotion_primitive<T>::value) { return lhs == rhs.Value; }
+
+    /*
+     * Operator+ (Addition)
+     */
+    template<typename T, std::enable_if_t<is_promotion_primitive<T>::value, bool> = true>
+    friend inline constexpr Char operator+(Char const& lhs, T const& rhs) noexcept requires(is_promotion_primitive<T>::value) { return lhs.Value + rhs; }
+
+    template<typename T, std::enable_if_t<is_promotion_wrapper<T>::value, bool> = true>
+    friend inline constexpr Char operator+(Char const& lhs, T const& rhs) noexcept requires(is_promotion_wrapper<T>::value) { return lhs.Value + rhs.GetValue(); }
+
+    template<typename T, std::enable_if_t<is_promotion_primitive<T>::value, bool> = true>
+    friend inline constexpr Char operator+(T const& lhs, Char const& rhs) noexcept requires(is_promotion_primitive<T>::value) { return lhs + rhs.Value; }
 
     constexpr Char const& operator+() const noexcept {
         return *this;
