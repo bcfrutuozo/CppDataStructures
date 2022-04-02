@@ -48,16 +48,63 @@ template<>
 struct is_promotion_primitive<bool> : std::true_type {
 };
 
-// Forward declaration of all wrappers
+/*
+ * FORWARD DECLARATION OF ALL WRAPPERS
+ *
+ * This is more than necessary since all wrappers are including  he TypeValue.h
+ * So they must be forwarded declared before to handle their implementations
+ * on their respective headers
+*/
+class Boolean;
+class Byte;
 class Char;
+class Int16;
 class Int32;
+class Int64;
+class Double;
+class Float;
+class SByte;
+class UInt16;
+class UInt32;
+class UInt64;
 
 template<typename T>
 struct is_promotion_wrapper : std::false_type {};
 
 template<>
+struct is_promotion_wrapper<Boolean> : std::true_type {};
+
+template<>
+struct is_promotion_wrapper<Byte> : std::true_type {};
+
+template<>
 struct is_promotion_wrapper<Char> : std::true_type {};
+
+template<>
+struct is_promotion_wrapper<Int16> : std::true_type {};
+
 template<>
 struct is_promotion_wrapper<Int32> : std::true_type {};
+
+template<>
+struct is_promotion_wrapper<Int64> : std::true_type {};
+
+template<>
+struct is_promotion_wrapper<Double> : std::true_type {};
+
+template<>
+struct is_promotion_wrapper<Float> : std::true_type {};
+
+template<>
+struct is_promotion_wrapper<SByte> : std::true_type {};
+
+template<>
+struct is_promotion_wrapper<UInt16> : std::true_type {};
+
+template<>
+struct is_promotion_wrapper<UInt32> : std::true_type {};
+
+template<>
+struct is_promotion_wrapper<UInt64> : std::true_type {};
 
 #endif //CPPDATASTRUCTURES_TYPEVALUE_H

@@ -15,7 +15,17 @@
 
 class Char {
 
+    friend class Boolean;
+    friend class Byte;
+    friend class Int16;
     friend class Int32;
+    friend class Int64;
+    friend class Double;
+    friend class Float;
+    friend class SByte;
+    friend class UInt16;
+    friend class UInt32;
+    friend class UInt64;
 
 private:
 
@@ -218,45 +228,72 @@ private:
 
 public:
 
-    using value_type = char;
+    constexpr char const& GetValue() const noexcept { return Value; }
 
     constexpr Char() : Value() {};
 
     template<typename T, std::enable_if_t<is_promotion_primitive<T>::value, bool> = true>
-    constexpr Char(T value) noexcept requires(is_promotion_primitive<T>::value) : Value((value)) {}
+    constexpr Char(T const& value) noexcept requires(is_promotion_primitive<T>::value) : Value((value)) {}
 
     template<typename T, std::enable_if_t<is_promotion_wrapper<T>::value, bool> = true>
-    constexpr explicit Char(T value) noexcept requires(is_promotion_wrapper<T>::value) : Value((value)) {}
+    constexpr explicit Char(T const& wrapper) noexcept requires(is_promotion_wrapper<T>::value) : Value(wrapper) {}
 
-    Char(Char const &) = default;
+    constexpr Char(Char const &) = default;
 
-    Char(Char &&) = default;
+    constexpr Char(Char &&) = default;
 
-    Char &operator=(Char const &) = default;
-
-    Char &operator=(Char &&) = default;
+    constexpr Char &operator=(Char &&) = default;
 
     template<typename T, std::enable_if_t<is_promotion_primitive<T>::value, bool> = true>
-    constexpr Char operator=(T value) noexcept requires(is_promotion_primitive<T>::value) { return Value = value; };
+    constexpr Char& operator=(T const& value) noexcept requires(is_promotion_primitive<T>::value) { return Value = value; };
 
     template<typename T, std::enable_if_t<is_promotion_wrapper<T>::value, bool> = true>
-    constexpr Char operator=(T value) noexcept requires(is_promotion_wrapper<T>::value) { return Value = value; };
+    constexpr Char& operator=(T const& wrapper) noexcept requires(is_promotion_wrapper<T>::value) { Value = wrapper.GetValue(); return *this; };
 
     template<typename T, std::enable_if_t<is_promotion_primitive<T>::value, bool> = true>
     constexpr operator T() noexcept requires(is_promotion_primitive<T>::value) { return Value; };
-
-    template<typename T, std::enable_if_t<is_promotion_wrapper<T>::value, bool> = true>
-    constexpr operator T() noexcept requires(is_promotion_wrapper<T>::value) { return Value; };
 
     template<typename T, std::enable_if_t<is_promotion_primitive<T>::value, bool> = true>
     friend inline constexpr bool operator==(Char const& lhs, T const& rhs) noexcept requires(is_promotion_primitive<T>::value) { return lhs.Value == rhs; }
 
     template<typename T, std::enable_if_t<is_promotion_wrapper<T>::value, bool> = true>
-    friend inline constexpr bool operator==(Char const& lhs, T const& rhs) noexcept requires(is_promotion_wrapper<T>::value) { return lhs.Value == rhs.Value; }
+    friend inline constexpr bool operator==(Char const& lhs, T const& rhs) noexcept requires(is_promotion_wrapper<T>::value) { return lhs.Value == rhs.GetValue(); }
 
     template<typename T, std::enable_if_t<is_promotion_primitive<T>::value, bool> = true>
-    friend inline constexpr bool operator==(T const& lhs, Char const& rhs) noexcept requires(is_promotion_wrapper<T>::value) { return lhs == rhs.Value; }
+    friend inline constexpr bool operator==(T const& lhs, Char const& rhs) noexcept requires(is_promotion_primitive<T>::value) { return lhs == rhs.Value; }
 
+    constexpr Char const& operator+() const noexcept {
+        return *this;
+    }
+
+    constexpr Char operator-() const noexcept {
+        return Char(-Value);
+    }
+
+    constexpr Char operator~() const noexcept {
+        return Char(~Value);
+    }
+
+    constexpr bool operator!() const noexcept {
+        return !Value;
+    }
+
+    Char& operator++() noexcept {
+        ++Value;
+        return *this;
+    }
+    Char operator++(int) noexcept {
+        return Char(Value++);
+    }
+
+    Char& operator--() noexcept {
+        --Value;
+        return *this;
+    }
+
+    Char operator--(int) noexcept {
+        return Char(Value--);
+    }
 
     constexpr int GetHashCode() const noexcept { return (int) Value | ((int) Value << 16); }
 

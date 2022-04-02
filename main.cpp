@@ -11,6 +11,7 @@
 #include <string>
 #include "Char.h"
 #include "Int32.h"
+#include "Boolean.h"
 
 #include <iostream>
 
@@ -31,11 +32,17 @@ int main(int argc, char *argv[]) {
     std::cout << "LastIndex(PN): " << s.LastIndexOfAny("AP", 1, 3) << std::endl; //OK
 
     constexpr Int32 a = 8;
-    constexpr Char c = 8;
+    constexpr Char c = 1;
     constexpr int ooo = 8;
-    constexpr Int32 abc = 8;
+    Int32 abc = 10;
+    constexpr Boolean b1 = true;
 
-    static_assert(c == (char)8);
+    // Guarantee there is no overhead
+    static_assert(sizeof(Int32) == sizeof(int), "The wrapper has overhead.");
+    static_assert(sizeof(Char) == sizeof(char), "The wrapper has overhead.");
+    static_assert(sizeof(Boolean) == sizeof(bool), "The wrapper has overhead.");
+
+    static_assert(c == b1);
 
 
 #ifdef _WIN32
