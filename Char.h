@@ -11,7 +11,6 @@
 #include "TypeValue.h"
 #include "Boolean.h"
 #include "Byte.h"
-#include "Int32.h"
 #include "UnicodeCategory.h"
 #include "CharUnicodeInfo.h"
 
@@ -237,6 +236,17 @@ private:
             return true;
         return false;
     }
+
+    static constexpr int HIGH_SURROGATE_START = 0x00d800;
+    static constexpr int LOW_SURROGATE_END    = 0x00dfff;
+    static constexpr int UNICODE_PLANE00_END = 0x00ffff;
+
+    // The starting codepoint for Unicode plane 1.  Plane 1 contains 0x010000 ~ 0x01ffff.
+    static constexpr int UNICODE_PLANE01_START = 0x10000;
+
+    // The end codepoint for Unicode plane 16.  This is the maximum code point value allowed for Unicode.
+    // Plane 16 contains 0x100000 ~ 0x10ffff.
+    static constexpr int UNICODE_PLANE16_END   = 0x10ffff;
 
 public:
 
@@ -745,7 +755,23 @@ public:
 
     //</editor-fold>
 
-    constexpr Int32 GetHashCode() const noexcept { return (int) Value | ((int) Value << 16); }
+    static String ConvertFromUTF32(int utf32) noexcept;
+
+    /*=============================ConvertToUTF32===================================
+     ** Convert a surrogate pair to UTF32 value
+     ==============================================================================*/
+    static Int32 ConvertToUTF32(char highSurrogate, char lowSurrogate) noexcept;
+
+    /*=============================ConvertToUTF32===================================
+    ** Convert a character or a surrogate pair starting at index of the specified string
+    ** to UTF32 value.
+    ** The char pointed by index should be a surrogate pair or a BMP character.
+    ** This method throws if a high-surrogate is not followed by a low surrogate.
+    ** This method throws if a low surrogate is seen without preceding a high-surrogate.
+    ==============================================================================*/
+    static Int32 ConvertToUTF32(String&s, int index);
+
+    Int32 GetHashCode() const noexcept;
 
     static constexpr Boolean IsDigit(char c) {
         if (IsLatin1(c)) {
@@ -758,6 +784,12 @@ public:
         if(IsLatin1(c)) return GetLatin1UnicodeCategory(c) == UnicodeCategory::Control;
         return CharUnicodeInfo::GetUnicodeCategory(c) == UnicodeCategory::Control;
     }
+
+    static constexpr Boolean IsHighSurrogate(char c) noexcept {
+        return c >= CharUnicodeInfo::HIGH_SURROGATE_START && c <= CharUnicodeInfo::LOW_SURROGATE_END;
+    }
+
+    static Boolean IsHighSurrogate(String& s, int index) noexcept;
 
     static constexpr Boolean IsLetter(char c) noexcept {
         if (IsLatin1(c)) {
@@ -775,32 +807,37 @@ public:
         return (CheckLetterOrDigit(CharUnicodeInfo::GetUnicodeCategory(c)));
     }
 
-    static constexpr Boolean IsLower(char c) {
-        if (IsLatin1(c)) {
-            if (IsASCII(c)) return (c >= 'a' && c <= 'z');
-            return (GetLatin1UnicodeCategory(c) == UnicodeCategory::LowercaseLetter);
-        }
-        return (CharUnicodeInfo::GetUnicodeCategory(c) == UnicodeCategory::LowercaseLetter);
+    static Boolean IsLower(char c);
+
+    static constexpr Boolean IsLowSurrogate(char c) noexcept {
+        return c >= CharUnicodeInfo::LOW_SURROGATE_START && c <= CharUnicodeInfo::LOW_SURROGATE_END;
     }
 
-    static constexpr Boolean IsPunctuation(char c) {
-        if (IsLatin1(c)) return (CheckPunctuation(GetLatin1UnicodeCategory(c)));
-        return (CheckPunctuation(CharUnicodeInfo::GetUnicodeCategory(c)));
+    static Boolean IsLowSurrogate(String& s, int index) noexcept;
+
+    static Boolean IsPunctuation(char c) ;
+
+    static constexpr Boolean IsSurrogate(char c) {
+        return c >= HIGH_SURROGATE_START && c <= LOW_SURROGATE_END;
     }
 
-    static constexpr Boolean IsUpper(char c) noexcept {
-        if (IsLatin1(c)) {
-            if (IsASCII(c)) return (c >= 'A' && c <= 'Z');
-            return GetLatin1UnicodeCategory(c) == UnicodeCategory::UppercaseLetter;
-        }
-        return CharUnicodeInfo::GetUnicodeCategory(c) == UnicodeCategory::UppercaseLetter;
+    static constexpr Boolean IsSurrogatePair(char highSurrogate, char lowSurrogate) noexcept {
+        return (highSurrogate >= CharUnicodeInfo::HIGH_SURROGATE_START && highSurrogate <= CharUnicodeInfo::HIGH_SURROGATE_END) &&
+                (lowSurrogate >= CharUnicodeInfo::LOW_SURROGATE_START && lowSurrogate <= CharUnicodeInfo::LOW_SURROGATE_END);
     }
 
-    static Boolean IsWhiteSpace(char c) noexcept {
-        if (IsLatin1(c)) return IsWhiteSpaceLatin1(c);
-        return CharUnicodeInfo::IsWhiteSpace(c);
-    }
+    static Boolean IsSurrogatePair(String& s, int index) noexcept;
 
+    static Boolean IsUpper(char c) noexcept;
+
+    static Boolean IsWhiteSpace(char c) noexcept;
+
+    Char Parse(String& s);
+
+    String ToString() const noexcept;
+    static String ToString(char c) noexcept;
+
+    static Boolean TryParse(String& s, Char& result) noexcept;
 
     static constexpr Char MaxValue() { return static_cast<Char>(0xFFFF); }
     static constexpr Char MinValue() { return static_cast<Char>(0x00); }

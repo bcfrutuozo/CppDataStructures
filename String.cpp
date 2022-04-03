@@ -17,6 +17,14 @@ String::String() noexcept
     m_Data[0] = '\0';
 }
 
+String::String(char c, int count) noexcept
+    :
+    m_Length(count) {
+    m_Data = new Char[count + 1];
+    for(int i = 0; i < count; ++i) m_Data[i] = c;
+    m_Data[count] = '\0';
+}
+
 String::String(const char *c) noexcept
         :
         m_Data(nullptr) {

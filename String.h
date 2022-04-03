@@ -274,6 +274,8 @@ public:
 
     String() noexcept;
 
+    String(char c, int count) noexcept;
+
     String(const char *c) noexcept;
 
     String(const String &s) noexcept;

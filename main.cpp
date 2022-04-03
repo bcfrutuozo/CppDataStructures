@@ -37,7 +37,9 @@ int main(int argc, char *argv[]) {
     auto z = s.ToCharArray();
 
 
-    std::cout << s.Replace('D', 'Z');
+    for(size_t i = 0; i < s.GetLength(); ++i){
+        std::cout << s[i].GetHashCode() << std::endl;
+    }
 
 #ifdef _WIN32
     _CrtDumpMemoryLeaks();
