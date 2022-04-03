@@ -19,7 +19,7 @@ class Int32;
 class Int64;
 class Double;
 class Float;
-class SChar;
+class SByte;
 class UInt16;
 class UInt32;
 class UInt64;
@@ -741,6 +741,11 @@ public:
         return (CharUnicodeInfo::GetUnicodeCategory(c) == UnicodeCategory::DecimalDigitNumber);
     };
 
+    static constexpr bool IsControl(char c) noexcept {
+        if(IsLatin1(c)) return GetLatin1UnicodeCategory(c) == UnicodeCategory::Control;
+        return CharUnicodeInfo::GetUnicodeCategory(c) == UnicodeCategory::Control;
+    }
+
     static constexpr bool IsLetter(char c) noexcept {
         if (IsLatin1(c)) {
             if (IsASCII(c)) {
@@ -784,8 +789,8 @@ public:
     }
 
 
-    static constexpr char MaxValue = 0xFFFF;
-    static constexpr char MinValue = 0x00;
+    static constexpr char MaxValue = static_cast<char>(0xFFFF);
+    static constexpr char MinValue = static_cast<char>(0x00);
 };
 
 //#define char Char;

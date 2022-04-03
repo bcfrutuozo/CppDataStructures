@@ -12,4 +12,4 @@ add_subdirectory(tests)
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/charinfo.nlp DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 
-add_executable(CppDataStructures main.cpp String.h String.cpp Array.h Stack.h Queue.h Timer.cpp Timer.h List.h BidirectionalIterator.h LinkedList.h "Container.hpp" StringSplitOptions.h StringComparison.h UnicodeCategory.h Char.h TypeValue.h Int32.h CharUnicodeInfo.h Boolean.h Byte.h SByte.h Int16.h UInt16.h UInt32.h Int64.h UInt64.h Double.h Float.h)
+add_executable(CppDataStructures main.cpp String.h String.cpp Array.h Stack.h Queue.h Timer.cpp Timer.h List.h BidirectionalIterator.h LinkedList.h StringSplitOptions.h StringComparison.h UnicodeCategory.h Char.h TypeValue.h Int32.h CharUnicodeInfo.h Boolean.h Byte.h SByte.h Int16.h UInt16.h UInt32.h Int64.h UInt64.h Double.h Float.h CharUnicodeInfo.cpp)

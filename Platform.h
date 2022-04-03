@@ -6,6 +6,7 @@
 #include <cinttypes>
 #include <cstdint>
 #include <string_view>
+#include <type_traits>
 
 #if _WIN32
 typedef long long ssize_t;  /* Windows */
@@ -21,6 +22,21 @@ typedef long ssize_t;       /* Linux */
 #include <stdio.h>
 #include <cstring>
 #include <string>
+
+// Compare function to handle with const char*
+// Char* must always be compared with strcmp() function
+template<typename T>
+static inline constexpr typename std::enable_if<std::is_same<T, const char*>::value, bool>::type Equals(const T& a, const T& b) noexcept
+{
+    return (strcmp(a, b) == 0);
+}
+
+// Compare function for primitive and classes which contain implementation of operator==()
+template <typename T>
+static inline constexpr typename std::enable_if<!std::is_same<T, const char*>::value, bool>::type Equals(const T& a, const T& b) noexcept
+{
+    return (a == b);
+}
 
 /* Auxiliar c string functions to handle String class abstraction
  * Find the first occurrence of needle in haystack, where the search is limited to the

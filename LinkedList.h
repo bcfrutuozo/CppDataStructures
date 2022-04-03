@@ -10,7 +10,7 @@
 #include <iterator>
 
 template<typename T>
-class LinkedList : protected Container<T> {
+class LinkedList {
 
 private:
 

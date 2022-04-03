@@ -6,7 +6,7 @@
 #define CPPDATASTRUCTURES_STRING_H
 
 #include "Platform.h"
-#include "Container.hpp"
+#include "Char.h"
 #include "Array.h"
 #include "StringSplitOptions.h"
 #include "StringComparison.h"
@@ -14,7 +14,7 @@
 #include <iostream>
 #include <cstring>
 
-class String : Container<const char *> {
+class String {
 
 private:
 
@@ -298,17 +298,17 @@ public:
 
     char& operator[](size_t index);
 
-    bool operator==(const char *c) const noexcept;
+    Boolean operator==(const char *c) const noexcept;
 
-    inline bool operator==(const String &rhs) const noexcept;
+    inline Boolean operator==(const String &rhs) const noexcept;
 
-    inline bool operator!=(const char* c) const noexcept;
+    inline Boolean operator!=(const char* c) const noexcept;
 
-    inline bool operator!=(const String &rhs) const noexcept;
+    inline Boolean operator!=(const String &rhs) const noexcept;
 
-    bool Contains(char c) const noexcept;
+    Boolean Contains(char c) const noexcept;
 
-    bool Contains(const char *c) const noexcept;
+    Boolean Contains(const char *c) const noexcept;
 
     constexpr size_t GetLength() const noexcept { return m_Length; }
 
@@ -322,7 +322,7 @@ public:
 
     size_t Count(const char *c) const noexcept;
 
-    bool EndsWith(const char* c, StringComparison options = StringComparison::CaseSensitive) const noexcept;
+    Boolean EndsWith(const char* c, StringComparison options = StringComparison::CaseSensitive) const noexcept;
 
     ssize_t IndexOf(char c, StringComparison options = StringComparison::CaseSensitive) const noexcept;
 
@@ -350,9 +350,9 @@ public:
 
     String Insert(size_t index, const char* c) const;
 
-    inline constexpr bool IsEmpty() const noexcept { return GetLength() == 0; }
+    inline constexpr Boolean IsEmpty() const noexcept { return GetLength() == 0; }
 
-    constexpr bool IsWhiteSpace() const noexcept {
+    constexpr Boolean IsWhiteSpace() const noexcept {
         if(GetLength() == 0) return true;
 
         for(size_t i = 0; i < GetLength(); ++i)
@@ -417,13 +417,13 @@ public:
 
     Array<String> Split(const char* c, int count, StringSplitOptions options) const;
 
-    bool StartsWith(const char* c, StringComparison options = StringComparison::CaseSensitive) const noexcept;
+    Boolean StartsWith(const char* c, StringComparison options = StringComparison::CaseSensitive) const noexcept;
 
     String Substring(int startIndex) const;
 
     String Substring(int startIndex, int length) const;
 
-    Array<char> ToCharArray() const noexcept;
+    Array<Char> ToCharArray() const noexcept;
 
     // We are not dealing yet with UTF8. This will come at the future
     String ToLower() const noexcept;
@@ -466,11 +466,11 @@ public:
     constexpr ConstReverseIterator crbegin() const noexcept { return m_Data + LastIndex(); }
 
     constexpr ConstReverseIterator crend() const noexcept { return m_Data - 1; }
-};
 
-inline std::ostream &operator<<(std::ostream &os, const String &s) {
-    os << s.GetPointer();
-    return os;
+    friend inline std::ostream &operator<<(std::ostream &os, const String &s) {
+        os << s.GetPointer();
+        return os;
+    };
 };
 
 #endif //CPPDATASTRUCTURES_STRING_H

@@ -12,7 +12,7 @@
 #include <iostream>
 
 template<typename T>
-class Queue : protected Container<T> {
+class Queue {
 
 private:
 

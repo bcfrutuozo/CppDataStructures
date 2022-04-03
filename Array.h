@@ -6,15 +6,13 @@
 #define CPPDATASTRUCTURES_ARRAY_H
 
 #include "Platform.h"
-#include "Container.hpp"
 
 #include <stdexcept>
 #include <algorithm>
 #include <type_traits>
 
 template<typename T>
-class Array : protected Container<T>
-{
+class Array {
 
 private:
 

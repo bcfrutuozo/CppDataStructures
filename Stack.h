@@ -12,7 +12,7 @@
 #include <algorithm>
 
 template<typename T>
-class Stack : protected Container<T> {
+class Stack {
 private:
 
     struct StackNode {

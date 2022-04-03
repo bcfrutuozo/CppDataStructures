@@ -12,7 +12,7 @@
 #include <algorithm>
 
 template<typename T>
-class List : protected Container<T>{
+class List {
 private:
 
     struct ListNode {

@@ -6,7 +6,6 @@
 #include "Queue.h"
 
 #include <iostream>
-#include <cstring>
 #include <cstdio>
 #include <string.h>
 
@@ -132,32 +131,32 @@ char &String::operator[](size_t index) {
     return m_Data[index];
 }
 
-bool String::operator==(const char *c) const noexcept {
+Boolean String::operator==(const char *c) const noexcept {
     if (m_Length != strlen(c))
         return false;
 
     return strcmp(m_Data, c) == 0;
 }
 
-inline bool String::operator==(const String &rhs) const noexcept {
+inline Boolean String::operator==(const String &rhs) const noexcept {
     return *this == rhs.m_Data;
 }
 
-inline bool String::operator!=(const char *c) const noexcept {
+inline Boolean String::operator!=(const char *c) const noexcept {
     return !(*this == c);
 }
 
-inline bool String::operator!=(const String &rhs) const noexcept {
+inline Boolean String::operator!=(const String &rhs) const noexcept {
     return !(*this == rhs);
 }
 
-bool String::Contains(const char c) const noexcept {
+Boolean String::Contains(const char c) const noexcept {
     auto p = strchr(m_Data, c);
     if (p == nullptr) return false;
     return true;
 }
 
-bool String::Contains(const char *c) const noexcept {
+Boolean String::Contains(const char *c) const noexcept {
 
     auto p = strstr(m_Data, c);
     if (p == nullptr) return false;
@@ -219,7 +218,7 @@ size_t String::Count(const char *c) const noexcept {
     return IndicesOf(c).GetLength();
 }
 
-bool String::EndsWith(const char *c, StringComparison options) const noexcept {
+Boolean String::EndsWith(const char *c, StringComparison options) const noexcept {
     const size_t s = strlen(c);
     switch (options) {
         case StringComparison::CaseSensitive:
@@ -798,7 +797,7 @@ Array<String> String::Split(const char *delimiter, int count, StringSplitOptions
     return InternalSplit(delimiter, count, array, options);
 }
 
-bool String::StartsWith(const char *c, StringComparison options) const noexcept {
+Boolean String::StartsWith(const char *c, StringComparison options) const noexcept {
     const size_t s = strlen(c);
     switch (options) {
         case StringComparison::CaseSensitive:
@@ -832,10 +831,10 @@ String String::Substring(int startIndex, int length) const {
     return ret;
 }
 
-Array<char> String::ToCharArray() const noexcept {
-    if (GetLength() == 0) return Array<char>{};
+Array<Char> String::ToCharArray() const noexcept {
+    if (GetLength() == 0) return Array<Char>{};
 
-    Array<char> array(GetLength());
+    Array<Char> array(GetLength());
     for (size_t i = 0; i < array.GetLength(); ++i) {
         array[i] = m_Data[i];
     }

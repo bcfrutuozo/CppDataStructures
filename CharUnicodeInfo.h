@@ -5,12 +5,13 @@
 #ifndef CPPDATASTRUCTURES_CHARUNICODEINFO_H
 #define CPPDATASTRUCTURES_CHARUNICODEINFO_H
 
-#include "String.h"
 #include "UnicodeCategory.h"
 
+#include <cstring>
 #include <vector>
 #include <cassert>
 #include <fstream>
+#include <iterator>
 
 class CharUnicodeInfo final {
 
@@ -95,9 +96,10 @@ private:
         return true;
     }
 
-    static int InternalConvertToUTF32(String &s, int index) {
-        assert(index >= 0 && index < s.GetLength());
-        if (index < s.GetLength() - 1) {
+    static int InternalConvertToUTF32(const char* s, int index) {
+        auto length = strlen(s);
+        assert(index >= 0 && index < length);
+        if (index < length - 1) {
             auto temp1 = (int) s[index] - HIGH_SURROGATE_START;
             if (temp1 >= 0 && temp1 <= 0x3ff) {
                 auto temp2 = (int) s[index + 1] - LOW_SURROGATE_START;
@@ -110,11 +112,12 @@ private:
         return (int) s[index];
     }
 
-    static int InternalConvertToUTF32(String &s, int index, int &charLength) {
-        assert(s.GetLength() > 0);
-        assert(index >= 0 && index < s.GetLength());
+    static int InternalConvertToUTF32(const char* s, int index, int &charLength) {
+        auto length = strlen(s);
+        assert(length > 0);
+        assert(index >= 0 && index < length);
         charLength = 1;
-        if (index < s.LastIndex()) {
+        if (index < length) {
             auto temp1 = (int) s[index] - HIGH_SURROGATE_START;
             if (temp1 >= 0 && temp1 <= 0x3FF) {
                 auto temp2 = (int) s[index + 1] - HIGH_SURROGATE_END;
@@ -157,7 +160,7 @@ private:
         return (UnicodeCategory) InternalGetCategoryValue(ch, UNICODE_CATEGORY_OFFSET);
     }
 
-    static UnicodeCategory InternalGetUnicodeCategory(String &s, int index) {
+    static UnicodeCategory InternalGetUnicodeCategory(const char* s, int index) {
         return InternalGetUnicodeCategory(InternalConvertToUTF32(s, index));
     }
 
@@ -174,8 +177,9 @@ private:
         return pCategoriesValue[valueIndex * 2 + offset];
     }
 
-    static bool IsWhiteSpace(String &s, int index) noexcept {
-        assert(index >= 0 && index < s.GetLength());
+    static bool IsWhiteSpace(const char* s, int index) noexcept {
+        auto length = strlen(s);
+        assert(index >= 0 && index < length);
 
         UnicodeCategory uc = GetUnicodeCategory(s, index);
 
@@ -210,17 +214,11 @@ public:
         return InternalGetUnicodeCategory(ch);
     }
 
-    static UnicodeCategory GetUnicodeCategory(String &s, int index) {
-        if ((size_t) index >= s.GetLength()) throw std::out_of_range("index");
+    static UnicodeCategory GetUnicodeCategory(const char* s, int index) {
+        auto length = strlen(s);
+        if ((size_t) index >= length) throw std::out_of_range("index");
         return InternalGetUnicodeCategory(s, index);
     }
 };
-
-unsigned short *CharUnicodeInfo::pCategoryLevel1Index = nullptr;
-unsigned char *CharUnicodeInfo::pCategoriesValue = nullptr;
-unsigned short *CharUnicodeInfo::pNumericLevel1Index = nullptr;
-unsigned char *CharUnicodeInfo::pNumericValues = nullptr;
-CharUnicodeInfo::DigitValues *CharUnicodeInfo::pDigitValues = nullptr;
-const bool CharUnicodeInfo::IsInitialized = CharUnicodeInfo::InitTable();
 
 #endif //CPPDATASTRUCTURES_CHARUNICODEINFO_H
