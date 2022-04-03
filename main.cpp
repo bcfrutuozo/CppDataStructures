@@ -30,18 +30,14 @@
 #include <crtdbg.h>
 #endif
 
-
 int main(int argc, char *argv[]) {
     Timer t;
 
-    Char c = 'A';
     String s  = "ABCDEFA";
     auto z = s.ToCharArray();
 
-    for(auto it = z.begin(); it != z.end(); ++it)
-        std::cout << *it;
 
-    std::cout << s.LastIndexOf(c);
+    std::cout << s.Replace('D', 'Z');
 
 #ifdef _WIN32
     _CrtDumpMemoryLeaks();

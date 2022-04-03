@@ -20,7 +20,7 @@ class UInt16;
 class UInt32;
 class UInt64;
 
-class SByte {
+class SByte final {
 
 private:
 
@@ -59,7 +59,7 @@ public:
      * Operator= (Assignment)
      */
     template<typename T, std::enable_if_t<is_promotion_primitive<T>::value, bool> = true>
-    constexpr SByte operator=(T const& value) noexcept requires(is_promotion_primitive<T>::value) { return Value = value; };
+    constexpr SByte& operator=(T const& value) noexcept requires(is_promotion_primitive<T>::value) { Value = value; return *this; };
 
     template<typename T, std::enable_if_t<is_promotion_wrapper<T>::value, bool> = true>
     constexpr SByte& operator=(T const& wrapper) noexcept requires(is_promotion_wrapper<T>::value) { Value = wrapper.GetValue(); return *this; };

@@ -14,7 +14,7 @@
 #include <iostream>
 #include <cstring>
 
-class String {
+class String final {
 
 private:
 
@@ -23,9 +23,9 @@ private:
     {
         using iterator_category = std::bidirectional_iterator_tag;
         using difference_type = std::ptrdiff_t;
-        using value_type = char;
-        using pointer = char*;  // or also value_type*
-        using reference = char&;  // or also value_type&
+        using value_type = Char;
+        using pointer = Char*;  // or also value_type*
+        using reference = Char&;  // or also value_type&
 
         // Pointer field representation
         pointer pElement = nullptr;
@@ -81,9 +81,9 @@ private:
     {
         using iterator_category = std::bidirectional_iterator_tag;
         using difference_type = std::ptrdiff_t;
-        using value_type = const char;
-        using pointer = const char*;  // or also value_type*
-        using reference = const char&;  // or also value_type&
+        using value_type = const Char;
+        using pointer = const Char*;  // or also value_type*
+        using reference = const Char&;  // or also value_type&
 
         // Pointer field representation
         pointer pElement = nullptr;
@@ -139,9 +139,9 @@ private:
     {
         using iterator_category = std::bidirectional_iterator_tag;
         using difference_type = std::ptrdiff_t;
-        using value_type = char;
-        using pointer = char*;  // or also value_type*
-        using reference = char&;  // or also value_type&
+        using value_type = Char;
+        using pointer = Char*;  // or also value_type*
+        using reference = Char&;  // or also value_type&
 
         // Pointer field representation
         pointer pElement = nullptr;
@@ -197,9 +197,9 @@ private:
     {
         using iterator_category = std::bidirectional_iterator_tag;
         using difference_type = std::ptrdiff_t;
-        using value_type = const char;
-        using pointer = const char*;  // or also value_type*
-        using reference = const char&;  // or also value_type&
+        using value_type = const Char;
+        using pointer = const Char*;  // or also value_type*
+        using reference = const Char&;  // or also value_type&
 
         constexpr reference operator*() const { return *pElement; }
 
@@ -253,9 +253,9 @@ private:
     //</editor-fold>
 
     size_t m_Length;
-    char *m_Data;
+    Char *m_Data;
 
-    inline constexpr char *GetPointer() const noexcept { return m_Data; }
+    inline constexpr Char *GetPointer() const noexcept { return m_Data; }
 
     static constexpr char Space = ' ';              // 0x20
     static constexpr char FormFeed = '\f';          // 0x0c
@@ -296,7 +296,10 @@ public:
 
     inline String& operator+=(const String& rhs) noexcept;
 
-    char& operator[](size_t index);
+    constexpr Char& operator[](size_t index){
+        if (index > m_Length - 1) throw std::out_of_range("Out of string boundaries");
+        return m_Data[index];
+    }
 
     Boolean operator==(const char *c) const noexcept;
 
@@ -468,7 +471,8 @@ public:
     constexpr ConstReverseIterator crend() const noexcept { return m_Data - 1; }
 
     friend inline std::ostream &operator<<(std::ostream &os, const String &s) {
-        os << s.GetPointer();
+        for(auto it = s.cbegin(); it != s.cend(); ++it )
+            os << it->GetValue();
         return os;
     };
 };
