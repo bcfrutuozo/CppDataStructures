@@ -8,18 +8,18 @@
 #include "TypeValue.h"
 #include "Boolean.h"
 
-class Float {
+class Byte;
+class Char;
+class Int16;
+class Int32;
+class Int64;
+class Double;
+class SByte;
+class UInt16;
+class UInt32;
+class UInt64;
 
-    class Byte;
-    class Char;
-    class Int16;
-    class Int32;
-    class Int64;
-    class Double;
-    class SByte;
-    class UInt16;
-    class UInt32;
-    class UInt64;
+class Float {
 
 private:
 
@@ -28,7 +28,10 @@ private:
 public:
 
     //<editor-fold desc="Primitive abstraction section">
-    constexpr bool const& GetValue() const noexcept { return Value; }
+
+    using value_type = float;
+
+    constexpr float const& GetValue() const noexcept { return Value; }
 
     constexpr Float() : Value() {};
 
@@ -89,15 +92,16 @@ public:
 
     /*
      * Operator! (Logical NOT)
+     * Not applicable for float. However, C++ allows its usage
      */
-    constexpr Boolean operator!() const noexcept {
+    constexpr Float operator!() const noexcept {
         return !Value;
     }
 
     /*
      * Operator++ (Prefix increment)
      */
-    Float& operator++() noexcept {
+    constexpr Float& operator++() noexcept {
         ++Value;
         return *this;
     }
@@ -105,14 +109,14 @@ public:
     /*
      * Operator++ (Postfix increment)
      */
-    Float operator++(int) noexcept {
+    constexpr Float operator++(int) noexcept {
         return Float(Value++);
     }
 
     /*
      * Operator-- (Prefix decrement)
      */
-    Float& operator--() noexcept {
+    constexpr Float& operator--() noexcept {
         --Value;
         return *this;
     }
@@ -120,7 +124,7 @@ public:
     /*
      * Operator-- (Postfix decrement)
      */
-    Float operator--(int) noexcept {
+    constexpr Float operator--(int) noexcept {
         return Float(Value--);
     }
 
@@ -338,9 +342,10 @@ public:
     /*
      * Operator<< (Stream insertion)
      */
-    friend inline std::ostream& operator<<(std::ostream& lhs, Float & rhs) {
+    friend inline std::ostream& operator<<(std::ostream& lhs, Float const& rhs) {
         return lhs << rhs.Value;
     }
+    //</editor-fold>
 };
 
 #endif //CPPDATASTRUCTURES_FLOAT_H

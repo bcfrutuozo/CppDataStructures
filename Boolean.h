@@ -7,19 +7,19 @@
 
 #include "TypeValue.h"
 
-class Boolean {
+class Byte;
+class Char;
+class Int16;
+class Int32;
+class Int64;
+class Double;
+class Float;
+class SByte;
+class UInt16;
+class UInt32;
+class UInt64;
 
-    friend class Byte;
-    friend class Char;
-    friend class Int16;
-    friend class Int32;
-    friend class Int64;
-    friend class Double;
-    friend class Float;
-    friend class SByte;
-    friend class UInt16;
-    friend class UInt32;
-    friend class UInt64;
+class Boolean {
 
 private:
 
@@ -28,6 +28,9 @@ private:
 public:
 
     //<editor-fold desc="Primitive abstraction section">
+
+    using value_type = bool;
+
     constexpr bool const& GetValue() const noexcept { return Value; }
 
     constexpr Boolean() : Value() {};
@@ -91,9 +94,12 @@ public:
     }
 
     /*
-     * Operator! (Logical NOT)
+     * Operator! (Logical NOT) -> Semi-exclusive to Boolean
+     * Only boolean really has good usage for this. C++ allows its usage for
+     * many other primitives. However, when used, they behave as boolean.
+     * That's why Logical NOT is "Semi-exclusive"
      */
-    constexpr bool operator!() const noexcept {
+    constexpr Boolean operator!() const noexcept {
         return !Value;
     }
 
@@ -116,7 +122,6 @@ public:
         Value += other.GetValue();
         return *this;
     }
-
 
     /*
      * Operator-= (Subtraction assignment)
@@ -306,12 +311,12 @@ public:
      */
     template<typename T, std::enable_if_t<is_promotion_primitive<T>::value && std::is_integral<T>::value, bool> = true>
     friend inline constexpr Boolean operator%(Boolean const& lhs, T const& other) noexcept requires(is_promotion_primitive<T>::value && std::is_integral<T>::value) {
-        return lhs.Value %= other;
+        return lhs.Value % other;
     }
 
     template<typename T, std::enable_if_t<is_promotion_wrapper<T>::value && is_wrapper_integral<T>::value, bool> = true>
     friend inline constexpr Boolean operator%(Boolean const& lhs, T const& other) noexcept requires(is_promotion_wrapper<T>::value && is_wrapper_integral<T>::value) {
-        return lhs.Value %= other.GetValue();
+        return lhs.Value % other.GetValue();
     }
 
     template<typename T, std::enable_if_t<is_promotion_primitive<T>::value && std::is_integral<T>::value, bool> = true>
@@ -497,7 +502,7 @@ public:
     /*
      * Operator<< (Stream insertion)
      */
-    friend inline std::ostream& operator<<(std::ostream& lhs, Boolean & rhs) {
+    friend inline std::ostream& operator<<(std::ostream& lhs, Boolean const& rhs) {
         return lhs << rhs.Value;
     }
 

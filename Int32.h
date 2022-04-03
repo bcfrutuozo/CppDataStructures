@@ -10,18 +10,18 @@
 #include "TypeValue.h"
 #include "Boolean.h"
 
-class Int32 {
+class Byte;
+class Char;
+class Int16;
+class Int64;
+class Double;
+class Float;
+class SByte;
+class UInt16;
+class UInt32;
+class UInt64;
 
-    friend class Byte;
-    friend class Char;
-    friend class Int16;
-    friend class Int64;
-    friend class Double;
-    friend class Float;
-    friend class SByte;
-    friend class UInt16;
-    friend class UInt32;
-    friend class UInt64;
+class Int32 {
 
 private:
 
@@ -30,6 +30,9 @@ private:
 public:
 
     //<editor-fold desc="Primitive abstraction section">
+
+    using value_type = int32_t;
+
     constexpr int32_t const& GetValue() const noexcept { return Value; }
 
     constexpr Int32() : Value() {};
@@ -94,6 +97,7 @@ public:
 
     /*
      * Operator! (Logical NOT)
+     * Not applicable for int. However, C++ allows its usage
      */
     constexpr Boolean operator!() const noexcept {
         return !Value;
@@ -102,7 +106,7 @@ public:
     /*
      * Operator++ (Prefix increment)
      */
-    Int32& operator++() noexcept {
+    constexpr Int32& operator++() noexcept {
         ++Value;
         return *this;
     }
@@ -110,14 +114,14 @@ public:
     /*
      * Operator++ (Postfix increment)
      */
-    Int32 operator++(int) noexcept {
+    constexpr Int32 operator++(int) noexcept {
         return Int32(Value++);
     }
 
     /*
      * Operator-- (Prefix decrement)
      */
-    Int32& operator--() noexcept {
+    constexpr Int32& operator--() noexcept {
         --Value;
         return *this;
     }
@@ -125,7 +129,7 @@ public:
     /*
      * Operator-- (Postfix decrement)
      */
-    Int32 operator--(int) noexcept {
+    constexpr Int32 operator--(int) noexcept {
         return Int32(Value--);
     }
 
@@ -333,12 +337,12 @@ public:
      */
     template<typename T, std::enable_if_t<is_promotion_primitive<T>::value && std::is_integral<T>::value, bool> = true>
     friend inline constexpr Int32 operator%(Int32 const& lhs, T const& other) noexcept requires(is_promotion_primitive<T>::value && std::is_integral<T>::value) {
-        return lhs.Value %= other;
+        return lhs.Value % other;
     }
 
     template<typename T, std::enable_if_t<is_promotion_wrapper<T>::value && is_wrapper_integral<T>::value, bool> = true>
     friend inline constexpr Int32 operator%(Int32 const& lhs, T const& other) noexcept requires(is_promotion_wrapper<T>::value && is_wrapper_integral<T>::value) {
-        return lhs.Value %= other.GetValue();
+        return lhs.Value % other.GetValue();
     }
 
     template<typename T, std::enable_if_t<is_promotion_primitive<T>::value && std::is_integral<T>::value, bool> = true>
@@ -524,7 +528,7 @@ public:
     /*
      * Operator<< (Stream insertion)
      */
-    friend inline std::ostream& operator<<(std::ostream& lhs, Int32 & rhs) {
+    friend inline std::ostream& operator<<(std::ostream& lhs, Int32 const& rhs) {
         return lhs << rhs.Value;
     }
 
