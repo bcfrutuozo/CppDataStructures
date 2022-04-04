@@ -16,7 +16,7 @@ class Int32;
 class Int64;
 class Double;
 class Float;
-class UInt64;
+class SByte;
 class UInt16;
 class UInt32;
 
