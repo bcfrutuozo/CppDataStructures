@@ -9,6 +9,7 @@
 
 #include "TypeValue.h"
 #include "Boolean.h"
+#include "NumberStyles.h"
 
 class Char;
 class Int16;
@@ -17,6 +18,7 @@ class Int64;
 class Double;
 class Float;
 class SByte;
+class String;
 class UInt16;
 class UInt32;
 class UInt64;
@@ -26,6 +28,12 @@ class Byte final {
 private:
 
     uint8_t Value;
+
+    static constexpr NumberStyles InvalidNumberStyle = static_cast<NumberStyles>(~(NumberStyles::AllowLeadingWhite | NumberStyles::AllowTrailingWhite
+                                                                                 | NumberStyles::AllowLeadingSign | NumberStyles::AllowTrailingSign
+                                                                                 | NumberStyles::AllowParentheses | NumberStyles::AllowDecimalPoint
+                                                                                 | NumberStyles::AllowThousands | NumberStyles::AllowExponent
+                                                                                 | NumberStyles::AllowCurrencySymbol | NumberStyles::AllowHexSpecifier));
 
 public:
 
@@ -533,6 +541,15 @@ public:
     }
 
     //</editor-fold>
+
+    Int32 GetHashCode() const noexcept;
+
+    static Byte Parse(String& s);
+
+    static Byte Parse(String& s, NumberStyles style);
+
+    static constexpr Byte MaxValue() noexcept { return (unsigned char)0xFF; }
+    static constexpr Byte MinValue() noexcept { return (unsigned char)0x00; }
 };
 
 #endif //CPPDATASTRUCTURES_BYTE_H
