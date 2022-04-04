@@ -21,7 +21,5 @@ Byte Byte::Parse(String& s, NumberStyles style) {
         if((style & ~NumberStyles::HexNumber) != 0) throw std::invalid_argument("InvalidHexStyle");
 
     int i = 0;
-    try {
-        i = 
-    }
+
 }
