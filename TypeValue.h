@@ -12,31 +12,30 @@ template<typename T>
 struct is_promotion_primitive : std::false_type {
 };
 template<>
-struct is_promotion_primitive<int> : std::true_type {
+struct is_promotion_primitive<int32_t> : std::true_type {
 };
 template<>
-struct is_promotion_primitive<unsigned int> : std::true_type {
+struct is_promotion_primitive<uint32_t> : std::true_type {
 };
 template<>
-struct is_promotion_primitive<long> : std::true_type {
+struct is_promotion_primitive<int64_t> : std::true_type {
 };
 template<>
-struct is_promotion_primitive<short> : std::true_type {
+struct is_promotion_primitive<int16_t> : std::true_type {
 };
 template<>
 struct is_promotion_primitive<char> : std::true_type {
 };
 template<>
-struct is_promotion_primitive<unsigned char> : std::true_type {
+struct is_promotion_primitive<uint8_t> : std::true_type {
 };
 template<>
-struct is_promotion_primitive<unsigned short> : std::true_type {
+struct is_promotion_primitive<uint16_t> : std::true_type {
 };
 template<>
-struct is_promotion_primitive<signed char> : std::true_type {
-};
+struct is_promotion_primitive<int8_t> : std::true_type {};
 template<>
-struct is_promotion_primitive<unsigned long> : std::true_type {
+struct is_promotion_primitive<uint64_t> : std::true_type {
 };
 template<>
 struct is_promotion_primitive<double> : std::true_type {

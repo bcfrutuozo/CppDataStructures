@@ -30,8 +30,8 @@ private:
     struct UnicodeDataHeader {
 #ifdef __linux__
         /* Offset:  0x00 */ short TableName[16];
-#elif
-        /* Offset:  0x00 */ char TableName[16];
+#else
+        /* Offset:  0x00 */ wchar_t TableName[16];
 #endif
         /* Offset: 0x20 */ unsigned short Version[4];
         /* Offset: 0x28 */ unsigned int OffsetToCategoriesIndex;
@@ -67,7 +67,11 @@ private:
     // Every item contains the value for decimal digit/digit value.
     static DigitValues *pDigitValues;
 
-    static constexpr char *UNICODE_INFO_FILE_NAME = "charinfo.nlp";
+#ifdef __linux__
+    static constexpr const char* const UNICODE_INFO_FILE_NAME = "charinfo.nlp";
+#else
+    static constexpr const wchar_t * const UNICODE_INFO_FILE_NAME = L"charinfo.nlp";
+#endif
 
     // The starting codepoint for Unicode plane 1.  Plane 1 contains 0x010000 ~ 0x01ffff.
     static constexpr int UNICODE_PLANE01_START = 0x10000;
@@ -209,7 +213,7 @@ private:
     }
 
 public:
-
+    
     static UnicodeCategory GetUnicodeCategory(char ch) noexcept {
         return InternalGetUnicodeCategory(ch);
     }
