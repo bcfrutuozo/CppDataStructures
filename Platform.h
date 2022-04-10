@@ -8,6 +8,12 @@
 #include <string_view>
 #include <type_traits>
 
+#if _WIN64 | __x86_x64__ || __ppc64__
+#define ENVIRONMENT64
+#elif
+#define ENVIRONMENT32
+#endif
+
 #if _WIN32
 typedef long long ssize_t;  /* Windows */
 #define SSIZE_MIN  LLONG_MIN
@@ -22,6 +28,8 @@ typedef long ssize_t;       /* Linux */
 #include <stdio.h>
 #include <cstring>
 #include <string>
+
+#define ArraySize(array) (sizeof(array)/sizeof(array[0]))
 
 // Compare function to handle with const char*
 // Char* must always be compared with strcmp() function
