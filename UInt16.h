@@ -23,6 +23,8 @@ class UInt64;
 
 class UInt16 final {
 
+    friend class Number;
+
 private:
 
     uint16_t Value;

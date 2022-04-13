@@ -275,102 +275,273 @@
  * NaNs or Infinities.
  */
 
-#include "Boolean.h"
-#include "Int32.h"
 #include "NumberStyles.h"
 
-class Byte;
-class Decimal;
-class NumberFormatInfo;
+#include <sstream>
+
+
 class String;
-class StringBuilder;
 
-namespace Number {
+class Number final
+{
+	friend class Boolean;
+	friend class Byte;
+	friend class Char;
+	friend class Decimal;
+	friend class Double;
+	friend class Int16;
+	friend class Int32;
+	friend class Int64;
+	friend class SByte;
+	friend class Single;
+	friend class String;
+	friend class UInt16;
+	friend class UInt32;
+	friend class UInt64;
 
-    // Constants used by number parsing
-    static constexpr uint32_t NumberMaxDigits = 50;
-    static constexpr uint32_t Int32Precision = 10;
-    static constexpr uint32_t UInt32Precision = Int32Precision;
-    static constexpr uint32_t Int64Precision = 19;
-    static constexpr uint32_t UInt64Precision = 20;
+public:
 
-    /*
-     * NumberBuffer is a partial wrapper around a stack pointer that maps on to
-     * the native NUMBER struct so that it can be passed to native directly. It
-     * must be initialized with a stack Byte * of size NumberBufferBytes.
-     * For performance, this structure should attempt to be completely inlined.
-     *
-     * It should always be initialized like so:
-     *
-     * Byte * numberBufferBytes = stackalloc Byte[NumberBuffer.NumberBufferBytes];
-     * NumberBuffer number = new NumberBuffer(numberBufferBytes);
-     *
-     * For performance, when working on the buffer in managed we use the values in this
-     * structure, except for the digits, and pack those values into the byte buffer
-     * if called out to manage.
-     */
+	// Constants used by number parsing
+	static constexpr uint8_t DecimalNeg = static_cast<uint8_t>(0x80);
+	static constexpr uint32_t DecimalPrecision = 29;
+	static constexpr uint32_t NumberMaxDigits = 50;
+	static constexpr uint32_t Int32Precision = 10;
+	static constexpr uint32_t UInt32Precision = Int32Precision;
+	static constexpr uint32_t Int64Precision = 19;
+	static constexpr uint32_t UInt64Precision = 20;
 
-    class NumberBuffer {
+private:
 
-    private:
 
-        unsigned char* BaseAddress;
+	/*
+	 * NumberBuffer is a partial wrapper around a stack pointer that maps on to
+	 * the native NUMBER struct so that it can be passed to native directly. It
+	 * must be initialized with a stack Byte * of size NumberBufferBytes.
+	 * For performance, this structure should attempt to be completely inlined.
+	 *
+	 * It should always be initialized like so:
+	 *
+	 * Byte * numberBufferBytes = stackalloc Byte[NumberBuffer.NumberBufferBytes];
+	 * NumberBuffer number = new NumberBuffer(numberBufferBytes);
+	 *
+	 * For performance, when working on the buffer in managed we use the values in this
+	 * structure, except for the digits, and pack those values into the byte buffer
+	 * if called out to manage.
+	*/
+	class NumberBuffer
+	{
 
-        static bool HexNumberToInt32(NumberBuffer& number, int32_t& value) noexcept;
-        static bool HexNumberToInt64(NumberBuffer& number, int64_t& value) noexcept;
-        static bool HexNumberToUInt32(NumberBuffer& number, uint32_t& value) noexcept;
-        static bool HexNumberToUInt64(NumberBuffer& number, uint64_t& value) noexcept;
+	private:
 
-        static bool IsWhite(char ch) noexcept {
-            return ((ch == 0x20) || ((ch >= 0x09) && (ch <= 0x0d)));
-        }
+		unsigned char* BaseAddress;
 
-        // Implemented from COMM source...
-        static bool NumberBufferToDecimal(unsigned char* buffer, Decimal& result);
-        static bool NumberBufferToDouble(unsigned char* buffer, double result);
+	public:
 
-        static bool NumberToInt32(NumberBuffer& number, int32_t& value) noexcept;
-        static bool NumberToInt64(NumberBuffer& number, int64_t& value) noexcept;
-        static bool NumberToUInt32(NumberBuffer& number, uint32_t& value) noexcept;
-        static bool NumberToUInt64(NumberBuffer& number, uint64_t& value) noexcept;
+		char* Digits;
+		int32_t Precision;
+		int32_t Scale;
+		bool Sign;
 
-        static char* MatchChars(char* p, String& str) noexcept;
-        static char* MatchChars(char* p, char* str) noexcept;
+		constexpr NumberBuffer(uint8_t* data) noexcept;
 
-        static Decimal ParseDecimal(String& value, NumberStyles options);
-        static double ParseDouble(String& value, NumberStyles options);
-        static int32_t ParseInt32(String& value, NumberStyles options);
-        static int64_t ParseInt64(String& value, NumberStyles options);
-        static bool ParseNumber(const char* str, NumberStyles options, NumberBuffer& number, std::ostringstream* const sb, bool parseDecimal);
-        static float ParseSingle(String& value, NumberStyles options);
-        static uint32_t ParseUInt32(String& value, NumberStyles options);
-        static uint64_t ParseUInt64(String& value, NumberStyles options);
-        static void StringToNumber(String& value, NumberStyles options, NumberBuffer& number, bool parseDecimal);
-        static bool TrailingZeros(String& value, int32_t index) noexcept;
-        static bool TryParseDecimal(String& value, NumberStyles options, Decimal& result) noexcept;
-        static bool TryParseDouble(String& value, NumberStyles options, double& result) noexcept;
-        static bool TryParseInt32(String& value, NumberStyles options, int32_t& result) noexcept;
-        static bool TryParseInt64(String& value, NumberStyles options, int64_t& result) noexcept;
-        static bool TryParseSingle(String& value, NumberStyles options, float& result) noexcept;
-        static bool TryParseUInt32(String& value, NumberStyles options, uint32_t& result) noexcept;
-        static bool TryParseUInt64(String& value, NumberStyles options, uint64_t& result) noexcept;
-        static bool TryStringToNumber(String& value, NumberStyles options, NumberBuffer& number, bool parseDecimal) noexcept;
-        static bool TryStringToNumber(String& value, NumberStyles options, NumberBuffer& number, std::ostringstream* const sb, bool parseDecimal) noexcept;
+		static constexpr size_t NumberBufferBytes = 12 + ((NumberMaxDigits + 1) * 2) + sizeof(uintptr_t);
+	};
 
-    public:
+	static constexpr uint64_t rgval64Power10[] =
+	{	// Powers of 10
+		/*1*/  0xa000000000000000l,
+		/*2*/  0xc800000000000000l,
+		/*3*/  0xfa00000000000000l,
+		/*4*/  0x9c40000000000000l,
+		/*5*/  0xc350000000000000l,
+		/*6*/  0xf424000000000000l,
+		/*7*/  0x9896800000000000l,
+		/*8*/  0xbebc200000000000l,
+		/*9*/  0xee6b280000000000l,
+		/*10*/ 0x9502f90000000000l,
+		/*11*/ 0xba43b74000000000l,
+		/*12*/ 0xe8d4a51000000000l,
+		/*13*/ 0x9184e72a00000000l,
+		/*14*/ 0xb5e620f480000000l,
+		/*15*/ 0xe35fa931a0000000l,
 
-        Char* Digits;
-        Int32 Precision;
-        Int32 Scale;
-        Boolean Sign;
+		// Powers of 0.1
+		/*1*/  0xcccccccccccccccdl,
+		/*2*/  0xa3d70a3d70a3d70bl,
+		/*3*/  0x83126e978d4fdf3cl,
+		/*4*/  0xd1b71758e219652el,
+		/*5*/  0xa7c5ac471b478425l,
+		/*6*/  0x8637bd05af6c69b7l,
+		/*7*/  0xd6bf94d5e57a42bel,
+		/*8*/  0xabcc77118461ceffl,
+		/*9*/  0x89705f4136b4a599l,
+		/*10*/ 0xdbe6fecebdedd5c2l,
+		/*11*/ 0xafebff0bcb24ab02l,
+		/*12*/ 0x8cbccc096f5088cfl,
+		/*13*/ 0xe12e13424bb40e18l,
+		/*14*/ 0xb424dc35095cd813l,
+		/*15*/ 0x901d7cf73ab0acdcl
+	};
 
-        constexpr NumberBuffer(unsigned char* data) noexcept;
+	static constexpr int8_t rgexp64Power10[] = {
+		// Exponents for both powers of 10 and 0.1
+		/*1*/   4,
+		/*2*/   7,
+		/*3*/  10,
+		/*4*/  14,
+		/*5*/  17,
+		/*6*/  20,
+		/*7*/  24,
+		/*8*/  27,
+		/*9*/  30,
+		/*10*/ 34,
+		/*11*/ 37,
+		/*12*/ 40,
+		/*13*/ 44,
+		/*14*/ 47,
+		/*15*/ 50,
+	};
 
-        unsigned char* PackForNative() noexcept;
+	static constexpr uint64_t rgval64Power10By16[] = {
+		// Powers of 10^16
+		/*1*/  0x8e1bc9bf04000000l,
+		/*2*/  0x9dc5ada82b70b59el,
+		/*3*/  0xaf298d050e4395d6l,
+		/*4*/  0xc2781f49ffcfa6d4l,
+		/*5*/  0xd7e77a8f87daf7fal,
+		/*6*/  0xefb3ab16c59b14a0l,
+		/*7*/  0x850fadc09923329cl,
+		/*8*/  0x93ba47c980e98cdel,
+		/*9*/  0xa402b9c5a8d3a6e6l,
+		/*10*/ 0xb616a12b7fe617a8l,
+		/*11*/ 0xca28a291859bbf90l,
+		/*12*/ 0xe070f78d39275566l,
+		/*13*/ 0xf92e0c3537826140l,
+		/*14*/ 0x8a5296ffe33cc92cl,
+		/*15*/ 0x9991a6f3d6bf1762l,
+		/*16*/ 0xaa7eebfb9df9de8al,
+		/*17*/ 0xbd49d14aa79dbc7el,
+		/*18*/ 0xd226fc195c6a2f88l,
+		/*19*/ 0xe950df20247c83f8l,
+		/*20*/ 0x81842f29f2cce373l,
+		/*21*/ 0x8fcac257558ee4e2l,
 
-        static constexpr size_t NumberBufferBytes = 12 + ((NumberMaxDigits + 1) * 2) + sizeof(uintptr_t);
-    };
+		// Powers of 0.1^16
+		/*1*/  0xe69594bec44de160l,
+		/*2*/  0xcfb11ead453994c3l,
+		/*3*/  0xbb127c53b17ec165l,
+		/*4*/  0xa87fea27a539e9b3l,
+		/*5*/  0x97c560ba6b0919b5l,
+		/*6*/  0x88b402f7fd7553abl,
+		/*7*/  0xf64335bcf065d3a0l,
+		/*8*/  0xddd0467c64bce4c4l,
+		/*9*/  0xc7caba6e7c5382edl,
+		/*10*/ 0xb3f4e093db73a0b7l,
+		/*11*/ 0xa21727db38cb0053l,
+		/*12*/ 0x91ff83775423cc29l,
+		/*13*/ 0x8380dea93da4bc82l,
+		/*14*/ 0xece53cec4a314f00l,
+		/*15*/ 0xd5605fcdcf32e217l,
+		/*16*/ 0xc0314325637a1978l,
+		/*17*/ 0xad1c8eab5ee43ba2l,
+		/*18*/ 0x9becce62836ac5b0l,
+		/*19*/ 0x8c71dcd9ba0b495cl,
+		/*20*/ 0xfd00b89747823938l,
+		/*21*/ 0xe3e27a444d8d991al,
+	};
 
+	static constexpr int16_t rgexp64Power10By16[] = {
+		// Exponents for both powers of 10^16 and 0.1^16
+		/*1*/    54,
+		/*2*/   107,
+		/*3*/   160,
+		/*4*/   213,
+		/*5*/   266,
+		/*6*/   319,
+		/*7*/   373,
+		/*8*/   426,
+		/*9*/   479,
+		/*10*/  532,
+		/*11*/  585,
+		/*12*/  638,
+		/*13*/  691,
+		/*14*/  745,
+		/*15*/  798,
+		/*16*/  851,
+		/*17*/  904,
+		/*18*/  957,
+		/*19*/ 1010,
+		/*20*/ 1064,
+		/*21*/ 1117,
+	};
+
+	static constexpr uint32_t DigitsToInt(char* p, int count)
+	{
+		assert(count >= 1 && count <= 9);
+		char* end = p + count;
+		uint32_t res = *p - '0';
+		for(p = p + 1; p < end; ++p) res = (10 * res) + *p - '0';
+		return res;
+	}
+
+	static constexpr uint64_t Mul32x32To64(uint32_t a, uint32_t b) noexcept { return static_cast<uint64_t>(a) * static_cast<uint64_t>(b); }
+
+	static constexpr uint64_t Mul64Lossy(uint64_t a, uint64_t b, int32_t* pexp) noexcept
+	{
+		// it's ok to losse some precision here - Mul64 will be called
+		// at most twice during the conversion, so the error won't propagate
+		// to any of the 53 significant bits of the result
+		uint64_t val = Mul32x32To64(a >> 32, b >> 32) +
+			(Mul32x32To64(a >> 32, b) >> 32) +
+			(Mul32x32To64(a, b >> 32) >> 32);
+
+		// normalize
+		if((val & static_cast<int64_t>(0x8000000000000000)) == 0) { val <<= 1; *pexp -= 1; }
+
+		return val;
+	}
+
+	static bool HexNumberToInt32(NumberBuffer& number, int32_t& value) noexcept;
+	static bool HexNumberToInt64(NumberBuffer& number, int64_t& value) noexcept;
+	static bool HexNumberToUInt32(NumberBuffer& number, uint32_t& value) noexcept;
+	static bool HexNumberToUInt64(NumberBuffer& number, uint64_t& value) noexcept;
+
+	static bool IsWhite(char ch) noexcept
+	{
+		return ((ch == 0x20) || ((ch >= 0x09) && (ch <= 0x0d)));
+	}
+
+	// Implemented from COMM source...
+	static bool NumberBufferToDecimal(NumberBuffer& buffer, Decimal& result);
+	static bool NumberBufferToDouble(NumberBuffer& buffer, double* result);
+
+	static bool NumberToInt32(NumberBuffer& number, int32_t& value) noexcept;
+	static bool NumberToInt64(NumberBuffer& number, int64_t& value) noexcept;
+	static bool NumberToUInt32(NumberBuffer& number, uint32_t& value) noexcept;
+	static bool NumberToUInt64(NumberBuffer& number, uint64_t& value) noexcept;
+
+	static char* MatchChars(char* p, String& str) noexcept;
+	static char* MatchChars(char* p, char* str) noexcept;
+
+	static Decimal ParseDecimal(String& value, NumberStyles options);
+	static double ParseDouble(String& value, NumberStyles options);
+	static int32_t ParseInt32(String& value, NumberStyles options);
+	static int64_t ParseInt64(String& value, NumberStyles options);
+	static bool ParseNumber(const char* str, NumberStyles options, NumberBuffer& number, std::ostringstream* sb, bool parseDecimal);
+	static float ParseSingle(String& value, NumberStyles options);
+	static uint32_t ParseUInt32(String& value, NumberStyles options);
+	static uint64_t ParseUInt64(String& value, NumberStyles options);
+	static void StringToNumber(String& value, NumberStyles options, NumberBuffer& number, bool parseDecimal);
+	static bool TrailingZeros(String& value, int32_t index) noexcept;
+	static bool TryParseDecimal(String& value, NumberStyles options, Decimal& result) noexcept;
+	static bool TryParseDouble(String& value, NumberStyles options, double& result) noexcept;
+	static bool TryParseInt32(String& value, NumberStyles options, int32_t& result) noexcept;
+	static bool TryParseInt64(String& value, NumberStyles options, int64_t& result) noexcept;
+	static bool TryParseSingle(String& value, NumberStyles options, float& result) noexcept;
+	static bool TryParseUInt32(String& value, NumberStyles options, uint32_t& result) noexcept;
+	static bool TryParseUInt64(String& value, NumberStyles options, uint64_t& result) noexcept;
+	static bool TryStringToNumber(String& value, NumberStyles options, NumberBuffer& number, bool parseDecimal) noexcept;
+	static bool TryStringToNumber(String& value, NumberStyles options, NumberBuffer& number, std::ostringstream* sb, bool parseDecimal) noexcept;
 };
 
 #endif //CPPDATASTRUCTURES_NUMBER_H

@@ -23,6 +23,8 @@ class UInt64;
 
 class Int64 final {
 
+    friend class Number;
+
 private:
 
     int64_t Value;

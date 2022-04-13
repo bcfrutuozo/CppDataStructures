@@ -11,17 +11,7 @@
 #include "BitConverter.h"
 #include "MidPointRounding.hpp"
 
-class Byte;
-class Int16;
-class Int32;
-class Int64;
-class Double;
-class Single;
-class SByte;
 class String;
-class UInt16;
-class UInt32;
-class UInt64;
 
 /*
  * We must declare PowerOvfl outside the Decimal class scope, as we are using
@@ -45,8 +35,10 @@ private:
 	{};
 };
 
-class Decimal
+class Decimal final
 {
+	// NumberBuffer class can access Lo, Mid, Hi, Flags directly to work with NumberBufferToDecimal function
+	friend class Number;
 
 private:
 
@@ -305,6 +297,7 @@ private:
 	class DecCalc
 	{
 		friend class Decimal;
+		friend class Number;
 
 	private:
 
@@ -542,6 +535,53 @@ private:
 
 			if((low & 1) == 0 && scale >= 1 && Div96ByConst(high64, low, 10))
 				scale--;
+		}
+
+		static constexpr void DecAdd(Decimal& d1, Decimal& d2) noexcept
+		{
+			if(D32AddCarry(d1.Lo, d2.Lo))
+			{
+				if(D32AddCarry(d1.Mid, 1))
+				{
+					D32AddCarry(d1.Hi, 1);
+				}
+			}
+		}
+
+		static constexpr void DecAddInt32(Decimal& d1, uint32_t i) noexcept
+		{
+			if(D32AddCarry(d1.Lo, i))
+			{
+				if(D32AddCarry(d1.Mid, 1))
+				{
+					D32AddCarry(d1.Hi, 1);
+				}
+			}
+		}
+
+		static constexpr void DecMul10(Decimal& d) noexcept
+		{
+			Decimal d2 = d;
+			DecShiftLeft(d);
+			DecShiftLeft(d);
+			DecAdd(d, d2);
+			DecShiftLeft(d);
+		}
+
+		static constexpr void DecShiftLeft(Decimal& d) noexcept
+		{
+			uint32_t c0 = (d.Lo & 0x80000000);
+			uint32_t c1 = (d.Mid & 0x80000000);
+			d.Lo <<= 1;
+			d.Mid = d.Mid << 1 | c0;
+			d.Hi = d.Hi << 1 | c1;
+		}
+
+		static constexpr bool D32AddCarry(int32_t& value, uint32_t i) noexcept
+		{
+			uint32_t sum = static_cast<uint32_t>(value) + i;
+			value = sum;
+			return (sum < value || sum < i);
 		}
 
 		/// Do partial divide, yielding 32-bit result and 64-bit remainder.
@@ -3036,7 +3076,7 @@ public:
 		return d1;
 	}
 
-	static constexpr Array<int> GetBits(Decimal& d) noexcept { return { d.Lo, d.Mid, d.Hi, d.Flags }; }
+	static constexpr Array<int32_t> GetBits(Decimal& d) noexcept { return { d.Lo, d.Mid, d.Hi, d.Flags }; }
 
 	constexpr int GetHashCode() const noexcept { return DecCalc::GetHashCode(*this); }
 
@@ -3079,7 +3119,7 @@ public:
 	static constexpr Decimal Round(Decimal d, MidPointRounding mode) { return PrivateRound(d, 0, mode); }
 	static constexpr Decimal Round(Decimal d, int decimals, MidPointRounding mode) { return PrivateRound(d, decimals, mode); }
 
-	static constexpr int Sign(Decimal const& d) noexcept { return (d.Lo | d.Mid | d.Hi) == 0 ? 0 : (d.Flags >> 31) | 1; }
+	static constexpr int32_t Sign(Decimal const& d) noexcept { return (d.Lo | d.Mid | d.Hi) == 0 ? 0 : (d.Flags >> 31) | 1; }
 
 	static constexpr Decimal Subtract(Decimal d1, Decimal d2)
 	{
@@ -3089,7 +3129,7 @@ public:
 
 	static Decimal Parse(String s);
 	static Decimal Parse(String s, NumberStyles style);
-	static Byte	ToByte(Decimal value);
+	static uint8_t ToByte(Decimal value);
 
 	static Decimal ToDecimal(const unsigned char buffer[])
 	{
@@ -3103,17 +3143,17 @@ public:
 		return Decimal(lo, mid, hi, flags);
 	}
 
-	static Double ToDouble(Decimal value);
-	static Single ToFloat(Decimal value);
-	static Int16 ToInt16(Decimal value);
-	static Int32 ToInt32(Decimal value);
-	static Int64 ToInt64(Decimal value);
-	static SByte ToSByte(Decimal value);
+	static double ToDouble(Decimal value);
+	static float ToFloat(Decimal value);
+	static int16_t ToInt16(Decimal value);
+	static int32_t ToInt32(Decimal value);
+	static int64_t ToInt64(Decimal value);
+	static int8_t ToSByte(Decimal value);
 	String ToString();
 	String ToString(String const& format);
-	static UInt16 ToUInt16(Decimal value);
-	static UInt32 ToUInt32(Decimal value);
-	static UInt64 ToUInt64(Decimal value);
+	static uint16_t ToUInt16(Decimal value);
+	static uint32_t ToUInt32(Decimal value);
+	static uint64_t ToUInt64(Decimal value);
 
 	static constexpr Decimal Truncate(Decimal value) noexcept
 	{
@@ -3121,8 +3161,8 @@ public:
 		return value;
 	}
 
-	static Boolean TryParse(String s, Decimal& result);
-	static Boolean TryParse(String s, NumberStyles style, Decimal& result);
+	static bool TryParse(String s, Decimal& result);
+	static bool TryParse(String s, NumberStyles style, Decimal& result);
 };
 
 typedef Decimal decimal;

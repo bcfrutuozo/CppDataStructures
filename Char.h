@@ -37,6 +37,8 @@ class UInt64;
  */
 class Char final {
 
+    friend class Number;
+
 private:
 
     char Value;

@@ -22,6 +22,8 @@ class UInt32;
 
 class UInt64 final {
 
+    friend class Number;
+
 private:
 
     uint64_t Value;

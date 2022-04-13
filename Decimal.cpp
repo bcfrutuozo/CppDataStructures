@@ -28,7 +28,7 @@ Decimal Decimal::Parse(String s, NumberStyles style)
 	return Number::ParseDecimal(s, style);
 }
 
-Byte Decimal::ToByte(Decimal value)
+uint8_t Decimal::ToByte(Decimal value)
 {
 	unsigned int temp;
 	
@@ -45,17 +45,17 @@ Byte Decimal::ToByte(Decimal value)
 	return static_cast<unsigned char>(temp);
 }
 
-Double Decimal::ToDouble(Decimal value)
+double Decimal::ToDouble(Decimal value)
 {
 	return DecCalc::VarR8FromDec(value);
 }
 
-Single Decimal::ToFloat(Decimal value)
+float Decimal::ToFloat(Decimal value)
 {
 	return DecCalc::VarR4FromDec(value);
 }
 
-Int16 Decimal::ToInt16(Decimal value)
+int16_t Decimal::ToInt16(Decimal value)
 {
 	int temp;
 	try
@@ -70,7 +70,7 @@ Int16 Decimal::ToInt16(Decimal value)
 	return static_cast<short>(temp);
 }
 
-Int32 Decimal::ToInt32(Decimal value)
+int32_t Decimal::ToInt32(Decimal value)
 {
 	TruncateSelf(value);
 
@@ -91,7 +91,7 @@ Int32 Decimal::ToInt32(Decimal value)
 	throw std::overflow_error("Int32");
 }
 
-Int64 Decimal::ToInt64(Decimal value)
+int64_t Decimal::ToInt64(Decimal value)
 {
 	TruncateSelf(value);
 
@@ -112,7 +112,7 @@ Int64 Decimal::ToInt64(Decimal value)
 	throw std::overflow_error("Int64");
 }
 
-SByte Decimal::ToSByte(Decimal value)
+int8_t Decimal::ToSByte(Decimal value)
 {
 	int temp;
 	try
@@ -137,7 +137,7 @@ String Decimal::ToString(String const& format)
 	return Number::FormatDecimal(*this, format);
 }
 
-UInt16  Decimal::ToUInt16(Decimal value)
+uint16_t  Decimal::ToUInt16(Decimal value)
 {
 	unsigned int temp;
 	try
@@ -152,7 +152,7 @@ UInt16  Decimal::ToUInt16(Decimal value)
 	return static_cast<unsigned short>(temp);
 }
 
-UInt32 Decimal::ToUInt32(Decimal value)
+uint32_t Decimal::ToUInt32(Decimal value)
 {
 	TruncateSelf(value);
 
@@ -165,7 +165,7 @@ UInt32 Decimal::ToUInt32(Decimal value)
 	throw std::overflow_error("UInt32");
 }
 
-UInt64 Decimal::ToUInt64(Decimal value)
+uint64_t Decimal::ToUInt64(Decimal value)
 {
 	TruncateSelf(value);
 
@@ -178,13 +178,13 @@ UInt64 Decimal::ToUInt64(Decimal value)
 	throw std::overflow_error("UInt64");
 }
 
-Boolean Decimal::TryParse(String s, Decimal& result)
+bool Decimal::TryParse(String s, Decimal& result)
 {
 	if(s.IsEmpty()) return false;
 	return Number::TryParseDecimal(s, NumberStyles::Number, result);
 }
 
-Boolean Decimal::TryParse(String s, NumberStyles style, Decimal& result)
+bool Decimal::TryParse(String s, NumberStyles style, Decimal& result)
 {
 	if(s.IsEmpty()) return false;
 	return Number::TryParseDecimal(s, style, result);

@@ -22,6 +22,8 @@ class UInt64;
 
 class SByte final {
 
+    friend class Number;
+
 private:
 
     int8_t Value;

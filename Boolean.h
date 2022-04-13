@@ -21,6 +21,8 @@ class UInt64;
 
 class Boolean final {
 
+    friend class Number;
+
 private:
 
     bool Value;

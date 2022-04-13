@@ -21,6 +21,8 @@ class UInt64;
 
 class Single final {
 
+    friend class Number;
+
 private:
 
     float Value;

@@ -25,6 +25,8 @@ class UInt64;
 
 class Byte final {
 
+    friend class Number;
+
 private:
 
     uint8_t Value;

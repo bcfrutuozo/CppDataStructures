@@ -16,7 +16,7 @@
 
 class String final {
 
-    friend class Number::NumberBuffer;
+    friend class Number;
 
 private:
 
