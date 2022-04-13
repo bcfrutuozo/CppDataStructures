@@ -36,4 +36,28 @@ enum class NumberStyles {
                AllowParentheses  | AllowDecimalPoint | AllowThousands | AllowCurrencySymbol | AllowExponent,
 };
 
+static inline constexpr NumberStyles operator&(NumberStyles lhs, NumberStyles rhs)
+{
+    using T = std::underlying_type_t<NumberStyles>;
+    return static_cast<NumberStyles>(static_cast<T>(lhs) & static_cast<T>(rhs));
+}
+
+static inline constexpr NumberStyles operator&=(NumberStyles lhs, NumberStyles rhs)
+{
+    lhs = lhs & rhs;
+    return lhs;
+}
+
+static inline constexpr NumberStyles operator|(NumberStyles lhs, NumberStyles rhs)
+{
+    using T = std::underlying_type_t<NumberStyles>;
+    return static_cast<NumberStyles>(static_cast<T>(lhs) | static_cast<T>(rhs));
+}
+
+static inline constexpr NumberStyles operator&=(NumberStyles lhs, NumberStyles rhs)
+{
+    lhs = lhs | rhs;
+    return lhs;
+}
+
 #endif //CPPDATASTRUCTURES_NUMBERSTYLES_H

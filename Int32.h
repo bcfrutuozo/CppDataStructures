@@ -15,7 +15,7 @@ class Char;
 class Int16;
 class Int64;
 class Double;
-class Float;
+class Single;
 class SByte;
 class UInt16;
 class UInt32;
@@ -533,6 +533,9 @@ public:
     }
 
     //</editor-fold>
+
+    static inline constexpr int32_t MaxValue = 0x7FFFFFFF;
+    static inline constexpr int32_t MinValue = static_cast<int32_t>(0x80000000);
 };
 
 #endif //CPPDATASTRUCTURES_INT32_H

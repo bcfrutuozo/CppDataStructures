@@ -18,7 +18,7 @@ class Int16;
 class Int32;
 class Int64;
 class Double;
-class Float;
+class Single;
 class SByte;
 class String;
 class UInt16;
@@ -368,7 +368,6 @@ public:
         Value += other.GetValue();
         return *this;
     }
-
 
     /*
      * Operator-= (Subtraction assignment)

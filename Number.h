@@ -288,11 +288,11 @@ class StringBuilder;
 namespace Number {
 
     // Constants used by number parsing
-    static constexpr Int32 NumberMaxDigits = 50;
-    static constexpr Int32 Int32Precision = 10;
-    static constexpr Int32 UInt32Precision = Int32Precision;
-    static constexpr Int32 Int64Precision = 19;
-    static constexpr Int32 UInt64Precision = 20;
+    static constexpr uint32_t NumberMaxDigits = 50;
+    static constexpr uint32_t Int32Precision = 10;
+    static constexpr uint32_t UInt32Precision = Int32Precision;
+    static constexpr uint32_t Int64Precision = 19;
+    static constexpr uint32_t UInt64Precision = 20;
 
     /*
      * NumberBuffer is a partial wrapper around a stack pointer that maps on to
@@ -314,36 +314,48 @@ namespace Number {
 
     private:
 
-        Byte* BaseAddress;
+        unsigned char* BaseAddress;
 
-        static Boolean HexNumberToInt32(NumberBuffer const& number, Int32& value) noexcept;
-        static Boolean HexNumberToInt64(NumberBuffer const& number, Int64& value) noexcept;
-        static Boolean HexNumberToUInt32(NumberBuffer const& number, UInt32& value) noexcept;
-        static Boolean HexNumberToUInt64(NumberBuffer const& number, UInt64& value) noexcept;
+        static bool HexNumberToInt32(NumberBuffer& number, int32_t& value) noexcept;
+        static bool HexNumberToInt64(NumberBuffer& number, int64_t& value) noexcept;
+        static bool HexNumberToUInt32(NumberBuffer& number, uint32_t& value) noexcept;
+        static bool HexNumberToUInt64(NumberBuffer& number, uint64_t& value) noexcept;
 
-        static Boolean IsWhite(char ch) noexcept {
+        static bool IsWhite(char ch) noexcept {
             return ((ch == 0x20) || ((ch >= 0x09) && (ch <= 0x0d)));
         }
 
-        static Boolean NumberToInt32(NumberBuffer const& number, Int32& value) noexcept;
-        static Boolean NumberToInt64(NumberBuffer const& number, Int64& value) noexcept;
-        static Boolean NumberToUInt32(NumberBuffer const& number, UInt32& value) noexcept;
-        static Boolean NumberToUInt64(NumberBuffer const& number, UInt64& value) noexcept;
+        // Implemented from COMM source...
+        static bool NumberBufferToDecimal(unsigned char* buffer, Decimal& result);
+        static bool NumberBufferToDouble(unsigned char* buffer, double result);
+
+        static bool NumberToInt32(NumberBuffer& number, int32_t& value) noexcept;
+        static bool NumberToInt64(NumberBuffer& number, int64_t& value) noexcept;
+        static bool NumberToUInt32(NumberBuffer& number, uint32_t& value) noexcept;
+        static bool NumberToUInt64(NumberBuffer& number, uint64_t& value) noexcept;
 
         static char* MatchChars(char* p, String& str) noexcept;
         static char* MatchChars(char* p, char* str) noexcept;
 
-        static Decimal ParseDecimal(String const& value, NumberStyles options, NumberFormatInfo const& numfmt) noexcept;
-        static Double ParseDouble(String const& value, NumberStyles options, NumberFormatInfo const& numfmt) noexcept;
-        static Int32 ParseInt32(String const& value, NumberStyles options, NumberFormatInfo const& numfmt) noexcept;
-        static Int64 ParseInt64(String const& value, NumberStyles options, NumberFormatInfo const& numfmt) noexcept;
-        static Boolean ParseNumber(const char* str, NumberStyles options, NumberBuffer const& number, StringBuilder const& sb, NumberFormatInfo const& numfmt, Boolean parseDecimal) noexcept;
-        static Float ParseSingle(String const& value, NumberStyles options, NumberFormatInfo const& numfmt) noexcept;
-        static UInt32 ParseUInt32(String const& value, NumberStyles options, NumberFormatInfo const& numfmt) noexcept;
-        static UInt64 ParseUInt64(String const& value, NumberStyles options, NumberFormatInfo const& numfmt) noexcept;
-
-
-        //TODO: STILL NEED STRING FUNCTIONS AND TRYPARSE
+        static Decimal ParseDecimal(String& value, NumberStyles options);
+        static double ParseDouble(String& value, NumberStyles options);
+        static int32_t ParseInt32(String& value, NumberStyles options);
+        static int64_t ParseInt64(String& value, NumberStyles options);
+        static bool ParseNumber(const char* str, NumberStyles options, NumberBuffer& number, std::ostringstream* const sb, bool parseDecimal);
+        static float ParseSingle(String& value, NumberStyles options);
+        static uint32_t ParseUInt32(String& value, NumberStyles options);
+        static uint64_t ParseUInt64(String& value, NumberStyles options);
+        static void StringToNumber(String& value, NumberStyles options, NumberBuffer& number, bool parseDecimal);
+        static bool TrailingZeros(String& value, int32_t index) noexcept;
+        static bool TryParseDecimal(String& value, NumberStyles options, Decimal& result) noexcept;
+        static bool TryParseDouble(String& value, NumberStyles options, double& result) noexcept;
+        static bool TryParseInt32(String& value, NumberStyles options, int32_t& result) noexcept;
+        static bool TryParseInt64(String& value, NumberStyles options, int64_t& result) noexcept;
+        static bool TryParseSingle(String& value, NumberStyles options, float& result) noexcept;
+        static bool TryParseUInt32(String& value, NumberStyles options, uint32_t& result) noexcept;
+        static bool TryParseUInt64(String& value, NumberStyles options, uint64_t& result) noexcept;
+        static bool TryStringToNumber(String& value, NumberStyles options, NumberBuffer& number, bool parseDecimal) noexcept;
+        static bool TryStringToNumber(String& value, NumberStyles options, NumberBuffer& number, std::ostringstream* const sb, bool parseDecimal) noexcept;
 
     public:
 
@@ -352,11 +364,11 @@ namespace Number {
         Int32 Scale;
         Boolean Sign;
 
-        NumberBuffer(Byte*) noexcept;
+        constexpr NumberBuffer(unsigned char* data) noexcept;
 
-        Byte* PackForNative() noexcept;
+        unsigned char* PackForNative() noexcept;
 
-        static constexpr Int32 NumberBufferBytes = 12 + ((NumberMaxDigits + 1) * 2) + sizeof(uintptr_t);
+        static constexpr size_t NumberBufferBytes = 12 + ((NumberMaxDigits + 1) * 2) + sizeof(uintptr_t);
     };
 
 };

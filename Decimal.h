@@ -8,8 +8,42 @@
 #include <bit>
 
 #include "Platform.h"
-#include "Byte.h"
 #include "BitConverter.h"
+#include "MidPointRounding.hpp"
+
+class Byte;
+class Int16;
+class Int32;
+class Int64;
+class Double;
+class Single;
+class SByte;
+class String;
+class UInt16;
+class UInt32;
+class UInt64;
+
+/*
+ * We must declare PowerOvfl outside the Decimal class scope, as we are using
+ * it as constexpr inside of Decimal class.
+ * That's the only reason it's completely private being private of Decimal class.
+ * For that class is supposed to be accessed just for Decimal class
+*/
+class PowerOvfl
+{
+	friend class Decimal;
+
+private:
+
+	const unsigned int Hi;
+	const unsigned long long MidLo;
+
+	constexpr PowerOvfl(unsigned int hi, unsigned int mid, unsigned int lo)
+		:
+		Hi(hi),
+		MidLo((static_cast<unsigned long long>(mid) << 32) + lo)
+	{};
+};
 
 class Decimal
 {
@@ -48,30 +82,30 @@ private:
 	};
 
 	// Constant representing the Decimal value 0.
-	static constexpr Decimal Zero() { return 0m; }
+	static constexpr Decimal Zero() { return 0.0; }
 
 	// Constant representing the Decimal value 1.
-	static constexpr Decimal One() { return 1m; }
+	static constexpr Decimal One() { return 1.0; }
 
 	// Constant representing the Decimal value -1.
-	static constexpr Decimal MinusOne() { return -1m; }
+	static constexpr Decimal MinusOne() { return -1.0; }
 
 	// Constant representing the largest possible Decimal value. The value of
 	// this constant is 79,228,162,514,264,337,593,543,950,335.
-	static constexpr Decimal MaxValue() { return 79228162514264337593543950335m; }
+	static constexpr Decimal MaxValue() { return 79228162514264337593543950335.0; }
 
 	// Constant representing the smallest possible Decimal value. The value of
 	// this constant is -79,228,162,514,264,337,593,543,950,335.
-	static constexpr Decimal MinValue() { return -79228162514264337593543950335m; }
+	static constexpr Decimal MinValue() { return -79228162514264337593543950335.0; }
 
 
 	// Constant representing the negative number that is the closest possible
 	// Decimal value to -0m.
-	static constexpr Decimal NearNegativeZero() { return -0.000000000000000000000000001m; }
+	static constexpr Decimal NearNegativeZero() { return -0.000000000000000000000000001; }
 
 	// Constant representing the positive number that is the closest possible
 	// Decimal value to +0m.
-	static constexpr Decimal NearPositiveZero() { +0.000000000000000000000000001m; }
+	static constexpr Decimal NearPositiveZero() { +0.000000000000000000000000001; }
 
 	/*
 	 * The Lo, Mid, Hi, and Flags fields contain the representation of the
@@ -91,20 +125,10 @@ private:
 	int Lo;
 	int Mid;
 
+	unsigned long long ULOMIDLE;
+
 	inline constexpr bool IsNegative() const noexcept { return Flags < 0; }
 	inline constexpr int Scale() const noexcept { return static_cast<unsigned char>(Flags >> ScaleShift); }
-
-	struct PowerOvfl
-	{
-		const unsigned int Hi;
-		const unsigned long MidLo;
-
-		constexpr PowerOvfl(unsigned int hi, unsigned int mid, unsigned int lo) noexcept
-			:
-			Hi(hi),
-			MidLo(static_cast<unsigned long>(mid) << 32 + lo)
-		{}
-	};
 
 	static constexpr PowerOvfl PowerOvflValues[] =
 	{
@@ -280,6 +304,8 @@ private:
 	 */
 	class DecCalc
 	{
+		friend class Decimal;
+
 	private:
 
 		// NOTE: Do not change the offsets of these fields. This structure must have the same layout as Decimal.
@@ -369,22 +395,22 @@ private:
 				1e80
 		};
 
-		static unsigned int GetExponent(float f) noexcept
+		static inline constexpr unsigned int GetExponent(float f) noexcept
 		{
 			return static_cast<unsigned char>(*reinterpret_cast<unsigned int*>(&f) >> 23);
 		}
 
-		static unsigned int GetExponent(double d) noexcept
+		static inline constexpr unsigned int GetExponent(double d) noexcept
 		{
 			return static_cast<unsigned int>(*reinterpret_cast<unsigned long*>(&d) >> 52) & 0x7FFu;
 		}
 
-		static unsigned long unsigned UInt32x32To64(unsigned int a, unsigned int b) noexcept
+		static inline constexpr unsigned long unsigned UInt32x32To64(unsigned int a, unsigned int b) noexcept
 		{
 			return static_cast<unsigned long>(a) * static_cast<unsigned long>(b);
 		}
 
-		static void UInt64x64To128(unsigned long a, unsigned long b, DecCalc& result)
+		static constexpr void UInt64x64To128(unsigned long a, unsigned long b, DecCalc& result)
 		{
 			unsigned long low = UInt32x32To64(static_cast<unsigned int>(a), static_cast<unsigned int>(b)); // lo partial prod
 			unsigned long mid = UInt32x32To64(static_cast<unsigned int>(a), static_cast<unsigned int>(b >> 32)); // mid 1 partial prod
@@ -495,7 +521,7 @@ private:
 
 		/// Normalize (unscale) the number by trying to divide out 10^8, 10^4, 10^2, and 10^1.
 		/// If a division by one of these powers returns a zero remainder, then we keep the quotient.
-		static void Unscale(unsigned int& low, unsigned long& high64, int& scale)
+		static constexpr void Unscale(unsigned int& low, unsigned long& high64, int& scale)
 		{
 			// Since 10 = 2 * 5, there must be a factor of 2 for every power of 10 we can extract.
 			// We use this as a quick test on whether to try a given power.
@@ -1316,7 +1342,7 @@ private:
 		}
 
 		/// Does an in-place round by the specified scale
-		static void InternalRound(DecCalc& d, unsigned int scale, RoundingMode mode)
+		static void InternalRound(DecCalc& d, unsigned int scale, RoundingMode mode) noexcept
 		{
 			// the scale becomes the desired decimal count
 			d.uflags -= scale << ScaleShift;
@@ -1782,7 +1808,7 @@ private:
 		}
 
 		/// Convert float to Decimal
-		static void VarDecFromR4(float input, DecCalc& result)
+		static constexpr void VarDecFromR4(float input, DecCalc& result)
 		{
 			result = DecCalc();
 
@@ -1790,7 +1816,7 @@ private:
 			// than 2^93.  So a float with an exponent of -94 could just
 			// barely reach 0.5, but smaller exponents will always round to zero.
 			const unsigned int SNGBIAS = 126;
-			int exp = (int)(GetExponent(input) - SNGBIAS);
+			int exp = static_cast<int>(GetExponent(input) - SNGBIAS);
 			if(exp < -94)
 				return; // result should be zeroed out
 
@@ -1841,8 +1867,8 @@ private:
 
 			// Round to integer
 			unsigned int mant;
-			mant = (unsigned int)(int)dbl;
-			dbl -= (int)mant;  // difference between input & integer
+			mant = static_cast<unsigned int>(static_cast<int>(dbl));
+			dbl -= static_cast<int>(mant);  // difference between input & integer
 			if(dbl > 0.5 || dbl == 0.5 && (mant & 1) != 0)
 				mant++;
 			if(mant == 0)
@@ -1867,8 +1893,8 @@ private:
 					else
 					{
 						unsigned long low64 = UInt32x32To64(mant, s_powers10[power - 9]);
-						unsigned long hi64 = UInt32x32To64(TenToPowerNine, (unsigned int)(low64 >> 32));
-						low64 = UInt32x32To64(TenToPowerNine, (unsigned int)low64);
+						unsigned long hi64 = UInt32x32To64(TenToPowerNine, static_cast<unsigned int>(low64) >> 32);
+						low64 = UInt32x32To64(TenToPowerNine, static_cast<unsigned int>(low64));
 						result.Low(static_cast<unsigned int>(low64));
 						hi64 += low64 >> 32;
 						result.Mid(static_cast<unsigned int>(hi64));
@@ -1941,7 +1967,7 @@ private:
 			// than 2^93.  So a float with an exponent of -94 could just
 			// barely reach 0.5, but smaller exponents will always round to zero.
 			const unsigned int DBLBIAS = 1022;
-			int exp = (int)(GetExponent(input) - DBLBIAS);
+			int exp = static_cast<int>(GetExponent(input) - DBLBIAS);
 			if(exp < -94)
 				return; // result should be zeroed out
 
@@ -2101,8 +2127,8 @@ private:
 			// Value taken via reverse engineering the double that corresponds to 2^64. (oleaut32 has ds2to64 = DEFDS(0, 0, DBLBIAS + 65, 0))
 			const double ds2to64 = 1.8446744073709552e+019;
 
-			double dbl = ((double)value.Lo +
-						  (double)value.Hi * ds2to64) / s_doublePowers10[value.Scale()];
+			double dbl = (static_cast<double>(value.Lo) +
+						  static_cast<double>(value.Hi) * ds2to64) / s_doublePowers10[value.Scale()];
 
 			if(value.IsNegative())
 				dbl = -dbl;
@@ -2110,7 +2136,7 @@ private:
 			return dbl;
 		}
 
-		static int GetHashCode(Decimal const& d)
+		static constexpr int GetHashCode(Decimal const& d)
 		{
 			if((d.Lo | d.Mid | d.Hi) == 0)return 0;
 
@@ -2571,8 +2597,10 @@ private:
 
 	constexpr Decimal(int lo, int mid, int hi, int flags)
 	{
-		if((flags & ~(SignMask | ScaleMask)) == 0 && (flags & ScaleMask) <= (28 << 16))
+		if(IsValid(flags))
 		{
+			ULOMIDLE = 0;
+
 			Lo = lo;
 			Mid = mid;
 			Hi = hi;
@@ -2581,6 +2609,73 @@ private:
 		}
 
 		throw std::invalid_argument("DecBitCtor");
+	}
+
+	static inline constexpr DecCalc& AsMutable(Decimal& d) noexcept { return *reinterpret_cast<DecCalc*>(&d); }
+
+	static inline constexpr Decimal Abs(Decimal d) { return Decimal(d.Lo, d.Mid, d.Hi, d.Flags & ~SignMask); }
+
+	static constexpr void GetBytes(Decimal& d, unsigned char buffer[]) noexcept
+	{
+		assert(buffer != nullptr && ArraySize(buffer) >= 16);
+		buffer[0] = static_cast<unsigned char>(d.Lo);
+		buffer[1] = static_cast<unsigned char>(d.Lo >> 8);
+		buffer[2] = static_cast<unsigned char>(d.Lo >> 16);
+		buffer[3] = static_cast<unsigned char>(d.Lo >> 24);
+		buffer[4] = static_cast<unsigned char>(d.Mid);
+		buffer[5] = static_cast<unsigned char>(d.Mid >> 8);
+		buffer[6] = static_cast<unsigned char>(d.Mid >> 16);
+		buffer[7] = static_cast<unsigned char>(d.Mid >> 24);
+		buffer[8] = static_cast<unsigned char>(d.Hi);
+		buffer[9] = static_cast<unsigned char>(d.Hi >> 8);
+		buffer[10] = static_cast<unsigned char>(d.Hi >> 16);
+		buffer[11] = static_cast<unsigned char>(d.Hi >> 24);
+		buffer[12] = static_cast<unsigned char>(d.Flags);
+		buffer[13] = static_cast<unsigned char>(d.Flags >> 8);
+		buffer[14] = static_cast<unsigned char>(d.Flags >> 16);
+		buffer[15] = static_cast<unsigned char>(d.Flags >> 24);
+	}
+
+	/*
+	 * This method does a 'raw' and 'unchecked' addition of a UInt32 to a Decimal in place.
+	 * 'raw' means that it operates on the internal 96-bit unsigned integer value and
+	 * ingores the sign and scale. This means that it is not equivalent to just adding
+	 * that number, as the sign and scale are effectively applied to the UInt32 value also.
+	 * 'unchecked' means that it does not fail if you overflow the 96 bit value.
+	 */
+	static void InternalAddUInt32RawUnchecked(Decimal& value, unsigned int i)
+	{
+		unsigned int v;
+		unsigned int sum;
+		v = static_cast<unsigned int>(value.Lo);
+		sum = v + i;
+		value.Lo = static_cast<unsigned int>(sum);
+		if(sum < v || sum < i)
+		{
+			v = static_cast<unsigned int>(value.Mid);
+			sum = v + 1;
+			value.Mid = static_cast<unsigned int>(sum);
+			if(sum < v || sum < 1)
+			{
+				value.Hi = static_cast<int>(static_cast<unsigned int>(value.Hi) + 1);
+			}
+		}
+	}
+
+	static inline constexpr bool IsValid(int flags) noexcept
+	{
+		return (flags & ~(SignMask | ScaleMask)) == 0 && (static_cast<unsigned int>(flags & ScaleMask) <= (28 << ScaleShift));
+	}
+
+	inline constexpr unsigned long Low64() noexcept { return BitConverter::IsLittleEndian ? static_cast<unsigned long long>(ULOMIDLE) : (static_cast<unsigned long long>(Mid) << 32) | Lo; }
+
+	static Decimal PrivateRound(Decimal& d, int decimals, MidPointRounding mode)
+	{
+		if(static_cast<unsigned int>(decimals) > 28) throw std::invalid_argument("Scale should not be larger than 28");
+
+		int scale = d.Scale() - decimals;
+		if(scale > 0) DecCalc::InternalRound(AsMutable(d), static_cast<unsigned int>(scale), static_cast<RoundingMode>(mode));
+		return d;
 	}
 
 	constexpr void SetBits(int bits[])
@@ -2592,7 +2687,7 @@ private:
 		if(arraySize == 4)
 		{
 			int f = bits[3];
-			if((f & ~(SignMask | ScaleMask)) == 0 && (f & ScaleMask) <= (28 << 16))
+			if(IsValid(f))
 			{
 				Lo = bits[0];
 				Mid = bits[1];
@@ -2605,10 +2700,22 @@ private:
 		throw std::invalid_argument("bits must contain the size of 4 ints");
 	}
 
-	static constexpr Decimal Abs(Decimal d) { return Decimal(d.Lo, d.Mid, d.Hi, d.Flags & ~SignMask); }
-
+	static constexpr void TruncateSelf(Decimal& d) noexcept
+	{
+		int flags = d.Flags;
+		if((flags & ScaleMask) != 0)
+			DecCalc::InternalRound(AsMutable(d), static_cast<unsigned char>(flags >> ScaleShift), RoundingMode::Truncate);
+	}
 
 public:
+
+	constexpr Decimal() noexcept
+		:
+		Lo(0),
+		Mid(0),
+		Hi(0),
+		Flags(0)
+	{}
 
 	constexpr Decimal(int value) noexcept
 		:
@@ -2627,6 +2734,14 @@ public:
 		}
 		Lo = value_copy;
 	}
+
+	constexpr Decimal(unsigned int value) noexcept
+		:
+		Lo(static_cast<int>(value)),
+		Mid(0),
+		Hi(0),
+		Flags(0)
+	{}
 
 	constexpr Decimal(long value) noexcept
 		:
@@ -2653,6 +2768,16 @@ public:
 		Mid(static_cast<int>(value) >> 32),
 		Hi(0)
 	{}
+
+	constexpr Decimal(float value) noexcept
+	{
+		DecCalc::VarDecFromR4(value, AsMutable(*this));
+	}
+
+	constexpr Decimal(double value) noexcept
+	{
+		DecCalc::VarDecFromR8(value, AsMutable(*this));
+	}
 
 	/*
 	 * Constructs a Decimal from an integer array containing a binary
@@ -2694,16 +2819,312 @@ public:
 		if(isNegative) Flags |= SignMask;
 	}
 
-	static constexpr Decimal Add(Decimal d1, Decimal d2) {}
+	constexpr operator unsigned char() const { return ToByte(*this); }
+	constexpr operator signed char() const { return ToSByte(*this); }
+	constexpr operator char() const
+	{
+		unsigned short temp;
+		try
+		{
+			temp = ToUInt16(*this);
+		}
+		catch(const std::overflow_error& ex)
+		{
+			throw std::overflow_error(ex);
+		}
+
+		return static_cast<char>(temp);
+	}
+
+	constexpr operator short() const { return ToInt16(*this); }
+	constexpr operator unsigned short() const { return ToUInt16(*this); }
+	constexpr operator int() const { return ToInt32(*this); }
+	constexpr operator unsigned int() const { return ToUInt32(*this); }
+	constexpr operator long long() const { return ToInt64(*this); }
+	constexpr operator unsigned long long() const { return ToUInt64(*this); }
+	constexpr operator float() const { return ToFloat(*this); }
+	constexpr operator double() const { return ToDouble(*this); }
+
+	/*
+	 * Operator+ (Unary Plus -> Does not change value)
+	 */
+	constexpr Decimal const& operator+() const noexcept
+	{
+		return *this;
+	}
+
+	/*
+	 * Operator- (Unary Minus -> Changes the sign of value)
+	 */
+	constexpr Decimal operator-() const noexcept
+	{
+		return Decimal(Lo, Mid, Hi, Flags ^ SignMask);
+	}
+
+	/*
+	 * Operator++ (Prefix increment)
+	 */
+	constexpr Decimal& operator++() noexcept
+	{
+		auto ret = Decimal::Add(*this, Decimal::One());
+
+		Lo = ret.Lo;
+		Mid = ret.Mid;
+		Hi = ret.Hi;
+		Flags = ret.Flags;
+
+		return *this;
+	}
+
+	/*
+	 * Operator-- (Prefix decrement)
+	 */
+	constexpr Decimal& operator--() noexcept
+	{
+		auto ret = Decimal::Subtract(*this, Decimal::One());
+
+		Lo = ret.Lo;
+		Mid = ret.Mid;
+		Hi = ret.Hi;
+		Flags = ret.Flags;
+
+		return *this;
+	}
+
+	/*
+ * Operator+= (Addition assignment)
+ */
+	constexpr Decimal& operator+=(Decimal& other)
+	{
+		DecCalc::DecAddSub(AsMutable(*this), AsMutable(other), false);
+		return *this;
+	}
+
+	/*
+	 * Operator-= (Subtraction assignment)
+	 */
+	constexpr Decimal& operator-=(Decimal& other)
+	{
+		DecCalc::DecAddSub(AsMutable(*this), AsMutable(other), true);
+		return *this;
+	}
+
+	/*
+	 * Operator*= (Multiplication assignment)
+	 */
+	constexpr Decimal& operator*=(Decimal& other)
+	{
+		DecCalc::VarDecMul(AsMutable(*this), AsMutable(other));
+		return *this;
+	}
+
+	/*
+	 * Operator/= (Division assignment)
+	 */
+	constexpr Decimal& operator/=(Decimal& other)
+	{
+		DecCalc::VarDecDiv(AsMutable(*this), AsMutable(other));
+		return *this;
+	}
+
+	/*
+	 * Operator%= (Modulo assignment)
+	 */
+	constexpr Decimal& operator%=(Decimal& other)
+	{
+		DecCalc::VarDecMod(AsMutable(*this), AsMutable(other));
+		return *this;
+	}
+
+	/*
+	 * Operator+ (Addition)
+	 */
+	constexpr Decimal operator+(Decimal& other) noexcept
+	{
+		Decimal lhs = *this;
+		DecCalc::DecAddSub(AsMutable(lhs), AsMutable(other), false);
+		return lhs;
+	}
+
+	/*
+	 * Operator- (Subtraction)
+	 */
+	constexpr Decimal operator-(Decimal& other) noexcept
+	{
+		Decimal lhs = *this;
+		DecCalc::DecAddSub(AsMutable(lhs), AsMutable(other), true);
+		return lhs;
+	}
+
+	/*
+	* Operator* (Multiplication)
+	*/
+	constexpr Decimal operator*(Decimal& other) noexcept
+	{
+		Decimal lhs = *this;
+		DecCalc::VarDecMul(AsMutable(lhs), AsMutable(other));
+		return lhs;
+	}
+
+	/*
+	* Operator/ (Division)
+	*/
+	constexpr Decimal operator/(Decimal& other)
+	{
+		Decimal lhs = *this;
+		DecCalc::VarDecDiv(AsMutable(lhs), AsMutable(other));
+		return lhs;
+	}
+
+	/*
+	 * Operator% (Modulo)
+	 */
+	constexpr Decimal operator%(Decimal& other)
+	{
+		Decimal lhs = *this;
+		DecCalc::VarDecMod(AsMutable(lhs), AsMutable(other));
+		return lhs;
+	}
+
+	/*
+	 * Operator== (Equality)
+	 */
+	inline constexpr bool operator==(Decimal& other) const noexcept { return DecCalc::VarDecCmp(*this, other) == 0; }
+
+	/*
+	 * Operator!= (Inequality)
+	 */
+	inline constexpr bool operator!=(Decimal& other) const noexcept { return !(*this == other); }
+
+	/*
+	 * Operator< (Less Than)
+	 */
+	inline constexpr bool operator<(Decimal& other) const noexcept { return DecCalc::VarDecCmp(*this, other) < 0; }
+
+	/*
+	 * Operator<= (Less Than or Equal to )
+	 */
+	inline constexpr bool operator<=(Decimal& other) const noexcept { return DecCalc::VarDecCmp(*this, other) <= 0; }
+
+	/*
+	 * Operator> (Greater than)
+	 */
+	inline constexpr bool operator>(Decimal& other) const noexcept { return DecCalc::VarDecCmp(*this, other) > 0; }
+
+	/*
+	 * Operator>= (Greater Than or Equal to )
+	 */
+	inline constexpr bool operator>=(Decimal& other) const noexcept { return DecCalc::VarDecCmp(*this, other) >= 0; }
+
+
+	static constexpr Decimal Add(Decimal d1, Decimal d2)
+	{
+		DecCalc::DecAddSub(AsMutable(d1), AsMutable(d2), false);
+		return d1;
+	}
+
+	static constexpr Decimal Ceiling(Decimal d)
+	{
+		int flags = d.Flags;
+		if((flags & ScaleMask) != 0) DecCalc::InternalRound(AsMutable(d), static_cast<unsigned char>(flags >> ScaleShift), RoundingMode::Ceiling);
+		return d;
+	}
+
+	static constexpr Decimal Divide(Decimal d1, Decimal d2)
+	{
+		DecCalc::VarDecDiv(AsMutable(d1), AsMutable(d2));
+		return d1;
+	}
+
+	static constexpr Array<int> GetBits(Decimal& d) noexcept { return { d.Lo, d.Mid, d.Hi, d.Flags }; }
+
+	constexpr int GetHashCode() const noexcept { return DecCalc::GetHashCode(*this); }
+
+	static constexpr Decimal Floor(Decimal d)
+	{
+		int flags = d.Flags;
+		if((flags & ScaleMask) != 0) DecCalc::InternalRound(AsMutable(d), static_cast<unsigned char>(flags >> ScaleShift), RoundingMode::Floor);
+		return d;
+	}
+
+	static constexpr Decimal& Max(Decimal& d1, Decimal& d2) noexcept
+	{
+		return DecCalc::VarDecCmp(d1, d2) > 0 ? d1 : d2;
+	}
+
+	static constexpr Decimal& Min(Decimal& d1, Decimal& d2) noexcept
+	{
+		return DecCalc::VarDecCmp(d1, d2) < 0 ? d1 : d2;
+	}
+
+	static constexpr Decimal Multiply(Decimal d1, Decimal d2) noexcept
+	{
+		DecCalc::VarDecMul(AsMutable(d1), AsMutable(d2));
+		return d1;
+	}
+
+	static constexpr Decimal Negate(Decimal& d)
+	{
+		return Decimal(d.Lo, d.Mid, d.Hi, d.Flags ^ SignMask);
+	}
+
+	static constexpr Decimal Remainder(Decimal d1, Decimal d2)
+	{
+		DecCalc::VarDecMod(AsMutable(d1), AsMutable(d2));
+		return d1;
+	}
+
+	static constexpr Decimal Round(Decimal d) { return PrivateRound(d, 0, MidPointRounding::ToEven); }
+	static constexpr Decimal Round(Decimal d, int decimals) { return PrivateRound(d, decimals, MidPointRounding::ToEven); }
+	static constexpr Decimal Round(Decimal d, MidPointRounding mode) { return PrivateRound(d, 0, mode); }
+	static constexpr Decimal Round(Decimal d, int decimals, MidPointRounding mode) { return PrivateRound(d, decimals, mode); }
+
+	static constexpr int Sign(Decimal const& d) noexcept { return (d.Lo | d.Mid | d.Hi) == 0 ? 0 : (d.Flags >> 31) | 1; }
+
+	static constexpr Decimal Subtract(Decimal d1, Decimal d2)
+	{
+		DecCalc::DecAddSub(AsMutable(d1), AsMutable(d2), true);
+		return d1;
+	}
+
+	static Decimal Parse(String s);
+	static Decimal Parse(String s, NumberStyles style);
+	static Byte	ToByte(Decimal value);
+
+	static Decimal ToDecimal(const unsigned char buffer[])
+	{
+		assert(buffer != nullptr && ArraySize(buffer) >= 16);
+
+		int lo = static_cast<int>(buffer[0]) | static_cast<int>(buffer[1]) << 8 | static_cast<int>(buffer[2]) << 16 | static_cast<int>(buffer[3]) << 24;
+		int mid = static_cast<int>(buffer[4]) | static_cast<int>(buffer[5]) << 8 | static_cast<int>(buffer[6]) << 16 | static_cast<int>(buffer[7]) << 24;
+		int hi = static_cast<int>(buffer[8]) | static_cast<int>(buffer[9]) << 8 | static_cast<int>(buffer[10]) << 16 | static_cast<int>(buffer[11]) << 24;
+		int flags = static_cast<int>(buffer[12]) | static_cast<int>(buffer[13]) << 8 | static_cast<int>(buffer[14]) << 16 | static_cast<int>(buffer[15]) << 24;
+
+		return Decimal(lo, mid, hi, flags);
+	}
+
+	static Double ToDouble(Decimal value);
+	static Single ToFloat(Decimal value);
+	static Int16 ToInt16(Decimal value);
+	static Int32 ToInt32(Decimal value);
+	static Int64 ToInt64(Decimal value);
+	static SByte ToSByte(Decimal value);
+	String ToString();
+	String ToString(String const& format);
+	static UInt16 ToUInt16(Decimal value);
+	static UInt32 ToUInt32(Decimal value);
+	static UInt64 ToUInt64(Decimal value);
+
+	static constexpr Decimal Truncate(Decimal value) noexcept
+	{
+		TruncateSelf(value);
+		return value;
+	}
+
+	static Boolean TryParse(String s, Decimal& result);
+	static Boolean TryParse(String s, NumberStyles style, Decimal& result);
 };
 
-
-// This operator allows us to declare a Decimal as if we were doing it
-// the same way on C#. By passing the "m" suffix at the end of the number
-static constexpr Decimal operator "" m(const char* c)
-{
-	return Decimal{ c }; // Assuming an explicit c'tor
-}
-
+typedef Decimal decimal;
 
 #endif //CPPDATASTRUCTURES_DECIMAL_H

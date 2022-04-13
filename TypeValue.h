@@ -61,7 +61,7 @@ class Int16;
 class Int32;
 class Int64;
 class Double;
-class Float;
+class Single;
 class SByte;
 class UInt16;
 class UInt32;
@@ -92,7 +92,7 @@ template<>
 struct is_promotion_wrapper<Double> : std::true_type {};
 
 template<>
-struct is_promotion_wrapper<Float> : std::true_type {};
+struct is_promotion_wrapper<Single> : std::true_type {};
 
 template<>
 struct is_promotion_wrapper<SByte> : std::true_type {};
@@ -131,7 +131,7 @@ template<>
 struct is_wrapper_integral<Double> : std::false_type {};
 
 template<>
-struct is_wrapper_integral<Float> : std::false_type {};
+struct is_wrapper_integral<Single> : std::false_type {};
 
 template<>
 struct is_wrapper_integral<SByte> : std::true_type {};

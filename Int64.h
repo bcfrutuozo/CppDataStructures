@@ -15,7 +15,7 @@ class Char;
 class Int16;
 class Int32;
 class Double;
-class Float;
+class Single;
 class SByte;
 class UInt16;
 class UInt32;

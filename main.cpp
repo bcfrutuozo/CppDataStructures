@@ -21,6 +21,7 @@
 #include "Double.h"
 #include "Float.h"
 #include "UInt32.h"
+#include "Decimal.h"
 
 #include <iostream>
 
@@ -33,9 +34,12 @@
 int main(int argc, char *argv[]) {
     Timer t;
 
+    Boolean b = true;
     String s  = "ABCDEFA";
     auto z = s.ToCharArray();
 
+    char a = 'a';
+    Char* p = a;
 
     for(size_t i = 0; i < s.GetLength(); ++i){
         std::cout << s[i].GetHashCode() << std::endl;

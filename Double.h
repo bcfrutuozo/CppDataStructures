@@ -7,13 +7,14 @@
 
 #include "TypeValue.h"
 #include "Boolean.h"
+#include "BitConverter.h"
 
 class Byte;
 class Char;
 class Int16;
 class Int32;
 class Int64;
-class Float;
+class Single;
 class SByte;
 class UInt16;
 class UInt32;
@@ -346,6 +347,19 @@ public:
         return lhs << rhs.Value;
     }
     //</editor-fold>
+
+    static inline constexpr double Epsilon = std::numeric_limits<double>::epsilon();
+    static inline constexpr bool IsInfinity(Double const& d) noexcept { return (*reinterpret_cast<const long long*>(&d) & 0x7FFFFFFFFFFFFFFF) == 0x7FF0000000000000; }
+    static inline constexpr bool IsNaN(Double const& d) noexcept { return (*reinterpret_cast<const unsigned long long*>(&d) & 0x7FFFFFFFFFFFFFFFL) == 0x7FF0000000000000L; }
+    static inline constexpr bool IsNegative(Double const& d) noexcept { return (*reinterpret_cast<const unsigned long long*>(&d) & 0x8000000000000000) == 0x800000000000000; }
+    static inline constexpr bool IsNegativeInfinity(Double const& d) noexcept { return d == NegativeInfinity; }
+    static inline constexpr bool IsPositiveInfinity(Double const& d) noexcept { return d == PositiveInfinity; }
+    static inline constexpr double MinValue = std::numeric_limits<double>::min();
+    static inline constexpr double MaxValue = std::numeric_limits<double>::max();
+    static inline constexpr double NaN = std::numeric_limits<double>::signaling_NaN();
+    static inline constexpr double NegativeInfinity = -std::numeric_limits<double>::signaling_NaN();
+    static inline constexpr double NegativeZero() noexcept { return BitConverter::Int64BitsToDouble(static_cast<long>(0x8000000000000000)); }
+    static inline constexpr double PositiveInfinity = std::numeric_limits<double>::signaling_NaN();;
 };
 
 #endif //CPPDATASTRUCTURES_DOUBLE_H

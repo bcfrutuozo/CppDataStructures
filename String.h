@@ -16,6 +16,8 @@
 
 class String final {
 
+    friend class Number::NumberBuffer;
+
 private:
 
     //<editor-fold desc="Iterators implementation">
