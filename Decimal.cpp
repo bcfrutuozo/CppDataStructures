@@ -15,6 +15,7 @@
 #include "UInt64.h"
 #include "String.h"
 #include "Number.h"
+#include "NumberFormatter.hpp"
 
 Decimal Decimal::Parse(String s)
 {
@@ -129,7 +130,7 @@ int8_t Decimal::ToSByte(Decimal value)
 
 String Decimal::ToString()
 {
-	return Number::FormatDecimal(*this, nullptr);
+	return Number::FormatDecimal(*this, "");
 }
 
 String Decimal::ToString(String const& format)
@@ -137,7 +138,7 @@ String Decimal::ToString(String const& format)
 	return Number::FormatDecimal(*this, format);
 }
 
-uint16_t  Decimal::ToUInt16(Decimal value)
+uint16_t Decimal::ToUInt16(Decimal value)
 {
 	unsigned int temp;
 	try

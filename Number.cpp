@@ -9,6 +9,7 @@
 #include "Double.h"
 #include "Single.h"
 #include "String.h"
+#include "NumberFormatter.hpp"
 
 Number::NumberBuffer::NumberBuffer(uint8_t* stackBuffer) noexcept
 	:
@@ -18,6 +19,41 @@ Number::NumberBuffer::NumberBuffer(uint8_t* stackBuffer) noexcept
 	Scale(0),
 	Sign(false)
 {}
+
+String Number::FormatDecimal(Decimal& value, String const& format)
+{
+	return NumberFormatter::NumberToString(format, value);
+}
+
+String Number::FormatDouble(double& value, String const& format)
+{
+	return NumberFormatter::NumberToString(format, value);
+}
+
+String Number::FormatInt32(int32_t& value, String const& format)
+{
+	return NumberFormatter::NumberToString(format, value);
+}
+
+String Number::FormatInt64(int64_t& value, String const& format)
+{
+	return NumberFormatter::NumberToString(format, value);
+}
+
+String Number::FormatUInt32(uint32_t& value, String const& format)
+{
+	return NumberFormatter::NumberToString(format, value);
+}
+
+String Number::FormatUInt64(uint64_t& value, String const& format)
+{
+	return NumberFormatter::NumberToString(format, value);
+}
+
+String Number::FormatSingle(float& value, String const& format)
+{
+	return NumberFormatter::NumberToString(format, value);
+}
 
 bool Number::HexNumberToInt32(NumberBuffer& number, int32_t& value) noexcept
 {

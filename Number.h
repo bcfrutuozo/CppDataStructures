@@ -277,10 +277,11 @@
 
 #include "NumberStyles.h"
 
+#include <cassert>
 #include <sstream>
 
-
 class String;
+class Decimal;
 
 class Number final
 {
@@ -292,6 +293,7 @@ class Number final
 	friend class Int16;
 	friend class Int32;
 	friend class Int64;
+	friend class NumberFormatter;
 	friend class SByte;
 	friend class Single;
 	friend class String;
@@ -330,7 +332,7 @@ private:
 	*/
 	class NumberBuffer
 	{
-
+		friend class NumberFormatter;
 	private:
 
 		unsigned char* BaseAddress;
@@ -542,6 +544,95 @@ private:
 	static bool TryParseUInt64(String& value, NumberStyles options, uint64_t& result) noexcept;
 	static bool TryStringToNumber(String& value, NumberStyles options, NumberBuffer& number, bool parseDecimal) noexcept;
 	static bool TryStringToNumber(String& value, NumberStyles options, NumberBuffer& number, std::ostringstream* sb, bool parseDecimal) noexcept;
+
+public:
+
+	struct NumberFormatInfo
+	{
+	private:
+
+		String positiveSign;
+		String negativeSign;
+		String numberDecimalSeparator;
+		String numberGroupSeparator;
+		String currencyGroupSeparator;
+		String currencyDecimalSeparator;
+		String currencySymbol;
+		String nanSymbol;
+		String positiveInfinitySymbol;
+		String negativeInfinitySymbol;
+		String percentDecimalSeparator;
+		String percentGroupSeparator;
+		String percentSymbol;
+		String perMileSymbol;
+
+		int numberDecimalDigits;
+		int currencyDecimalDigits;
+		int currencyPositivePattern;
+		int currencyNegativePattern;
+		int numberNegativePattern;
+		int percentPositivePattern;
+		int percentNegativePattern;
+		int percentDecimalDigits;
+
+		static constexpr const char* const NativeDigits[] = { "0", "1" ,"2", "3", "4", "5", "6", "7", "8", "9" };
+
+		NumberFormatInfo(const char* culture) noexcept
+		{
+			// As we'll be not checking cultures, get the current one from the environment variables
+
+			if(culture == nullptr) std::setlocale(LC_ALL, "");
+			else if(std::setlocale(LC_ALL, culture) == nullptr) throw std::invalid_argument("Invalid culture info");
+
+			auto lc = std::localeconv();
+			positiveSign = lc->positive_sign;
+			negativeSign = lc->negative_sign;
+			numberDecimalSeparator = lc->decimal_point;
+			numberGroupSeparator = lc->grouping;
+			currencyGroupSeparator = lc->mon_grouping;
+			currencyDecimalSeparator = lc->mon_decimal_point;
+			currencySymbol = "\x00a4";	// U+00a4 is the symbol for International Monetary Fund.
+			nanSymbol = "NaN";
+			positiveInfinitySymbol = "Infinity";
+			negativeInfinitySymbol = "-Infinity";
+			percentDecimalSeparator = lc->decimal_point;
+			percentGroupSeparator = lc->grouping;
+			percentSymbol = "%";
+			perMileSymbol = "\u2030";
+			numberDecimalDigits = lc->frac_digits;
+			currencyDecimalDigits = lc->frac_digits;
+			currencyPositivePattern = lc->p_sign_posn;
+			currencyNegativePattern = lc->n_sign_posn;
+			numberNegativePattern = lc->n_cs_precedes;
+			percentPositivePattern = lc->p_sign_posn;
+			percentNegativePattern = lc->n_sign_posn;
+			percentDecimalDigits = lc->frac_digits;
+		}
+
+		static NumberFormatInfo Instance;
+
+	public:
+
+		NumberFormatInfo()
+			:
+			NumberFormatInfo(nullptr)
+		{}
+
+		static constexpr const char* PositiveSign() {
+			return reinterpret_cast<const char*>(Instance.positiveSign.GetPointer());
+		}
+	};
+
+	static String FormatDecimal(Decimal& value, String const& format);
+	static String FormatDouble(double& value, String const& format);
+	static String FormatInt32(int32_t& value, String const& format);
+	static String FormatInt64(int64_t& value, String const& format);
+	static String FormatUInt32(uint32_t& value, String const& format);
+	static String FormatUInt64(uint64_t& value, String const& format);
+	static String FormatSingle(float& value, String const& format);
 };
+
+// Initialize default static variable for locale
+Number::NumberFormatInfo Instance = Number::NumberFormatInfo();
 
 #endif //CPPDATASTRUCTURES_NUMBER_H

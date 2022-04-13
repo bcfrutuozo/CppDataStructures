@@ -17,6 +17,8 @@
 class String final {
 
     friend class Number;
+    friend class NumberFormatter;
+    friend class NumberFormatInfo;
 
 private:
 
