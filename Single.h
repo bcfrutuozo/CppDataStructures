@@ -350,10 +350,10 @@ public:
     //</editor-fold>
 
     static inline constexpr float Epsilon = std::numeric_limits<float>::epsilon();
-    static inline constexpr bool IsInfinity(Single const& s) noexcept { return (*reinterpret_cast<const int*>(&s) & 0x7FFFFFFF) == 0x7F800000; }
-    static inline constexpr bool IsNaN(Single const& s) noexcept { return (*reinterpret_cast<const int*>(&s) & 0x7FFFFFFF) > 0x7F800000; }
-    static inline constexpr bool IsNegativeInfinity(Single const& s) noexcept { return *reinterpret_cast<const int*>(&s) == static_cast<int>(0xFF800000); }
-    static inline constexpr bool IsPositiveInfinity(Single const& s) noexcept { return *reinterpret_cast<const int*>(&s) == 0x7F800000; }
+    static inline bool IsInfinity(Single const& s) noexcept { return (*reinterpret_cast<const int*>(&s) & 0x7FFFFFFF) == 0x7F800000; }
+    static inline bool IsNaN(Single const& s) noexcept { return (*reinterpret_cast<const int*>(&s) & 0x7FFFFFFF) > 0x7F800000; }
+    static inline bool IsNegativeInfinity(Single const& s) noexcept { return *reinterpret_cast<const int*>(&s) == static_cast<int>(0xFF800000); }
+    static inline bool IsPositiveInfinity(Single const& s) noexcept { return *reinterpret_cast<const int*>(&s) == 0x7F800000; }
     static inline constexpr float MinValue = std::numeric_limits<float>::min();
     static inline constexpr float MaxValue = std::numeric_limits<float>::max();
     static inline constexpr float NaN = std::numeric_limits<float>::signaling_NaN();

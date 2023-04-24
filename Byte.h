@@ -544,14 +544,8 @@ public:
 
     //</editor-fold>
 
-    Int32 GetHashCode() const noexcept;
-
-    static Byte Parse(String& s);
-
-    static Byte Parse(String& s, NumberStyles style);
-
-    static constexpr Byte MaxValue() noexcept { return (unsigned char)0xFF; }
-    static constexpr Byte MinValue() noexcept { return (unsigned char)0x00; }
+    static inline constexpr Byte MaxValue() noexcept { return (unsigned char)0xFF; }
+    static inline constexpr Byte MinValue() noexcept { return (unsigned char)0x00; }
 };
 
 #endif //CPPDATASTRUCTURES_BYTE_H

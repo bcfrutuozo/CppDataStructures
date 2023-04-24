@@ -7,7 +7,7 @@
 
 #ifdef __linux__ 
     //linux code goes here
-#elif _WIN32
+#elif !__linux__ & _MSC_VER
 #define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>
 #include <crtdbg.h>
@@ -30,7 +30,7 @@ int main(int argc, char* argv[])
 
     int result = Catch::Session().run(argc, argv);
 
-#if _WIN32
+#if _MSC_VER
     _CrtDumpMemoryLeaks();
 #endif
 

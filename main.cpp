@@ -21,11 +21,10 @@
 #include "Double.h"
 #include "Float.h"
 #include "UInt32.h"
-#include "Decimal.h"
 
 #include <iostream>
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 #define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>
 #include <crtdbg.h>
@@ -38,14 +37,9 @@ int main(int argc, char *argv[]) {
     String s  = "ABCDEFA";
     auto z = s.ToCharArray();
 
-    char a = 'a';
-    Char* p = a;
+    std::cout << "Size of class: " << sizeof(Boolean);
 
-    for(size_t i = 0; i < s.GetLength(); ++i){
-        std::cout << s[i].GetHashCode() << std::endl;
-    }
-
-#ifdef _WIN32
+#ifdef _MSC_VER
     _CrtDumpMemoryLeaks();
 #endif
 

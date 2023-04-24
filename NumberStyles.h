@@ -5,7 +5,7 @@
 #ifndef CPPDATASTRUCTURES_NUMBERSTYLES_H
 #define CPPDATASTRUCTURES_NUMBERSTYLES_H
 
-enum class NumberStyles {
+enum class NumberStyles : int {
     // Bit flag indicating that leading whitespace is allowed. Character values
     // 0x0009, 0x000A, 0x000B, 0x000C, 0x000D, and 0x0020 are considered to be
     // whitespace.
@@ -38,8 +38,7 @@ enum class NumberStyles {
 
 static inline constexpr NumberStyles operator&(NumberStyles lhs, NumberStyles rhs)
 {
-    using T = std::underlying_type_t<NumberStyles>;
-    return static_cast<NumberStyles>(static_cast<T>(lhs) & static_cast<T>(rhs));
+    return static_cast<NumberStyles>(static_cast<int>(lhs) & static_cast<int>(rhs));
 }
 
 static inline constexpr NumberStyles operator&=(NumberStyles lhs, NumberStyles rhs)
@@ -50,14 +49,39 @@ static inline constexpr NumberStyles operator&=(NumberStyles lhs, NumberStyles r
 
 static inline constexpr NumberStyles operator|(NumberStyles lhs, NumberStyles rhs)
 {
-    using T = std::underlying_type_t<NumberStyles>;
-    return static_cast<NumberStyles>(static_cast<T>(lhs) | static_cast<T>(rhs));
+    return static_cast<NumberStyles>(static_cast<int>(lhs) | static_cast<int>(rhs));
 }
 
-static inline constexpr NumberStyles operator&=(NumberStyles lhs, NumberStyles rhs)
+static inline constexpr NumberStyles operator|=(NumberStyles lhs, NumberStyles rhs)
 {
     lhs = lhs | rhs;
     return lhs;
 }
+
+static inline constexpr NumberStyles operator~(NumberStyles ns)
+{
+    return static_cast<NumberStyles>(~static_cast<int>(ns));
+}
+
+static inline constexpr bool operator==(int a, NumberStyles ns)
+{
+    return a == static_cast<int>(ns);
+}
+
+static inline constexpr bool operator==(NumberStyles ns, int a)
+{
+    return a == ns;
+}
+
+static inline constexpr bool operator!=(int a, NumberStyles ns)
+{
+    return !(a == ns);
+}
+
+static inline constexpr bool operator!=(NumberStyles ns, int a)
+{
+    return a != ns;
+}
+
 
 #endif //CPPDATASTRUCTURES_NUMBERSTYLES_H

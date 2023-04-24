@@ -129,19 +129,19 @@ namespace BitConverter
 		return static_cast<unsigned long>(ToInt64(value, startIndex));
 	}
 
-	static constexpr float ToSingle(unsigned char value[], int startIndex)
+	static float ToSingle(unsigned char value[], int startIndex)
 	{
 		int temp = ToInt32(value, startIndex);
 		return *reinterpret_cast<float*>(&temp);
 	}
 
-	static constexpr float ToDouble(unsigned char value[], int startIndex)
+	static float ToDouble(unsigned char value[], int startIndex)
 	{
 		int temp = ToInt32(value, startIndex);
 		return *reinterpret_cast<double*>(&temp);
 	}
 
-	static constexpr char GetHexValue(int i) noexcept
+	static char GetHexValue(int i) noexcept
 	{
 		assert(i >= 0 && i < 16);
 		if(i < 10) return static_cast<char>(i + '0');
@@ -166,14 +166,14 @@ namespace BitConverter
 		return (value[startIndex] == 0) ? false : true;
 	}
 
-	static constexpr long DoubleToInt64Bits(double value) noexcept
+	static long DoubleToInt64Bits(double value) noexcept
 	{
 		// This method is implemented assuming little endian with an ambiguous spec
 		assert(IsLittleEndian);
 		return *reinterpret_cast<long*>(&value);
 	}
 
-	static constexpr double Int64BitsToDouble(long value) noexcept
+	static double Int64BitsToDouble(long value) noexcept
 	{
 		// This method is implemented assuming little endian with an ambiguous spec
 		assert(IsLittleEndian);
