@@ -50,7 +50,7 @@ private:
 
     // The native pointer to the 12:4:4 index table of the Unicode category data.
     static unsigned short *pCategoryLevel1Index;
-    static unsigned char *pCategoriesValue;
+    static char *pCategoriesValue;
 
     // The native pointer to the 12:4:4 index table of the Unicode numeric data.
     // The value of this index table is an index into the real value table stored in pNumericValues.
@@ -61,7 +61,7 @@ private:
     // unsafe static double* pNumericValues;
     // To get around the IA64 alignment issue.  Our double data is aligned in 8-byte boundary, but loader loads the embedded table starting
     // at 4-byte boundary.  This cause a alignment issue since double is 8-byte.
-    static unsigned char *pNumericValues;
+    static char *pNumericValues;
 
     // The digit value table, which is indexed by pNumericLevel1Index.  It shares the same index as pNumericValues.
     // Every item contains the value for decimal digit/digit value.
@@ -92,16 +92,16 @@ private:
         UnicodeDataHeader *mainHeader = reinterpret_cast<UnicodeDataHeader *>(vec.data());
 
         pCategoryLevel1Index = reinterpret_cast<unsigned short *>(vec.data() + mainHeader->OffsetToCategoriesIndex);
-        pCategoriesValue = (unsigned char *) (vec.data() + mainHeader->OffsetToCategoriesValues);
+        pCategoriesValue = (char *) (vec.data() + mainHeader->OffsetToCategoriesValues);
         pNumericLevel1Index = (unsigned short *) (vec.data() + mainHeader->OffsetToNumericIndex);
-        pNumericValues = (unsigned char *) (vec.data() + mainHeader->OffsetToNumericValue);
+        pNumericValues = (char *) (vec.data() + mainHeader->OffsetToNumericValue);
         pDigitValues = (DigitValues *) (vec.data() + mainHeader->OffsetToDigitValue);
 
         return true;
     }
 
-    static int InternalConvertToUTF32(const char* s, int index) {
-        auto length = strlen(s);
+    static int InternalConvertToUTF32(const wchar_t* s, int index) {
+        auto length = wcslen(s);
         assert(index >= 0 && index < length);
         if (index < length - 1) {
             auto temp1 = (int) s[index] - HIGH_SURROGATE_START;
@@ -116,8 +116,8 @@ private:
         return (int) s[index];
     }
 
-    static int InternalConvertToUTF32(const char* s, int index, int &charLength) {
-        auto length = strlen(s);
+    static int InternalConvertToUTF32(const wchar_t* s, int index, int &charLength) {
+        auto length = wcslen(s);
         assert(length > 0);
         assert(index >= 0 && index < length);
         charLength = 1;
@@ -141,17 +141,17 @@ private:
         // Get the level 2 item from the highest 12 bit (8 - 19) of ch.
         unsigned short index = pNumericLevel1Index[ch >> 8];
         index = pNumericLevel1Index[index + ((ch >> 4) & 0x000f)];
-        auto pBytePtr = (unsigned char *) &(pNumericLevel1Index[index]);
+        auto pBytePtr = (wchar_t *) &(pNumericLevel1Index[index]);
         // Get the result from the 0 -3 bit of ch.
 
 #ifdef __x86_64__
         // To get around the IA64 alignment issue.  Our double data is aligned in 8-byte boundary, but loader loads the embedded table starting
         // at 4-byte boundary.  This cause an alignment issue since double is 8-byte.
-        unsigned char *pSourcePtr = &(pNumericValues[pBytePtr[(ch & 0x000f)] * sizeof(double)]);
-        if (((long) pSourcePtr % 8) != 0) {
+        auto *pSourcePtr = reinterpret_cast<unsigned char*>(pNumericValues[pBytePtr[(ch & 0x000f)] * sizeof(double)]);
+        if (((long long) pSourcePtr % 8) != 0) {
             // We are not aligned in 8-byte boundary.  Do a copy.
             double ret;
-            auto *retPtr = (unsigned char *) &ret;
+            auto *retPtr = (wchar_t *) &ret;
             memcpy(retPtr, pSourcePtr, sizeof(double));
             return (ret);
         }
@@ -164,7 +164,7 @@ private:
         return (UnicodeCategory) InternalGetCategoryValue(ch, UNICODE_CATEGORY_OFFSET);
     }
 
-    static UnicodeCategory InternalGetUnicodeCategory(const char* s, int index) {
+    static UnicodeCategory InternalGetUnicodeCategory(const wchar_t* s, int index) {
         return InternalGetUnicodeCategory(InternalConvertToUTF32(s, index));
     }
 
@@ -181,8 +181,8 @@ private:
         return pCategoriesValue[valueIndex * 2 + offset];
     }
 
-    static bool IsWhiteSpace(const char* s, int index) noexcept {
-        auto length = strlen(s);
+    static bool IsWhiteSpace(const wchar_t* s, int index) noexcept {
+        auto length = wcslen(s);
         assert(index >= 0 && index < length);
 
         UnicodeCategory uc = GetUnicodeCategory(s, index);
@@ -198,7 +198,7 @@ private:
         return false;
     }
 
-    static bool IsWhiteSpace(char c) {
+    static bool IsWhiteSpace(wchar_t c) {
         UnicodeCategory uc = GetUnicodeCategory(c);
 
         // In Unicode 3.0, U+2028 is the only character which is under the category "LineSeparator".
@@ -214,12 +214,12 @@ private:
 
 public:
     
-    static UnicodeCategory GetUnicodeCategory(char ch) noexcept {
+    static UnicodeCategory GetUnicodeCategory(const wchar_t ch) noexcept {
         return InternalGetUnicodeCategory(ch);
     }
 
-    static UnicodeCategory GetUnicodeCategory(const char* s, int index) {
-        auto length = strlen(s);
+    static UnicodeCategory GetUnicodeCategory(const wchar_t* s, int index) {
+        auto length = wcslen(s);
         if ((size_t) index >= length) throw std::out_of_range("index");
         return InternalGetUnicodeCategory(s, index);
     }

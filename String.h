@@ -10,477 +10,1027 @@
 #include "Array.h"
 #include "StringSplitOptions.h"
 #include "StringComparison.h"
+#include "Algorithm.hpp"
 
 #include <iostream>
 #include <cstring>
+#include <memory>
+#include <string>
+#include <limits>
+#include <atomic>
+#include <utility>
+#include <cassert>
+#include <cstdint>
+#include <stdexcept>
+#include <string_view>
+#include <type_traits>
 
-class String final {
+/**
+ * @brief Immutable string based on a plain C-string (char *) with ref-counting.
+ * @details
+ *   - Shared content between multiple instances (using ref counting).
+ *   - Automatic mem dealloc (when no refs point to content).
+ *   - Same sizeof than a 'char *'.
+ *   - Null not allowed (equals to empty string).
+ *   - Empty string don't require memory allocation.
+ *   - String content available on debug.
+ *   - Mimics the STL basic_string class.
+ * @details Memory layout:
+ *
+ *       ----|----|-----------NUL
+ *        ^   ^    ^
+ *        |   |    |-- string content (NUL-terminated)
+ *        |   |-- string length (4-bytes)
+ *        |-- ref counter (4-bytes)
+ *
+ *   mStr (cstring pointer) points to the string content (to allow view content on debug).
+ *   Allocated memory is aligned to ref counter type size.
+ *   Allocated memory is a multiple of ref counter type size.
+ * @note This class is immutable.
+ */
+template<typename Char,
+        typename Traits = std::char_traits<Char>,
+        typename Allocator = std::allocator<Char>>
+class ImmutableString {
 
-    friend class Number;
-    friend class NumberFormatter;
-    friend class NumberFormatInfo;
+    // Friend declarations to be a part of String class
+    friend class String;
+
+    friend class std::hash<ImmutableString<char>>;
+
+    friend class std::hash<ImmutableString<wchar_t>>;
+
+    friend class std::hash<ImmutableString<char8_t>>;
+
+    friend class std::hash<ImmutableString<char16_t>>;
+
+    friend class std::hash<ImmutableString<char32_t>>;
 
 private:
 
-    //<editor-fold desc="Iterators implementation">
-    struct Iterator
-    {
-        using iterator_category = std::bidirectional_iterator_tag;
-        using difference_type = std::ptrdiff_t;
-        using value_type = Char;
-        using pointer = Char*;  // or also value_type*
-        using reference = Char&;  // or also value_type&
+    // Declarations
+    using prefix_type = std::uint32_t;
+    using atomic_prefix_type = std::atomic<prefix_type>;
+    using pointer = typename std::allocator_traits<Allocator>::pointer;
+    using allocator_type = typename std::allocator_traits<Allocator>::template rebind_alloc<prefix_type>;
+    using allocator_traits = std::allocator_traits<allocator_type>;
+    using traits_type = Traits;
+    using size_type = typename std::allocator_traits<Allocator>::size_type;
+    using difference_type = typename std::allocator_traits<Allocator>::difference_type;
+    using value_type = Char;
+    using const_reference = const value_type &;
+    using const_pointer = typename std::allocator_traits<Allocator>::const_pointer;
+    using const_iterator = const_pointer;
+    using const_reverse_iterator = typename std::reverse_iterator<const_iterator>;
+    using basic_cstring_view = std::basic_string_view<value_type, traits_type>;
 
-        // Pointer field representation
-        pointer pElement = nullptr;
-
-        constexpr Iterator(pointer ptr) noexcept : pElement(ptr) {}
-
-        constexpr reference operator*() const { return *pElement; }
-
-        constexpr pointer operator->() const { return pElement; }
-
-        // Prefix increment
-        constexpr Iterator& operator++()
-        {
-            this->pElement++;
-            return *this;
-        }
-
-        // Postfix increment
-        constexpr Iterator operator++(int)
-        {
-            Iterator tmp = *this;
-            ++(*this);
-            return tmp;
-        }
-
-        // Prefix decrement
-        constexpr Iterator& operator--()
-        {
-            this->pElement--;
-            return *this;
-        }
-
-        // Postfix decrement
-        constexpr Iterator operator--(int)
-        {
-            Iterator tmp = *this;
-            --(*this);
-            return tmp;
-        }
-
-        inline constexpr friend bool operator==(const Iterator& a, const Iterator& b) noexcept
-        {
-            return a.pElement == b.pElement;
-        };
-
-        inline constexpr friend bool operator!=(const Iterator& a, const Iterator& b) noexcept
-        {
-            return !(a == b);
-        };
+    // Empty String representation
+    struct EmptyCString {
+        atomic_prefix_type counter{0};
+        prefix_type len{0};
+        value_type str[2] = {value_type(), value_type()};
     };
 
-    struct ConstIterator
-    {
-        using iterator_category = std::bidirectional_iterator_tag;
-        using difference_type = std::ptrdiff_t;
-        using value_type = const Char;
-        using pointer = const Char*;  // or also value_type*
-        using reference = const Char&;  // or also value_type&
+    // Static members
+    // Special value indicating the maximum achievable index + 1.
+    static constexpr size_type npos = std::numeric_limits<size_type>::max();
 
-        // Pointer field representation
-        pointer pElement = nullptr;
+    // Returns the maximum number of elements the string is able to hold.
+    static constexpr size_type max_size() noexcept {
+        return std::numeric_limits<prefix_type>::max() - sizeof(prefix_type) / sizeof(value_type);
+    }
 
-        constexpr ConstIterator(pointer ptr) noexcept : pElement(ptr) {}
+    static allocator_type mAllocator;
+    static constexpr EmptyCString mEmpty{};
 
-        constexpr reference operator*() const { return *pElement; }
+    // Memory buffer with prefix_type alignment.
+    const_pointer mStr = nullptr;
 
-        constexpr pointer operator->() const { return pElement; }
+    // Sanitize a char array pointer avoiding nulls.
+    static inline constexpr const_pointer sanitize(const_pointer str) noexcept {
+        return ((str == nullptr || str[0] == value_type()) ? mEmpty.str : str);
+    }
 
-        // Prefix increment
-        constexpr ConstIterator& operator++()
-        {
-            this->pElement++;
+    // Return pointer to counter from pointer to string.
+    static inline constexpr atomic_prefix_type *getPtrToCounter(const_pointer str) noexcept {
+        static_assert(sizeof(atomic_prefix_type) == sizeof(prefix_type));
+        static_assert(sizeof(value_type) <= sizeof(prefix_type));
+        assert(str != nullptr);
+        pointer ptr = const_cast<pointer>(str) - (2 * sizeof(prefix_type)) / sizeof(value_type);
+        return reinterpret_cast<atomic_prefix_type *>(ptr);
+    }
+
+    // Return pointer to string length from pointer to string.
+    static inline constexpr prefix_type *getPtrToLength(const_pointer str) noexcept {
+        static_assert(sizeof(value_type) <= sizeof(prefix_type));
+        assert(str != nullptr);
+        pointer ptr = const_cast<pointer>(str) - (sizeof(prefix_type) / sizeof(value_type));
+        return reinterpret_cast<prefix_type *>(ptr);
+    }
+
+    // Return pointer to string from pointer to counter.
+    static inline constexpr const_pointer getPtrToString(const prefix_type *ptr) noexcept {
+        static_assert(sizeof(atomic_prefix_type) == sizeof(prefix_type));
+        assert(ptr != nullptr);
+        return reinterpret_cast<const_pointer>(ptr + 2);
+    }
+
+    /**
+     * Returns the length of the prefix_type array to allocate.
+     * @details Allocator allocates an array of prefix_type (not Char) to grant the memory alignment.
+     * @details The returned length considere the place for the ending NUL.
+     * @example Let len=6, sizeof(Char)=2, sizeof(prefix_type)=4
+     *    We need to reserve:
+     *      - 4-bytes for the counter (uint32_t)
+     *      - 4-bytes for the length (uint32_t)
+     *      - 6 x 2-bytes = 12-bytes for the string content
+     *      - 1 x 2-bytes = 2-bytes for the terminating NUL
+     *    Total to reserve = 22-bytes
+     *    Expresed in 4-bytes (uint32_t) units = 6 (upper rounding)
+     *    In this case there are 2 ending bytes acting as padding.
+     * @param[in] len Length of the string (without ending NUL).
+     * @return Length of the prefix_type array.
+     */
+    static constexpr size_type getAllocatedLength(size_type len) noexcept {
+        static_assert(sizeof(value_type) <= sizeof(prefix_type));
+        return 3 + (len * sizeof(value_type)) / sizeof(prefix_type);
+    }
+
+    /**
+     * Allocate memory for the ref-counter + length + string + NUL.
+     * @details We allocate prefix_types to grant memory alignment.
+     * @param[in] len Length to reserve (of prefix_types).
+     * @return A pointer to the allocated memory.
+     */
+    [[nodiscard]]
+    static constexpr prefix_type *allocate(size_type len) noexcept {
+        static_assert(sizeof(atomic_prefix_type) == sizeof(prefix_type));
+        static_assert(alignof(value_type) <= alignof(prefix_type));
+        static_assert(sizeof(value_type) <= sizeof(prefix_type));
+        assert(len > 0);
+        prefix_type *ptr = allocator_traits::allocate(mAllocator, len);
+        assert(reinterpret_cast<std::size_t>(ptr) % alignof(prefix_type) == 0);
+        return ptr;
+    }
+
+    // Deallocates the memory allocated by the object.
+    static constexpr void deallocate(const_pointer str) noexcept {
+        assert(str != nullptr);
+        assert(str != mEmpty.str);
+        atomic_prefix_type *ptr = getPtrToCounter(str);
+        prefix_type len = *getPtrToLength(str);
+        size_type n = getAllocatedLength(len);
+        ptr->~atomic_prefix_type();
+        allocator_traits::deallocate(mAllocator, reinterpret_cast<prefix_type *>(ptr), n);
+    }
+
+    /**
+     * Decrements the ref-counter.
+     * If no more references then deallocate the memory.
+     * The empty string is never deallocated.
+     * @param[in] str Memory to release.
+     */
+    static constexpr void release(const_pointer str) noexcept {
+        atomic_prefix_type *ptr = getPtrToCounter(str);
+        prefix_type counts = ptr[0].load(std::memory_order_relaxed);
+
+        // Constant (e.g. mEmpty)
+        if (counts == 0) { return; }
+        if (counts > 1) { counts = ptr[0].fetch_sub(1, std::memory_order_relaxed); }
+        if (counts == 1) { deallocate(str); }
+    }
+
+    // Increment the reference counter (except for constants).
+    static constexpr void incrementRefCounter(const_pointer str) noexcept {
+        atomic_prefix_type *ptr = getPtrToCounter(str);
+        if (ptr[0].load(std::memory_order_relaxed) > 0) {
+            ptr[0].fetch_add(1, std::memory_order_relaxed);
+        }
+    }
+
+    // Constructors
+    constexpr ImmutableString() noexcept: ImmutableString(nullptr) {}
+
+    constexpr ImmutableString(const_pointer str, size_type startIndex, size_type len) noexcept {
+        if (startIndex > 0) len -= startIndex;
+        assert(len < max_size() && "invalid string length");
+        if (str == nullptr || len == 0) { mStr = mEmpty.str; }
+        else {
+            size_type n = getAllocatedLength(len);
+            prefix_type *ptr = allocate(n);
+            std::atomic_init(reinterpret_cast<atomic_prefix_type *>(ptr), 1); // ref-counter = 1
+            ptr[1] = static_cast<prefix_type>(len); // length
+            auto content = reinterpret_cast<pointer>(ptr + 2);
+            traits_type::copy(content, str + startIndex, len);
+            content[len] = value_type();
+            mStr = content;
+        }
+    }
+
+    constexpr ImmutableString(const_pointer str, size_type len) noexcept: ImmutableString(str, 0, len) {}
+
+    constexpr ImmutableString(const_pointer str) noexcept: ImmutableString(str,
+                                                                           (str == nullptr ? 0 : Algorithm::strlen(
+                                                                                   str))) {}
+
+    constexpr ImmutableString(value_type c, size_type len) noexcept {
+        assert(len < max_size() && "invalid string length");
+        size_type n = getAllocatedLength(len);
+        prefix_type *ptr = allocate(n);
+        std::atomic_init(reinterpret_cast<atomic_prefix_type *>(ptr), 1); // ref-counter = 1
+        ptr[1] = static_cast<prefix_type>(len); // length
+        pointer content = reinterpret_cast<pointer>(ptr + 2);
+        for (auto i = 0; i < len; ++i)
+            traits_type::copy(content + i, &c, 1);
+        content[len] = value_type();
+        mStr = content;
+    }
+
+    /**
+     * Destructor.
+     * Decrements the ref-counter if other instances exists.
+     * Otherwise deallocates memory.
+     */
+    constexpr ~ImmutableString() { release(mStr); }
+
+    // Copy constructor.
+    constexpr ImmutableString(const ImmutableString &other) noexcept: mStr(other.mStr) { incrementRefCounter(mStr); }
+
+    // Move constructor.
+    constexpr ImmutableString(ImmutableString &&other) noexcept: mStr(std::exchange(other.mStr, mEmpty.str)) {}
+
+    // Copy assignment.
+    constexpr ImmutableString &operator=(const ImmutableString &other) noexcept {
+        if (mStr == other.mStr) {
             return *this;
         }
+        release(mStr);
+        mStr = other.mStr;
+        incrementRefCounter(mStr);
+        return *this;
+    }
 
-        // Postfix increment
-        constexpr ConstIterator operator++(int)
-        {
-            ConstIterator tmp = *this;
-            ++(*this);
-            return tmp;
-        }
+    // Move assignment.
+    constexpr ImmutableString &operator=(ImmutableString &&other) noexcept {
+        std::swap(mStr, other.mStr);
+        return *this;
+    }
 
-        // Prefix decrement
-        constexpr ConstIterator& operator--()
-        {
-            this->pElement--;
+    // Conversion to 'const char *'
+    constexpr operator const_pointer() const { return mStr; }
+
+    // Operators overloading
+    inline constexpr ImmutableString operator+(const_pointer str) const noexcept {
+        return Algorithm::strcat(mStr, str);
+    }
+
+    inline constexpr ImmutableString &operator+=(const_pointer str) noexcept {
+        auto p = ImmutableString::concat(mStr, str);
+        if (mStr == p.mStr) {
             return *this;
         }
+        release(mStr);
+        mStr = p.mStr;
+        incrementRefCounter(mStr);
+        return *this;
+    }
 
-        // Postfix decrement
-        constexpr ConstIterator operator--(int)
-        {
-            ConstIterator tmp = *this;
-            --(*this);
-            return tmp;
-        }
+    inline constexpr ImmutableString &operator+=(const ImmutableString &str) noexcept {
+        return *this += str.mStr;
+    }
 
-        inline constexpr friend bool operator==(const ConstIterator& a, const ConstIterator& b) noexcept
-        {
-            return a.pElement == b.pElement;
-        };
+    // Return length of string.
+    inline constexpr size_type size() const noexcept { return *(getPtrToLength(mStr)); }
 
-        inline constexpr friend bool operator!=(const ConstIterator& a, const ConstIterator& b) noexcept
-        {
-            return !(a == b);
-        };
-    };
+    // Return length of string.
+    inline constexpr size_type length() const noexcept { return *(getPtrToLength(mStr)); }
 
-    struct ReverseIterator
-    {
-        using iterator_category = std::bidirectional_iterator_tag;
-        using difference_type = std::ptrdiff_t;
-        using value_type = Char;
-        using pointer = Char*;  // or also value_type*
-        using reference = Char&;  // or also value_type&
+    // Test if string is empty.
+    inline constexpr bool empty() const noexcept { return (length() == 0); }
 
-        // Pointer field representation
-        pointer pElement = nullptr;
+    // Returns a reference to the character at specified location pos in range [0, length()].
+    inline constexpr const_reference operator[](size_type pos) const noexcept { return mStr[pos]; }
 
-        constexpr ReverseIterator(pointer ptr) noexcept : pElement(ptr) {}
+    // Returns a reference to the character at specified location pos in range [0, length()].
+    constexpr const_reference at(size_type pos) const {
+        return (pos > length() ? throw std::out_of_range("cstring::at") : mStr[pos]);
+    }
 
-        constexpr reference operator*() const { return *pElement; }
+    // Get last character of the string.
+    constexpr const_reference back() const {
+        return (empty() ? throw std::out_of_range("cstring::back") : mStr[length() - 1]);
+    }
 
-        constexpr pointer operator->() const { return pElement; }
+    // Get first character of the string.
+    constexpr const_reference front() const { return (empty() ? throw std::out_of_range("cstring::front") : mStr[0]); }
 
-        // Prefix increment
-        constexpr ReverseIterator& operator++()
-        {
-            this->pElement--;
-            return *this;
-        }
+    // Returns a non-null pointer to a null-terminated character array.
+    inline constexpr const_pointer data() const noexcept {
+        assert(mStr != nullptr);
+        return mStr;
+    }
 
-        // Postfix increment
-        constexpr ReverseIterator operator++(int)
-        {
-            ReverseIterator tmp = *this;
-            --(*this);
-            return tmp;
-        }
+    // Returns a non-null pointer to a null-terminated character array.
+    inline constexpr const_pointer c_str() const noexcept { return data(); }
 
-        // Prefix decrement
-        constexpr ReverseIterator& operator--()
-        {
-            this->pElement++;
-            return *this;
-        }
+    // Returns a string_view of content.
+    inline constexpr basic_cstring_view view() const noexcept { return basic_cstring_view(mStr, length()); }
 
-        // Postfix decrement
-        constexpr ReverseIterator operator--(int)
-        {
-            ReverseIterator tmp = *this;
-            ++(*this);
-            return tmp;
-        }
+    // Const iterator to the beginning.
+    constexpr const_iterator cbegin() const noexcept { return view().cbegin(); }
 
-        inline constexpr friend bool operator==(const ReverseIterator& a, const ReverseIterator& b) noexcept
-        {
-            return a.pElement ==  b.pElement;
-        };
+    // Const iterator to the end.
+    constexpr const_iterator cend() const noexcept { return view().cend(); }
 
-        inline constexpr friend bool operator!=(const ReverseIterator& a, const ReverseIterator& b) noexcept
-        {
-            return !(a == b);
-        };
-    };
+    // Const reverse iterator to the beginning.
+    constexpr const_reverse_iterator crbegin() const noexcept { return view().crbegin(); }
 
-    struct ConstReverseIterator
-    {
-        using iterator_category = std::bidirectional_iterator_tag;
-        using difference_type = std::ptrdiff_t;
-        using value_type = const Char;
-        using pointer = const Char*;  // or also value_type*
-        using reference = const Char&;  // or also value_type&
+    // Const reverse iterator to the end.
+    constexpr const_reverse_iterator crend() const noexcept { return view().crend(); }
 
-        constexpr reference operator*() const { return *pElement; }
+    // Exchanges the contents of the string with another.
+    void swap(ImmutableString &other) noexcept { std::swap(mStr, other.mStr); }
 
-        constexpr pointer operator->() const { return pElement; }
+    // Returns the substring [pos, pos+len).
+    constexpr basic_cstring_view substr(size_type pos = 0, size_type len = npos) const {
+        return view().substr(pos, len);
+    }
 
-        // Pointer field representation
-        pointer pElement = nullptr;
+    // Compare contents.
+    int constexpr compare(const ImmutableString &other) const noexcept {
+        return view().compare(other.view());
+    }
 
-        constexpr ConstReverseIterator(pointer ptr) noexcept : pElement(ptr) {}
+    int constexpr compare(size_type pos, size_type len, const ImmutableString &other) const noexcept {
+        return substr(pos, len).compare(other.view());
+    }
 
-        // Prefix increment
-        constexpr ConstReverseIterator& operator++()
-        {
-            this->pElement--;
-            return *this;
-        }
+    int constexpr
+    compare(size_type pos1, size_type len1, const ImmutableString &other, size_type pos2, size_type len2 = npos) const {
+        return substr(pos1, len1).compare(other.substr(pos2, len2));
+    }
 
-        // Postfix increment
-        constexpr ConstReverseIterator operator++(int)
-        {
-            ConstReverseIterator tmp = *this;
-            --(*this);
-            return tmp;
-        }
+    int constexpr compare(const_pointer str) const {
+        return view().compare(sanitize(str));
+    }
 
-        // Prefix increment
-        constexpr ConstReverseIterator& operator--()
-        {
-            this->pElement++;
-            return *this;
-        }
+    int constexpr compare(size_type pos, size_type len, const_pointer str) const {
+        return substr(pos, len).compare(sanitize(str));
+    }
 
-        // Postfix increment
-        constexpr ConstReverseIterator operator--(int)
-        {
-            ConstReverseIterator tmp = *this;
-            ++(*this);
-            return tmp;
-        }
+    int constexpr compare(size_type pos, size_type len, const_pointer str, size_type len2) const {
+        return substr(pos, len).compare(basic_cstring_view(sanitize(str), len2));
+    }
 
-        inline constexpr friend bool operator==(const ConstReverseIterator& a, const ConstReverseIterator& b) noexcept
-        {
-            return a.pElement == b.pElement;
-        };
+    int constexpr compare(const basic_cstring_view other) const noexcept {
+        return view().compare(other);
+    }
 
-        inline constexpr friend bool operator!=(const ConstReverseIterator& a, const ConstReverseIterator& b) noexcept
-        {
-            return !(a == b);
-        };
-    };
-    //</editor-fold>
+    /*
+     * Variadic template to dynamically receive a list of strings and concatenate
+     * all of them in a single one.
+     */
+    template<typename... Args>
+    static constexpr ImmutableString concat(Args... args) {
+        size_type len = Algorithm::strlen(args...);
+        auto data = new value_type[len + 1];
+        Algorithm::strcat(data, args...);
+        ImmutableString str(data);
+        delete[] data;
+        return str;
+    }
 
-    size_t m_Length;
-    Char *m_Data;
+    // Count contents
+    int constexpr count(value_type c) const noexcept {
+        return std::count(cbegin(), cend(), c);
+    }
 
-    inline constexpr Char *GetPointer() const noexcept { return m_Data; }
+    int constexpr count(const_pointer str) const noexcept {
+        return Algorithm::KMPSearch(str, mStr);
+    }
 
-    static constexpr char Space = ' ';              // 0x20
-    static constexpr char FormFeed = '\f';          // 0x0c
-    static constexpr char LineFeed = '\n';          // 0x0a
-    static constexpr char CarriageReturn = '\r';    // 0x0d
-    static constexpr char HorizontalTab = '\t';     // 0x09
-    static constexpr char VerticalTab = '\v';       // 0x0b
+    // Checks if the string view begins with the given prefix.
+    bool constexpr starts_with(const ImmutableString &other) const noexcept {
+        size_type len = other.length();
+        return (compare(0, len, other) == 0);
+    }
 
-    ssize_t InternalIndexOf(const char* c, int startIndex, int count, StringComparison options) const noexcept;
-    ssize_t InternalIndexOfAny(const char array[], int startIndex, int count) const noexcept;
-    ssize_t InternalLastIndexOf(const char* c, int startIndex, int count, StringComparison options) const noexcept;
-    ssize_t InternalLastIndexOfAny(const char array[], int startIndex, int count) const noexcept;
-    Array<String> InternalSplit(const char* c, int count, Array<size_t>& indices, StringSplitOptions options = StringSplitOptions::None) const noexcept;
+    bool constexpr starts_with(const basic_cstring_view sv) const noexcept {
+        auto len = sv.length();
+        return (compare(0, len, sv.data()) == 0);
+    }
+
+    bool constexpr starts_with(const_pointer str) const noexcept {
+        return starts_with(basic_cstring_view(sanitize(str)));
+    }
+
+    // Checks if the string ends with the given suffix.
+    bool constexpr ends_with(const ImmutableString &other) const noexcept {
+        auto len1 = length();
+        auto len2 = other.length();
+        return (len1 >= len2 && compare(len1 - len2, len2, other) == 0);
+    }
+
+    bool constexpr ends_with(const basic_cstring_view sv) const noexcept {
+        size_type len1 = length();
+        size_type len2 = sv.length();
+        return (len1 >= len2 && compare(len1 - len2, len2, sv.data()) == 0);
+    }
+
+    bool constexpr ends_with(const_pointer str) const noexcept {
+        return ends_with(basic_cstring_view(sanitize(str)));
+    }
+
+    // Find the first ocurrence of a substring.
+    auto constexpr find(const ImmutableString &other, size_type pos = 0) const noexcept {
+        return view().find(other.view(), pos);
+    }
+
+    auto constexpr find(const_pointer str, size_type pos, size_type len) const {
+        return view().find(sanitize(str), pos, len);
+    }
+
+    auto constexpr find(const_pointer str, size_type pos = 0) const {
+        return view().find(sanitize(str), pos);
+    }
+
+    auto constexpr find(value_type c, size_type pos = 0) const noexcept {
+        return view().find(c, pos);
+    }
+
+    // Find the last occurrence of a substring.
+    auto constexpr rfind(const ImmutableString &other, size_type pos = npos) const noexcept {
+        return view().rfind(other.view(), pos);
+    }
+
+    auto constexpr rfind(const_pointer str, size_type pos, size_type len) const {
+        return view().rfind(sanitize(str), pos, len);
+    }
+
+    auto constexpr rfind(const_pointer str, size_type pos = npos) const {
+        return view().rfind(sanitize(str), pos);
+    }
+
+    auto rfind(value_type c, size_type pos = npos) const noexcept {
+        return view().rfind(c, pos);
+    }
+
+    // Finds the first character equal to one of the given characters.
+    auto constexpr find_first_of(const ImmutableString &other, size_type pos = 0) const noexcept {
+        return view().find_first_of(other.view(), pos);
+    }
+
+    auto constexpr find_first_of(const_pointer str, size_type pos, size_type len) const {
+        return view().find_first_of(sanitize(str), pos, len);
+    }
+
+    auto constexpr find_first_of(const_pointer str, size_type pos = 0) const {
+        return view().find_first_of(sanitize(str), pos);
+    }
+
+    auto constexpr find_first_of(value_type c, size_type pos = 0) const noexcept {
+        return view().find_first_of(c, pos);
+    }
+
+    // Finds the first character equal to none of the given characters.
+    auto constexpr find_first_not_of(const ImmutableString &other, size_type pos = 0) const noexcept {
+        return view().find_first_not_of(other.view(), pos);
+    }
+
+    auto constexpr find_first_not_of(const_pointer str, size_type pos, size_type len) const {
+        return view().find_first_not_of(sanitize(str), pos, len);
+    }
+
+    auto constexpr find_first_not_of(const_pointer str, size_type pos = 0) const {
+        return view().find_first_not_of(sanitize(str), pos);
+    }
+
+    auto constexpr find_first_not_of(value_type c, size_type pos = 0) const noexcept {
+        return view().find_first_not_of(c, pos);
+    }
+
+    // Finds the last character equal to one of given characters.
+    auto constexpr find_last_of(const ImmutableString &other, size_type pos = npos) const noexcept {
+        return view().find_last_of(other.view(), pos);
+    }
+
+    auto constexpr find_last_of(const_pointer str, size_type pos, size_type len) const {
+        return view().find_last_of(sanitize(str), pos, len);
+    }
+
+    auto constexpr find_last_of(const_pointer str, size_type pos = npos) const {
+        return view().find_last_of(sanitize(str), pos);
+    }
+
+    auto constexpr find_last_of(value_type c, size_type pos = npos) const noexcept {
+        return view().find_last_of(c, pos);
+    }
+
+    // Finds the last character equal to none of the given characters.
+    auto constexpr find_last_not_of(const ImmutableString &other, size_type pos = npos) const noexcept {
+        return view().find_last_not_of(other.view(), pos);
+    }
+
+    auto constexpr find_last_not_of(const_pointer str, size_type pos, size_type len) const {
+        return view().find_last_not_of(sanitize(str), pos, len);
+    }
+
+    auto constexpr find_last_not_of(const_pointer str, size_type pos = npos) const {
+        return view().find_last_not_of(sanitize(str), pos);
+    }
+
+    auto constexpr find_last_not_of(value_type c, size_type pos = npos) const noexcept {
+        return view().find_last_not_of(c, pos);
+    }
+
+    // Checks if the string contains the given substring.
+    bool constexpr contains(basic_cstring_view sv) const noexcept {
+        return (view().find(sv) != npos);
+    }
+
+    bool constexpr contains(value_type c) const noexcept {
+        return (find(c) != npos);
+    }
+
+    bool constexpr contains(const_pointer str) const noexcept {
+        return (find(str) != npos);
+    }
+
+    // Left trim spaces.
+    constexpr basic_cstring_view ltrim() const {
+        const_pointer ptr = mStr;
+        while (std::isspace(*ptr)) ptr++;
+        return basic_cstring_view(ptr);
+    }
+
+    // Right trim spaces.
+    constexpr basic_cstring_view rtrim() const {
+        const_pointer ptr = mStr + length() - 1;
+        while (ptr >= mStr && std::isspace(*ptr)) ptr--;
+        ptr++;
+        return basic_cstring_view(mStr, static_cast<size_type>(ptr - mStr));
+    }
+
+    // Trim spaces.
+    constexpr basic_cstring_view trim() const {
+        const_pointer ptr1 = mStr;
+        const_pointer ptr2 = mStr + length() - 1;
+        while (std::isspace(*ptr1)) ptr1++;
+        while (ptr2 >= ptr1 && std::isspace(*ptr2)) ptr2--;
+        ptr2++;
+        return basic_cstring_view(ptr1, static_cast<size_type>(ptr2 - ptr1));
+    }
+
+    // Comparison operators (between basic_cstring)
+    friend inline constexpr bool operator==(const ImmutableString &lhs, const ImmutableString &rhs) noexcept {
+        return (lhs.compare(rhs) == 0);
+    }
+
+    friend inline constexpr bool operator!=(const ImmutableString &lhs, const ImmutableString &rhs) noexcept {
+        return (lhs.compare(rhs) != 0);
+    }
+
+    friend inline constexpr bool operator<(const ImmutableString &lhs, const ImmutableString &rhs) noexcept {
+        return (lhs.compare(rhs) < 0);
+    }
+
+    friend inline constexpr bool operator<=(const ImmutableString &lhs, const ImmutableString &rhs) noexcept {
+        return (lhs.compare(rhs) <= 0);
+    }
+
+    friend inline constexpr bool operator>(const ImmutableString &lhs, const ImmutableString &rhs) noexcept {
+        return (lhs.compare(rhs) > 0);
+    }
+
+    friend inline constexpr bool operator>=(const ImmutableString &lhs, const ImmutableString &rhs) noexcept {
+        return (lhs.compare(rhs) >= 0);
+    }
+
+    // Comparison operators (between basic_cstring and Char*)
+    friend inline constexpr bool operator==(const ImmutableString &lhs, const Char *rhs) noexcept {
+        return (lhs.compare(rhs) == 0);
+    }
+
+    friend inline constexpr bool operator!=(const ImmutableString &lhs, const Char *rhs) noexcept {
+        return (lhs.compare(rhs) != 0);
+    }
+
+    friend inline constexpr bool operator<(const ImmutableString &lhs, const Char *rhs) noexcept {
+        return (lhs.compare(rhs) < 0);
+    }
+
+    friend inline constexpr bool operator<=(const ImmutableString &lhs, const Char *rhs) noexcept {
+        return (lhs.compare(rhs) <= 0);
+    }
+
+    friend inline constexpr bool operator>(const ImmutableString &lhs, const Char *rhs) noexcept {
+        return (lhs.compare(rhs) > 0);
+    }
+
+    friend inline constexpr bool operator>=(const ImmutableString &lhs, const Char *rhs) noexcept {
+        return (lhs.compare(rhs) >= 0);
+    }
+
+    // Comparison operators (between Char * and basic_cstring)
+    friend inline constexpr bool
+    operator==(const Char *lhs, const ImmutableString<Char, Traits, Allocator> &rhs) noexcept {
+        return (rhs.compare(lhs) == 0);
+    }
+
+    friend constexpr bool operator!=(const Char *lhs, const ImmutableString<Char, Traits, Allocator> &rhs) noexcept {
+        return (rhs.compare(lhs) != 0);
+    }
+
+    friend inline constexpr bool
+    operator<(const Char *lhs, const ImmutableString<Char, Traits, Allocator> &rhs) noexcept {
+        return (rhs.compare(lhs) > 0);
+    }
+
+    friend inline constexpr bool
+    operator<=(const Char *lhs, const ImmutableString<Char, Traits, Allocator> &rhs) noexcept {
+        return (rhs.compare(lhs) >= 0);
+    }
+
+    friend inline constexpr bool
+    operator>(const Char *lhs, const ImmutableString<Char, Traits, Allocator> &rhs) noexcept {
+        return (rhs.compare(lhs) < 0);
+    }
+
+    friend inline constexpr bool
+    operator>=(const Char *lhs, const ImmutableString<Char, Traits, Allocator> &rhs) noexcept {
+        return (rhs.compare(lhs) <= 0);
+    }
+
+    // Overloading the std::swap algorithm for std::basic_cstring.
+    friend inline void swap(ImmutableString &lhs, ImmutableString &rhs) noexcept {
+        lhs.swap(rhs);
+    }
+
+    // Performs stream output on basic_cstring.
+    friend inline std::basic_ostream<Char, Traits> &
+    operator<<(std::basic_ostream<Char, Traits> &os, const ImmutableString &str) {
+        return operator<<(os, str.view());
+    }
+};
+
+// Static variable declaration
+template<typename Char, typename Traits, typename Allocator>
+typename ImmutableString<Char, Traits, Allocator>::allocator_type ImmutableString<Char, Traits, Allocator>::mAllocator{};
+
+// The template specializations of std::hash for ImmutableString<char>.
+template<>
+struct std::hash<ImmutableString<char>> {
+    std::size_t operator()(const ImmutableString<char> &str) const {
+        return std::hash<std::string_view>()(str.view());
+    }
+};
+
+// The template specializations of std::hash for ImmutableString<wchar_t>.
+template<>
+struct std::hash<ImmutableString<wchar_t>> {
+    std::size_t operator()(const ImmutableString<wchar_t> &str) const {
+        return std::hash<std::wstring_view>()(str.view());
+    }
+};
+
+// The template specializations of std::hash for ImmutableString<wchar_t>.
+template<>
+struct std::hash<ImmutableString<char8_t>> {
+    std::size_t operator()(const ImmutableString<char8_t> &str) const {
+        return std::hash<std::u8string_view>()(str.view());
+    }
+};
+
+// The template specializations of std::hash for ImmutableString<wchar_t>.
+template<>
+struct std::hash<ImmutableString<char16_t>> {
+    std::size_t operator()(const ImmutableString<char16_t> &str) const {
+        return std::hash<std::u16string_view>()(str.view());
+    }
+};
+
+// The template specializations of std::hash for ImmutableString<wchar_t>.
+template<>
+struct std::hash<ImmutableString<char32_t>> {
+    std::size_t operator()(const ImmutableString<char32_t> &str) const {
+        return std::hash<std::u32string_view>()(str.view());
+    }
+};
+
+class String final {
+private:
+
+    ImmutableString<char> m_Data;
+
+    static constexpr char Space = ' ';              // 0x0020
+    static constexpr char FormFeed = '\f';          // 0x000c
+    static constexpr char LineFeed = '\n';          // 0x000a
+    static constexpr char CarriageReturn = '\r';    // 0x000d
+    static constexpr char HorizontalTab = '\t';     // 0x0009
+    static constexpr char VerticalTab = '\v';       // 0x000b
+
+    //size_t InternalIndexOf(const wchar_t* c, int startIndex, int count, StringComparison options) const;
+    //size_t InternalIndexOfAny(const wchar_t* array, int startIndex, int count) const;
+    //size_t InternalLastIndexOf(const wchar_t* c, int startIndex, int count, StringComparison options) const;
+    //size_t InternalLastIndexOfAny(const wchar_t* array, int startIndex, int count) const;
+    //Array<String> InternalSplit(const wchar_t* c, int count, Array<size_t>& indices, StringSplitOptions options = StringSplitOptions::None) const noexcept;
+
+    constexpr String(const ImmutableString<char> &imString) : m_Data(imString) {}
 
 public:
 
-    String() noexcept;
+    constexpr String() noexcept: m_Data() {}
 
-    String(char c, int count) noexcept;
+    constexpr String(const char *c) : m_Data(c) {}
 
-    String(const char *c) noexcept;
+    constexpr String(const char c, int count) : m_Data(c, count) {}
 
-    String(const String &s) noexcept;
+    constexpr String(const char *c, int startIndex, int length) : m_Data(c, startIndex, length) {}
 
-    String(String &&s) noexcept;
+    // Copy assignment.
+    constexpr String &operator=(const String &other) noexcept = default;
 
-    ~String() noexcept;
-
-    String &operator=(const char *c) noexcept;
-
-    String &operator=(const String &other) noexcept;
-
-    String &operator=(String &&s) noexcept;
-
-    String operator+(const char *c) noexcept;
-
-    String operator+(const String &s) noexcept;
-
-    String& operator+=(const char* c) noexcept;
-
-    inline String& operator+=(const String& rhs) noexcept;
-
-    constexpr Char& operator[](size_t index){
-        if (index > m_Length - 1) throw std::out_of_range("Out of string boundaries");
-        return m_Data[index];
+    constexpr String &operator=(const char *c) {
+        m_Data = c;
+        return *this;
     }
 
-    Boolean operator==(const char *c) const noexcept;
+    inline constexpr String operator+(const char *c) const { return String::Concat(m_Data.c_str(), c); }
 
-    inline Boolean operator==(const String &rhs) const noexcept;
+    inline constexpr String operator+(const String &s) const {
+        return String::Concat(m_Data.c_str(), s.m_Data.c_str());
+    }
 
-    inline Boolean operator!=(const char* c) const noexcept;
+    inline constexpr String &operator+=(const char *c) {
+        m_Data += c;
+        return *this;
+    }
 
-    inline Boolean operator!=(const String &rhs) const noexcept;
+    inline constexpr String &operator+=(const String &s) {
+        m_Data += s.m_Data;
+        return *this;
+    }
 
-    Boolean Contains(char c) const noexcept;
+    inline constexpr Boolean operator==(const char *c) const noexcept { return m_Data == c; }
 
-    Boolean Contains(const char *c) const noexcept;
+    inline constexpr Boolean operator==(const String &s) const noexcept { return m_Data == s.m_Data; }
 
-    constexpr size_t GetLength() const noexcept { return m_Length; }
+    inline constexpr Boolean operator!=(const char *c) const noexcept { return !(*this == c); }
 
-    static String Concat(String& a, String& b) noexcept;
+    inline constexpr Boolean operator!=(const String &s) const noexcept { return (*this == s); }
 
-    String Concat(Array<String>& array) const noexcept;
+    // Returns a reference to the character at specified location pos in range [0, length()].
+    inline constexpr const Char &operator[](int pos) const {
+        if (pos > m_Data.length() - 1) throw std::out_of_range("Out of string boundaries");
+        return m_Data[pos];
+    }
 
-    void Copy(char c[], size_t length, size_t pos);
+    inline constexpr operator const char *() const noexcept { return m_Data.c_str(); }
 
-    size_t Count(char c) const noexcept;
+    inline constexpr Boolean Contains(char c) const noexcept { return m_Data.contains(c); }
 
-    size_t Count(const char *c) const noexcept;
+    inline constexpr Boolean Contains(const char *c) const noexcept { return m_Data.contains(c); }
 
-    Boolean EndsWith(const char* c, StringComparison options = StringComparison::CaseSensitive) const noexcept;
+    inline constexpr Boolean Contains(const String &s) const noexcept { return m_Data.contains(s.m_Data.c_str()); }
 
-    ssize_t IndexOf(char c, StringComparison options = StringComparison::CaseSensitive) const noexcept;
+    inline constexpr bool Empty() const noexcept { return (m_Data.length() == 0); }
 
-    ssize_t IndexOf(char c, int startIndex, StringComparison options = StringComparison::CaseSensitive) const noexcept;
+    inline constexpr size_t GetLength() const noexcept { return m_Data.length(); }
 
-    ssize_t IndexOf(char c, int startIndex, int count, StringComparison options = StringComparison::CaseSensitive) const noexcept;
+    static constexpr String Concat(const char *a, const char *b) noexcept {
+        return ImmutableString<char>::concat(a, b);
+    }
 
-    ssize_t IndexOf(const char *c, StringComparison options = StringComparison::CaseSensitive) const noexcept;
+    static constexpr String Concat(const char *a, const char *b, const char *c) noexcept {
+        return ImmutableString<char>::concat(a, b, c);
+    }
 
-    ssize_t IndexOf(const char *c, int startIndex, StringComparison options = StringComparison::CaseSensitive) const noexcept;
+    static constexpr String Concat(const char *a, const char *b, const char *c, const char *d) noexcept {
+        return ImmutableString<char>::concat(a, b, c, d);
+    }
 
-    ssize_t IndexOf(const char *c, int startIndex, int count, StringComparison options = StringComparison::CaseSensitive) const noexcept;
+    static constexpr String Concat(const String &a, const String &b) noexcept {
+        return String::Concat(a.m_Data.c_str(), b.m_Data.c_str());
+    }
 
-    ssize_t IndexOfAny(const char array[]) const noexcept;
+    static constexpr String Concat(const String &a, const String &b, const String &c) noexcept {
+        return String::Concat(a.m_Data.c_str(), b.m_Data.c_str(), c.m_Data.c_str());
+    }
 
-    ssize_t IndexOfAny(const char array[], int startIndex) const noexcept;
+    static constexpr String Concat(const String &a, const String &b, const String &c, const String &d) noexcept {
+        return String::Concat(a.m_Data.c_str(), b.m_Data.c_str(), c.m_Data.c_str(), d.m_Data.c_str());
+    }
 
-    ssize_t IndexOfAny(const char array[], int startIndex, int count) const noexcept;
+    constexpr String Concat(Array<String> &array) const noexcept {
+        size_t oldSize = m_Data.length();
+        size_t totalSize = oldSize;
 
-    Array<size_t> IndicesOf(char c) const noexcept;
+        for (const auto &it: array) totalSize += it.GetLength();
 
-    Array<size_t> IndicesOf(const char *c) const noexcept;
+        // Push what we already have
+        char *ch = new char[totalSize + 2];
+        Algorithm::strcat(ch, m_Data.data());
 
-    String Insert(size_t index, char c) const;
+        for (size_t i = 0, offset = 0; i < array.GetLength(); ++i) {
+            Algorithm::strcat(ch + oldSize + offset, array[i].m_Data.data());
+            offset += array[i].GetLength();
+        }
 
-    String Insert(size_t index, const char* c) const;
+        ch[totalSize + 1] = '\0';
+        String ret = ch;
+        delete[] ch;
+        return ret;
+    }
 
-    inline constexpr Boolean IsEmpty() const noexcept { return GetLength() == 0; }
+    constexpr size_t Count(char c) const noexcept { return m_Data.count(c); }
 
-    constexpr Boolean IsWhiteSpace() const noexcept {
-        if(GetLength() == 0) return true;
+    constexpr size_t Count(const char *c) const noexcept { return m_Data.count(c); }
 
-        for(size_t i = 0; i < GetLength(); ++i)
-            if(m_Data[i] != ' ') return false;
+    constexpr size_t Count(const String &s) const noexcept { return m_Data.count(s.m_Data.c_str()); }
+
+    //Boolean EndsWith(const char* c, StringComparison options = StringComparison::CaseSensitive) const noexcept;
+    //
+    //Boolean EndsWith(const wchar_t* c, StringComparison options = StringComparison::CaseSensitive) const noexcept;
+    //
+    //Boolean EndsWith(const Char* c, StringComparison options = StringComparison::CaseSensitive) const noexcept;
+    //
+    //size_t IndexOf(char c, StringComparison options = StringComparison::CaseSensitive) const noexcept;
+    //
+    //size_t IndexOf(wchar_t c, StringComparison options = StringComparison::CaseSensitive) const noexcept;
+    //
+    //size_t IndexOf(Char c, StringComparison options = StringComparison::CaseSensitive) const noexcept;
+    //
+    //size_t IndexOf(char c, int startIndex, StringComparison options = StringComparison::CaseSensitive) const noexcept;
+    //
+    //size_t IndexOf(wchar_t c, int startIndex, StringComparison options = StringComparison::CaseSensitive) const noexcept;
+    //
+    //size_t IndexOf(Char c, int startIndex, StringComparison options = StringComparison::CaseSensitive) const noexcept;
+    //
+    //size_t IndexOf(wchar_t c, int startIndex, int count, StringComparison options = StringComparison::CaseSensitive) const noexcept;
+    //
+    //size_t IndexOf(const char* c, StringComparison options = StringComparison::CaseSensitive) const noexcept;
+    //
+    //size_t IndexOf(const wchar_t* c, StringComparison options = StringComparison::CaseSensitive) const noexcept;
+    //
+    //size_t IndexOf(const Char* c, StringComparison options = StringComparison::CaseSensitive) const noexcept;
+    //
+    //size_t IndexOf(const char* c, int startIndex, StringComparison options = StringComparison::CaseSensitive) const noexcept;
+    //
+    //size_t IndexOf(const wchar_t* c, int startIndex, StringComparison options = StringComparison::CaseSensitive) const noexcept;
+    //
+    //size_t IndexOf(const Char* c, int startIndex, StringComparison options = StringComparison::CaseSensitive) const noexcept;
+    //
+    //size_t IndexOf(const char* c, int startIndex, int count, StringComparison options = StringComparison::CaseSensitive) const noexcept;
+    //
+    //size_t IndexOf(const wchar_t* c, int startIndex, int count, StringComparison options = StringComparison::CaseSensitive) const noexcept;
+    //
+    //size_t IndexOf(const Char* c, int startIndex, int count, StringComparison options = StringComparison::CaseSensitive) const noexcept;
+    //
+    //size_t IndexOfAny(const wchar_t* array) const noexcept;
+    //
+    //size_t IndexOfAny(const wchar_t* array, int startIndex) const noexcept;
+    //
+    //size_t IndexOfAny(const wchar_t* array, int startIndex, int count) const noexcept;
+    //
+    //Array<size_t> IndicesOf(wchar_t c) const noexcept;
+    //
+    //Array<size_t> IndicesOf(const wchar_t* c) const noexcept;
+    //
+    //String Insert(size_t index, wchar_t c) const;
+    //
+    //String Insert(size_t index, const wchar_t* c) const;
+
+    inline constexpr Boolean IsWhiteSpace() noexcept {
+        if (GetLength() == 0) return true;
+
+        for (size_t i = 0; i < GetLength(); ++i)
+            if (m_Data[i] != ' ') return false;
 
         return true;
     }
 
-    static String Join(char separator, Array<String>& arrayString) noexcept;
+    //static String Join(wchar_t separator, Array<String>& arrayString) noexcept;
+    //
+    //static String Join(wchar_t separator, Array<String>&& arrayString) noexcept;
+    //
+    //static String Join(const wchar_t* separator, Array<String>& arrayString) noexcept;
+    //
+    //static String Join(const wchar_t* separator, Array<String>&& arrayString) noexcept;
+    //
+    //inline ssize_t LastIndex() const noexcept { return GetLength() - 1; }
+    //
+    //size_t LastIndexOf(wchar_t c, StringComparison options = StringComparison::CaseSensitive) const noexcept;
+    //
+    //size_t LastIndexOf(wchar_t c, int startIndex, StringComparison options = StringComparison::CaseSensitive) const noexcept;
+    //
+    //size_t LastIndexOf(wchar_t c, int startIndex, int count, StringComparison options = StringComparison::CaseSensitive) const noexcept;
+    //
+    //size_t LastIndexOf(const wchar_t* c, StringComparison options = StringComparison::CaseSensitive) const noexcept;
+    //
+    //size_t LastIndexOf(const wchar_t* c, int startIndex, StringComparison options = StringComparison::CaseSensitive) const noexcept;
+    //
+    //size_t LastIndexOf(const wchar_t* c, int startIndex, int count, StringComparison options = StringComparison::CaseSensitive) const noexcept;
+    //
+    //size_t LastIndexOfAny(const wchar_t array[]) const noexcept;
+    //
+    //size_t LastIndexOfAny(const wchar_t array[], int startIndex) const noexcept;
+    //
+    //size_t LastIndexOfAny(const wchar_t array[], int startIndex, int count) const noexcept;
+    //
+    //String PadLeft(size_t width) const noexcept;
+    //
+    //String PadLeft(size_t width, wchar_t padding) const noexcept;
+    //
+    //String PadRight(size_t width) const noexcept;
+    //
+    //String PadRight(size_t width, wchar_t padding) const noexcept;
+    //
+    //String Remove(int startIndex) const;
+    //
+    //String Remove(int startIndex, int count) const;
+    //
+    //String Replace(wchar_t oldValue, wchar_t newValue) const noexcept;
+    //
+    //String Replace(const wchar_t* oldValue, const wchar_t* newValue) const noexcept;
+    //
+    //Array<String> Split(wchar_t c, int count);
+    //
+    //Array<String> Split(const wchar_t* c, int count);
+    //
+    //Array<String> Split(wchar_t c, StringSplitOptions options = StringSplitOptions::None) const noexcept;
+    //
+    //Array<String> Split(const wchar_t* delimiter, StringSplitOptions options = StringSplitOptions::None) const noexcept;
+    //
+    //Array<String> Split(wchar_t c, int count, StringSplitOptions options) const;
+    //
+    //Array<String> Split(const wchar_t* c, int count, StringSplitOptions options) const;
+    //
+    //Boolean StartsWith(const wchar_t* c, StringComparison options = StringComparison::CaseSensitive) const noexcept;
+    //
+    //String Substring(int startIndex) const;
+    //
+    //String Substring(int startIndex, int length) const;
+    //
+    //Array<Char> ToCharArray() const noexcept;
+    //
+    //String ToLower() const noexcept;
+    //
+    //String ToUpper() const noexcept;
 
-    static String Join(char separator, Array<String>&& arrayString) noexcept;
 
-    static String Join(const char* separator, Array<String>& arrayString) noexcept;
+    // Left trim spaces.
+    //basic_cstring_view TrimStart() const {
+    //	const_pointer ptr = mStr;
+    //	while (std::isspace(*ptr)) ptr++;
+    //	return basic_cstring_view(ptr);
+    //	//return String(ptr);
+    //}
 
-    static String Join(const char* separator, Array<String>&& arrayString) noexcept;
+    // Right trim spaces.
+    //basic_cstring_view TrimEnd() const {
+    //	const_pointer ptr = mStr + GetLength() - 1;
+    //	while (ptr >= mStr && std::isspace(*ptr)) ptr--;
+    //	ptr++;
+    //	return basic_cstring_view(mStr, static_cast<size_type>(ptr - mStr));
+    //	//return String(mStr, static_cast<size_type>(ptr - mStr));
+    //}
 
-    inline constexpr ssize_t LastIndex() const noexcept { return m_Length - 1; }
+    // Trim spaces.
+    //basic_cstring_view Trim() const {
+    //	const_pointer ptr1 = mStr;
+    //	const_pointer ptr2 = mStr + GetLength() - 1;
+    //	while (std::isspace(*ptr1)) ptr1++;
+    //	while (ptr2 >= ptr1 && std::isspace(*ptr2)) ptr2--;
+    //	ptr2++;
+    //	return basic_cstring_view(ptr1, static_cast<size_type>(ptr2 - ptr1));
+    //	//return String(ptr1, static_cast<size_type>(ptr2 - ptr1));
+    //}
 
-    ssize_t LastIndexOf(char c, StringComparison options = StringComparison::CaseSensitive) const noexcept;
+    //String Trim() const noexcept;
 
-    ssize_t LastIndexOf(char c, int startIndex, StringComparison options = StringComparison::CaseSensitive) const noexcept;
-
-    ssize_t LastIndexOf(char c, int startIndex, int count, StringComparison options = StringComparison::CaseSensitive) const noexcept;
-
-    ssize_t LastIndexOf(const char *c, StringComparison options = StringComparison::CaseSensitive) const noexcept;
-
-    ssize_t LastIndexOf(const char *c, int startIndex, StringComparison options = StringComparison::CaseSensitive) const noexcept;
-
-    ssize_t LastIndexOf(const char *c, int startIndex, int count, StringComparison options = StringComparison::CaseSensitive) const noexcept;
-
-    ssize_t LastIndexOfAny(const char array[]) const noexcept;
-
-    ssize_t LastIndexOfAny(const char array[], int startIndex) const noexcept;
-
-    ssize_t LastIndexOfAny(const char array[], int startIndex, int count) const noexcept;
-
-    String PadLeft(size_t width) const noexcept;
-
-    String PadLeft(size_t width, char padding) const noexcept;
-
-    String PadRight(size_t width) const noexcept;
-
-    String PadRight(size_t width, char padding) const noexcept;
-
-    String Remove(int startIndex) const;
-
-    String Remove(int startIndex, int count) const;
-
-    String Replace(char oldValue, char newValue) const noexcept;
-
-    String Replace(const char* oldValue, const char* newValue) const noexcept;
-
-    Array<String> Split(char c, int count);
-
-    Array<String> Split(const char* c, int count);
-
-    Array<String> Split(char c, StringSplitOptions options = StringSplitOptions::None) const noexcept;
-
-    Array<String> Split(const char *delimiter, StringSplitOptions options = StringSplitOptions::None) const noexcept;
-
-    Array<String> Split(char c, int count, StringSplitOptions options) const;
-
-    Array<String> Split(const char* c, int count, StringSplitOptions options) const;
-
-    Boolean StartsWith(const char* c, StringComparison options = StringComparison::CaseSensitive) const noexcept;
-
-    String Substring(int startIndex) const;
-
-    String Substring(int startIndex, int length) const;
-
-    Array<Char> ToCharArray() const noexcept;
-
-    // We are not dealing yet with UTF8. This will come at the future
-    String ToLower() const noexcept;
-
-    // We are not dealing yet with UTF8. This will come at the future
-    String ToUpper() const noexcept;
-
-    String Trim() const noexcept;
-
-    String Trim(char c) const noexcept;
-
-    String Trim(const char* c) const noexcept;
-
-    String TrimEnd() const noexcept;
-
-    String TrimEnd(char c) const noexcept;
-
-    String TrimEnd(const char* c) const noexcept;
-
-    String TrimStart() const noexcept;
-
-    String TrimStart(char c) const noexcept;
-
-    String TrimStart(const char* c) const noexcept;
-
-    friend std::ostream &operator<<(std::ostream &os, const String &s);
-
-    constexpr Iterator begin() noexcept { return m_Data; }
-
-    constexpr Iterator end() noexcept { return m_Data + m_Length; }
-
-    constexpr ConstIterator cbegin() const noexcept { return m_Data; }
-
-    constexpr ConstIterator cend() const noexcept { return m_Data + m_Length; }
-
-    constexpr ReverseIterator rbegin() noexcept { return m_Data + LastIndex(); }
-
-    constexpr ReverseIterator rend() noexcept { return m_Data - 1; }
-
-    constexpr ConstReverseIterator crbegin() const noexcept { return m_Data + LastIndex(); }
-
-    constexpr ConstReverseIterator crend() const noexcept { return m_Data - 1; }
-
-    friend inline std::ostream &operator<<(std::ostream &os, const String &s) {
-        for(auto it = s.cbegin(); it != s.cend(); ++it )
-            os << it->GetValue();
-        return os;
-    };
+    //String Trim(wchar_t c) const noexcept;
+    //
+    //String Trim(const wchar_t* c) const noexcept;
+    //
+    //String TrimEnd() const noexcept;
+    //
+    //String TrimEnd(wchar_t c) const noexcept;
+    //
+    //String TrimEnd(const wchar_t* c) const noexcept;
+    //
+    //String TrimStart() const noexcept;
+    //
+    //String TrimStart(wchar_t c) const noexcept;
+    //
+    //String TrimStart(const wchar_t* c) const noexcept;
 };
+
+// The template specializations of std::hash
+//template<>
+//struct std::hash<String> {
+//	std::size_t operator()(const String& str) const {
+//		return std::hash<std::string_view>()(str.view());
+//	}
+//};
 
 #endif //CPPDATASTRUCTURES_STRING_H

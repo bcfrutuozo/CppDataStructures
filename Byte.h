@@ -9,7 +9,6 @@
 
 #include "TypeValue.h"
 #include "Boolean.h"
-#include "NumberStyles.h"
 
 class Char;
 class Int16;
@@ -25,25 +24,16 @@ class UInt64;
 
 class Byte final {
 
-    friend class Number;
-
 private:
 
-    uint8_t Value;
-
-    static constexpr NumberStyles InvalidNumberStyle = static_cast<NumberStyles>(~(NumberStyles::AllowLeadingWhite | NumberStyles::AllowTrailingWhite
-                                                                                 | NumberStyles::AllowLeadingSign | NumberStyles::AllowTrailingSign
-                                                                                 | NumberStyles::AllowParentheses | NumberStyles::AllowDecimalPoint
-                                                                                 | NumberStyles::AllowThousands | NumberStyles::AllowExponent
-                                                                                 | NumberStyles::AllowCurrencySymbol | NumberStyles::AllowHexSpecifier));
+    using value_type = uint8_t;
+    value_type Value;
 
 public:
 
     //<editor-fold desc="Primitive abstraction section">
 
-    using value_type = uint8_t;
-
-    constexpr uint8_t const& GetValue() const noexcept { return Value; }
+    constexpr value_type const& GetValue() const noexcept { return Value; }
 
     constexpr Byte() : Value() {};
 

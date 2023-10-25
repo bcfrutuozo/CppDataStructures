@@ -1,10 +1,8 @@
 #include "BitConverter.h"
 
-#include "String.h"
-
 namespace BitConverter
 {
-	String BitConverter::ToString(unsigned char value[], int startIndex, int length)
+	String ToString(unsigned char* value, int startIndex, int length)
 	{
 		if(value == nullptr) throw std::invalid_argument("value is null");
 		if(length < 0) throw std::invalid_argument("length is 0");
@@ -26,7 +24,6 @@ namespace BitConverter
 		// As String can easily occupy more than the Stack size,
 		// we will be using the Heap for it
 		char* chArray = new char[chArrayLength];
-		int i = 0;
 		int index = startIndex;
 		for(size_t i = 0; i < chArrayLength; i += 3)
 		{
@@ -41,18 +38,18 @@ namespace BitConverter
 				chArray[i + 2] = '-';
 		}
 
-		String ret = chArray;
-		delete chArray;
+		String ret(chArray);
+		delete[] chArray;
 		return ret;
 	}
 
-	String BitConverter::ToString(unsigned char value[])
+	String ToString(unsigned char* value)
 	{
 		if(value == nullptr) throw std::invalid_argument("value is null");
 		return ToString(value, 0, ArraySize(value));
 	}
 
-	String BitConverter::ToString(unsigned char value[], int startIndex)
+	String ToString(unsigned char* value, int startIndex)
 	{
 		if(value == nullptr) throw std::invalid_argument("value is null");
 		return ToString(value, startIndex, ArraySize(value) - startIndex);

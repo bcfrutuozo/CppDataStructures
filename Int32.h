@@ -23,19 +23,16 @@ class UInt64;
 
 class Int32 final {
 
-    friend class Number;
-
 private:
 
-    int32_t Value;
+    using value_type = int32_t;
+    value_type Value;
 
 public:
 
     //<editor-fold desc="Primitive abstraction section">
 
-    using value_type = int32_t;
-
-    constexpr int32_t const& GetValue() const noexcept { return Value; }
+    constexpr value_type const& GetValue() const noexcept { return Value; }
 
     constexpr Int32() : Value() {};
 

@@ -27,7 +27,7 @@ String Char::ConvertFromUTF32(int utf32) noexcept {
     return String(surrogate);
 }
 
-Int32 Char::ConvertToUTF32(char highSurrogate, char lowSurrogate) noexcept {
+Int32 Char::ConvertToUTF32(Char highSurrogate, Char lowSurrogate) noexcept {
     if (!Char::IsHighSurrogate(highSurrogate)) {
         throw std::out_of_range("highSurrogate");
     }
@@ -43,13 +43,13 @@ Int32 Char::ConvertToUTF32(String &s, int index) {
     if (index < 0 && index >= s.GetLength()) throw std::out_of_range("index");
 
     // Check if the character at index is a high surrogate.
-    int temp1 = (int) s[index] - CharUnicodeInfo::HIGH_SURROGATE_START;
+    int temp1 = s[index] - CharUnicodeInfo::HIGH_SURROGATE_START;
     if (temp1 >= 0 && temp1 <= 0x7ff) {
         // Found a surrogate char.
         if (temp1 <= 0x3ff) {
             // Found a high surrogate.
             if (index < s.GetLength() - 1) {
-                int temp2 = (int) s[index + 1] - CharUnicodeInfo::LOW_SURROGATE_START;
+                int temp2 = s[index + 1] - CharUnicodeInfo::LOW_SURROGATE_START;
                 if (temp2 >= 0 && temp2 <= 0x3ff) {
                     // Found a low surrogate.
                     return ((temp1 * 0x400) + temp2 + UNICODE_PLANE01_START);
@@ -66,33 +66,33 @@ Int32 Char::ConvertToUTF32(String &s, int index) {
         }
     }
     // Not a high-surrogate or low-surrogate. Genereate the UTF32 value for the BMP characters.
-    return (int) s[index];
+    return s[index].GetValue();
 }
 
 Int32 Char::GetHashCode() const noexcept {
     return (int) Value | ((int) Value << 16);
 }
 
-Boolean Char::IsHighSurrogate(String &s, int index) noexcept {
+Boolean Char::IsHighSurrogate(String &s, int index) {
     if (index < 0 || index >= s.GetLength()) throw std::out_of_range("index");
 
-    return IsHighSurrogate(s[index]);
+    return Char::IsHighSurrogate(s[index]);
 }
 
-Boolean Char::IsLowSurrogate(String &s, int index) noexcept {
+Boolean Char::IsLowSurrogate(String &s, int index) {
     if (index < 0 || index >= s.GetLength()) throw std::out_of_range("index");
 
-    return IsLowSurrogate(s[index]);
+    return Char::IsLowSurrogate(s[index]);
 }
 
-Boolean Char::IsSurrogatePair(String &s, int index) noexcept {
+Boolean Char::IsSurrogatePair(String &s, int index) {
     if (index < 0 || index >= s.GetLength()) throw std::out_of_range("index");
-    if (index + 1 < s.GetLength()) return IsSurrogatePair(s[index], s[index + 1]);
+    if (index + 1 < s.GetLength()) return Char::IsSurrogatePair(s[index], s[index + 1]);
 
     return false;
 }
 
-Boolean Char::IsLower(char c) {
+Boolean Char::IsLower(Char c) {
     if (IsLatin1(c)) {
         if (IsASCII(c)) return (c >= 'a' && c <= 'z');
         return (GetLatin1UnicodeCategory(c) == UnicodeCategory::LowercaseLetter);
@@ -100,12 +100,12 @@ Boolean Char::IsLower(char c) {
     return (CharUnicodeInfo::GetUnicodeCategory(c) == UnicodeCategory::LowercaseLetter);
 }
 
-Boolean Char::IsPunctuation(char c) {
+Boolean Char::IsPunctuation(Char c) {
     if (IsLatin1(c)) return (CheckPunctuation(GetLatin1UnicodeCategory(c)));
     return (CheckPunctuation(CharUnicodeInfo::GetUnicodeCategory(c)));
 }
 
-Boolean Char::IsUpper(char c) noexcept {
+Boolean Char::IsUpper(Char c) noexcept {
     if (IsLatin1(c)) {
         if (IsASCII(c)) return (c >= 'A' && c <= 'Z');
         return GetLatin1UnicodeCategory(c) == UnicodeCategory::UppercaseLetter;
@@ -113,7 +113,7 @@ Boolean Char::IsUpper(char c) noexcept {
     return CharUnicodeInfo::GetUnicodeCategory(c) == UnicodeCategory::UppercaseLetter;
 }
 
-Boolean Char::IsWhiteSpace(char c) noexcept {
+Boolean Char::IsWhiteSpace(Char c) noexcept {
     if (IsLatin1(c)) return IsWhiteSpaceLatin1(c);
     return CharUnicodeInfo::IsWhiteSpace(c);
 }
@@ -128,7 +128,7 @@ String Char::ToString() const noexcept {
     return Char::ToString(Value);
 }
 
-String Char::ToString(char c) noexcept {
+String Char::ToString(Char c) noexcept {
     return String(c, 1);
 }
 

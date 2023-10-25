@@ -21,19 +21,16 @@ class UInt64;
 
 class Boolean final {
 
-    friend class Number;
-
 private:
 
-    bool Value;
+    using value_type = bool;
+    value_type Value;
 
 public:
 
     //<editor-fold desc="Primitive abstraction section">
 
-    using value_type = bool;
-
-    constexpr bool const& GetValue() const noexcept { return Value; }
+    constexpr value_type const& GetValue() const noexcept { return Value; }
 
     constexpr Boolean() : Value() {};
 

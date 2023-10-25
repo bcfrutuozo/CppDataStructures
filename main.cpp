@@ -1,47 +1,32 @@
-#include "Timer.h"
-#include "Array.h"
-#include "List.h"
-#include "LinkedList.h"
-#include "Stack.h"
-#include "Queue.h"
-#include <forward_list>
-#include <array>
-#include <list>
-#include "String.h"
-#include <string>
-#include "Char.h"
-#include "Int32.h"
-#include "Boolean.h"
-#include "Byte.h"
-#include "SByte.h"
-#include "Int64.h"
-#include "UInt64.h"
-#include "Int16.h"
-#include "UInt16.h"
-#include "Double.h"
-#include "Float.h"
-#include "UInt32.h"
-
 #include <iostream>
+#include "String.h"
+#include "Array.h"
 
-#ifdef _MSC_VER
-#define _CRTDBG_MAP_ALLOC
-#include <stdlib.h>
-#include <crtdbg.h>
-#endif
+int main(int argc, char* argv[])
+{
+	String s("ABCDE");
+	String s2 = "DEFG";
+    String s3 = "ZZZ";
 
-int main(int argc, char *argv[]) {
-    Timer t;
+	if(s2 == "CDEABC") std::cout << "YEAH" << std::endl;
 
-    Boolean b = true;
-    String s  = "ABCDEFA";
-    auto z = s.ToCharArray();
 
-    std::cout << "Size of class: " << sizeof(Boolean);
+    String s4 = String::Concat(s, s2, s3);
+    Array<String> as {s, s2, s3, s4};
+    auto s5 = s4.Concat(as);
 
-#ifdef _MSC_VER
-    _CrtDumpMemoryLeaks();
-#endif
+    std::cout << s5.Count('Z') << std::endl;
 
-    return 0;
+    String s10 = "A";
+    String s11 = "B";
+
+	//Array<String> f;
+	//f.Add(s);
+	//f.Add(z);
+	//
+	//String final1 = s.Concat(f);
+	//
+	//std::cout << (s == z) << std::endl;
+	//std::cout << (s == "ABC") << std::endl;
+	return 0;
 }

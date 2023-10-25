@@ -23,19 +23,16 @@ class UInt64;
 
 class UInt16 final {
 
-    friend class Number;
-
 private:
 
-    uint16_t Value;
+    using value_type = uint16_t;
+    value_type Value;
     
 public:
 
     //<editor-fold desc="Primitive abstraction section">
 
-    using value_type = uint16_t;
-
-    constexpr uint16_t const& GetValue() const noexcept { return Value; }
+    constexpr value_type const& GetValue() const noexcept { return Value; }
 
     constexpr UInt16() : Value() {};
 

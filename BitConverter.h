@@ -9,8 +9,7 @@
 #include <cassert>
 
 #include "Array.h"
-
-class String;
+#include "String.h"
 
 namespace BitConverter
 {
@@ -29,17 +28,17 @@ namespace BitConverter
 		return bytes;
 	}
 
-	static constexpr Array<unsigned char> GetBytes(float value) noexcept
+	static Array<unsigned char> GetBytes(float value) noexcept
 	{
 		return GetBytes(*reinterpret_cast<int*>(&value));
 	}
 
-	static constexpr Array<unsigned char> GetBytes(double value) noexcept
+	static Array<unsigned char> GetBytes(double value) noexcept
 	{
 		return GetBytes(*reinterpret_cast<long*>(&value));
 	}
 
-	static constexpr short ToInt16(unsigned char value[], int startIndex)
+	static constexpr short ToInt16(unsigned char* value, int startIndex)
 	{
 		if(value == nullptr) throw std::invalid_argument("value is null");
 		
@@ -59,12 +58,12 @@ namespace BitConverter
 		}
 	}
 
-	static inline constexpr char ToChar(unsigned char value[], int startIndex)
+	static inline constexpr char ToChar(unsigned char* value, int startIndex)
 	{
 		return static_cast<char>(ToInt16(value, startIndex));
 	}
 
-	static constexpr int ToInt32(unsigned char value[], int startIndex)
+	static constexpr int ToInt32(unsigned char* value, int startIndex)
 	{
 		if(value == nullptr) throw std::invalid_argument("value is null");
 
@@ -84,7 +83,7 @@ namespace BitConverter
 		}
 	}
 
-	static constexpr int ToInt64(unsigned char value[], int startIndex)
+	static constexpr int ToInt64(unsigned char* value, int startIndex)
 	{
 		if(value == nullptr) throw std::invalid_argument("value is null");
 
@@ -114,28 +113,28 @@ namespace BitConverter
 		}
 	}
 
-	static constexpr unsigned short ToUInt16(unsigned char value[], int startIndex)
+	static constexpr unsigned short ToUInt16(unsigned char* value, int startIndex)
 	{
 		return static_cast<unsigned short>(ToInt16(value, startIndex));
 	}
 
-	static constexpr unsigned int ToUInt32(unsigned char value[], int startIndex)
+	static constexpr unsigned int ToUInt32(unsigned char* value, int startIndex)
 	{
 		return static_cast<unsigned int>(ToInt32(value, startIndex));
 	}
 
-	static constexpr unsigned long ToUInt64(unsigned char value[], int startIndex)
+	static constexpr unsigned long ToUInt64(unsigned char* value, int startIndex)
 	{
 		return static_cast<unsigned long>(ToInt64(value, startIndex));
 	}
 
-	static float ToSingle(unsigned char value[], int startIndex)
+	static float ToSingle(unsigned char* value, int startIndex)
 	{
 		int temp = ToInt32(value, startIndex);
 		return *reinterpret_cast<float*>(&temp);
 	}
 
-	static float ToDouble(unsigned char value[], int startIndex)
+	static float ToDouble(unsigned char* value, int startIndex)
 	{
 		int temp = ToInt32(value, startIndex);
 		return *reinterpret_cast<double*>(&temp);
@@ -148,13 +147,13 @@ namespace BitConverter
 		return static_cast<char>(i - 10 + 'A');
 	}
 
-	static String ToString(unsigned char value[], int startIndex, int length);
+	static String ToString(unsigned char* value, int startIndex, int length);
 
-	static String ToString(unsigned char value[]);
+	static String ToString(unsigned char* value);
 
-	static String ToString(unsigned char value[], int startIndex);
+	static String ToString(unsigned char* value, int startIndex);
 
-	static constexpr bool ToBoolean(unsigned char value[], int startIndex)
+	static constexpr bool ToBoolean(unsigned char* value, int startIndex)
 	{
 		if(value == nullptr) throw std::invalid_argument("value is null");
 

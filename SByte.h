@@ -22,19 +22,16 @@ class UInt64;
 
 class SByte final {
 
-    friend class Number;
-
 private:
 
-    int8_t Value;
+    using value_type = int8_t;
+    value_type Value;
 
 public:
 
     //<editor-fold desc="Primitive abstraction section">
 
-    using value_type = int8_t;
-
-    constexpr int8_t const& GetValue() const noexcept { return Value; }
+    constexpr value_type const& GetValue() const noexcept { return Value; }
 
     constexpr SByte() : Value() {};
 

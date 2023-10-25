@@ -24,15 +24,14 @@ class Double final {
 
 private:
 
-    double Value;
+    using value_type = double;
+    value_type Value;
     
 public:
 
     //<editor-fold desc="Primitive abstraction section">
 
-    using value_type = double;
-
-    constexpr double const& GetValue() const noexcept { return Value; }
+    constexpr value_type const& GetValue() const noexcept { return Value; }
 
     constexpr Double() : Value() {};
 

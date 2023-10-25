@@ -21,19 +21,16 @@ class UInt64;
 
 class Single final {
 
-    friend class Number;
-
 private:
 
-    float Value;
+    using value_type = float;
+    value_type Value;
 
 public:
 
     //<editor-fold desc="Primitive abstraction section">
 
-    using value_type = float;
-
-    constexpr float const& GetValue() const noexcept { return Value; }
+    constexpr value_type const& GetValue() const noexcept { return Value; }
 
     constexpr Single() : Value() {};
 
@@ -360,5 +357,7 @@ public:
     static inline constexpr float NegativeInfinity = -std::numeric_limits<float>::infinity();
     static inline constexpr float PositiveInfinity = std::numeric_limits<float>::infinity();
 };
+
+typedef Single Float;
 
 #endif //CPPDATASTRUCTURES_FLOAT_H

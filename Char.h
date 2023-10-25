@@ -37,11 +37,10 @@ class UInt64;
  */
 class Char final {
 
-    friend class Number;
-
 private:
 
-    char Value;
+    using value_type = char;
+    value_type Value;
 
     // Define the whole Latin1 table based on Unicode category values from U+0000 to U+00FF
     static constexpr Byte CategoryForLatin1[256] = {
@@ -209,20 +208,20 @@ private:
         return false;
     }
 
-    static constexpr UnicodeCategory GetLatin1UnicodeCategory(char ch) noexcept {
+    static constexpr UnicodeCategory GetLatin1UnicodeCategory(Char ch) noexcept {
         assert(IsLatin1(ch) == true);
-        return static_cast<UnicodeCategory>(CategoryForLatin1[(int) ch].GetValue());
+        return static_cast<UnicodeCategory>(CategoryForLatin1[static_cast<int>(ch)].GetValue());
     }
 
-    static constexpr Boolean IsLatin1(char ch) noexcept {
+    static constexpr Boolean IsLatin1(const Char ch) noexcept {
         return (ch <= '\x00FF');
     }
 
-    static constexpr Boolean IsASCII(char ch) noexcept {
+    static constexpr Boolean IsASCII(const Char ch) noexcept {
         return (ch <= '\x007F');
     }
 
-    static Boolean IsWhiteSpaceLatin1(char ch) noexcept {
+    static Boolean IsWhiteSpaceLatin1(const Char ch) noexcept {
         /*
          * There are characters which belong to UnicodeCategory.Control but are considered as white spaces.
          * We use code point comparisons for these characters here as a temporary fix.
@@ -254,9 +253,7 @@ public:
 
     //<editor-fold desc="Primitive abstraction section">
 
-    using value_type = char;
-
-    constexpr char const& GetValue() const noexcept { return Value; }
+    constexpr value_type const& GetValue() const noexcept { return Value; }
 
     constexpr Char() : Value() {};
 
@@ -740,20 +737,6 @@ public:
     template<typename T, std::enable_if_t<is_promotion_primitive<T>::value, bool> = true>
     friend inline constexpr Boolean operator>=(T const& lhs, Char const& rhs) noexcept requires(is_promotion_primitive<T>::value) { return lhs >= rhs.Value; }
 
-    /*
-     * Operator<< (Stream extraction)
-     */
-    friend inline std::istream& operator>>(std::istream& lhs, Char & rhs) {
-        return lhs >> rhs.Value;
-    }
-
-    /*
-     * Operator<< (Stream insertion)
-     */
-    friend inline std::ostream& operator<<(std::ostream& lhs, Char const& rhs) {
-        return lhs << rhs.Value;
-    }
-
     //</editor-fold>
 
     static String ConvertFromUTF32(int utf32) noexcept;
@@ -761,7 +744,7 @@ public:
     /*=============================ConvertToUTF32===================================
      ** Convert a surrogate pair to UTF32 value
      ==============================================================================*/
-    static Int32 ConvertToUTF32(char highSurrogate, char lowSurrogate) noexcept;
+    static Int32 ConvertToUTF32(const Char highSurrogate, const Char lowSurrogate) noexcept;
 
     /*=============================ConvertToUTF32===================================
     ** Convert a character or a surrogate pair starting at index of the specified string
@@ -774,28 +757,28 @@ public:
 
     Int32 GetHashCode() const noexcept;
 
-    static constexpr Boolean IsDigit(char c) {
+    static constexpr Boolean IsDigit(Char c) noexcept {
         if (IsLatin1(c)) {
             return (c >= '0' && c <= '9');
         }
         return (CharUnicodeInfo::GetUnicodeCategory(c) == UnicodeCategory::DecimalDigitNumber);
     };
 
-    static constexpr Boolean IsControl(char c) noexcept {
+    static constexpr Boolean IsControl(Char c) noexcept {
         if(IsLatin1(c)) return GetLatin1UnicodeCategory(c) == UnicodeCategory::Control;
         return CharUnicodeInfo::GetUnicodeCategory(c) == UnicodeCategory::Control;
     }
 
-    static constexpr Boolean IsHighSurrogate(char c) noexcept {
+    static constexpr Boolean IsHighSurrogate(const Char c) noexcept {
         return c >= CharUnicodeInfo::HIGH_SURROGATE_START && c <= CharUnicodeInfo::LOW_SURROGATE_END;
     }
 
-    static Boolean IsHighSurrogate(String& s, int index) noexcept;
+    static Boolean IsHighSurrogate(String& s, int index);
 
-    static constexpr Boolean IsLetter(char c) noexcept {
+    static constexpr Boolean IsLetter(Char c) noexcept {
         if (IsLatin1(c)) {
             if (IsASCII(c)) {
-                c |= static_cast<char>(0x20);
+                c |= static_cast<value_type>(0x20);
                 return ((c >= 'a' && c <= 'z'));
             }
             return CheckLetter(GetLatin1UnicodeCategory(c));
@@ -803,40 +786,40 @@ public:
         return CheckLetter(CharUnicodeInfo::GetUnicodeCategory(c));
     }
 
-    static constexpr Boolean IsLetterOrDigit(char c) {
+    static constexpr Boolean IsLetterOrDigit(Char c) {
         if (IsLatin1(c)) return (CheckLetterOrDigit(GetLatin1UnicodeCategory(c)));
         return (CheckLetterOrDigit(CharUnicodeInfo::GetUnicodeCategory(c)));
     }
 
-    static Boolean IsLower(char c);
+    static Boolean IsLower(Char c);
 
-    static constexpr Boolean IsLowSurrogate(char c) noexcept {
+    static constexpr Boolean IsLowSurrogate(Char c) noexcept {
         return c >= CharUnicodeInfo::LOW_SURROGATE_START && c <= CharUnicodeInfo::LOW_SURROGATE_END;
     }
 
-    static Boolean IsLowSurrogate(String& s, int index) noexcept;
+    static Boolean IsLowSurrogate(String& s, int index);
 
-    static Boolean IsPunctuation(char c) ;
+    static Boolean IsPunctuation(Char c) ;
 
-    static constexpr Boolean IsSurrogate(char c) {
+    static constexpr Boolean IsSurrogate(Char c) {
         return c >= HIGH_SURROGATE_START && c <= LOW_SURROGATE_END;
     }
 
-    static constexpr Boolean IsSurrogatePair(char highSurrogate, char lowSurrogate) noexcept {
+    static constexpr Boolean IsSurrogatePair(const Char highSurrogate, const Char lowSurrogate) noexcept {
         return (highSurrogate >= CharUnicodeInfo::HIGH_SURROGATE_START && highSurrogate <= CharUnicodeInfo::HIGH_SURROGATE_END) &&
                 (lowSurrogate >= CharUnicodeInfo::LOW_SURROGATE_START && lowSurrogate <= CharUnicodeInfo::LOW_SURROGATE_END);
     }
 
-    static Boolean IsSurrogatePair(String& s, int index) noexcept;
+    static Boolean IsSurrogatePair(String& s, int index);
 
-    static Boolean IsUpper(char c) noexcept;
+    static Boolean IsUpper(Char c) noexcept;
 
-    static Boolean IsWhiteSpace(char c) noexcept;
+    static Boolean IsWhiteSpace(Char c) noexcept;
 
     Char Parse(String& s);
 
     String ToString() const noexcept;
-    static String ToString(char c) noexcept;
+    static String ToString(Char c) noexcept;
 
     static Boolean TryParse(String& s, Char& result) noexcept;
 

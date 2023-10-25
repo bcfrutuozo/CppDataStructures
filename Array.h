@@ -19,8 +19,8 @@ private:
 	//<editor-fold desc="Iterators implementation">
 	struct Iterator
 	{
-        using iterator_category = std::bidirectional_iterator_tag;
-        using difference_type = std::ptrdiff_t;
+		using iterator_category = std::bidirectional_iterator_tag;
+		using difference_type = std::ptrdiff_t;
 		using value_type = T;
 		using pointer = T*;  // or also value_type*
 		using reference = T&;  // or also value_type&
@@ -49,27 +49,27 @@ private:
 			return tmp;
 		}
 
-        // Prefix decrement
-        constexpr Iterator& operator--()
-        {
-            this->pElement--;
-            return *this;
-        }
+		// Prefix decrement
+		constexpr Iterator& operator--()
+		{
+			this->pElement--;
+			return *this;
+		}
 
-        // Postfix decrement
-        constexpr Iterator operator--(int)
-        {
-            Iterator tmp = *this;
-            --(*this);
-            return tmp;
-        }
+		// Postfix decrement
+		constexpr Iterator operator--(int)
+		{
+			Iterator tmp = *this;
+			--(*this);
+			return tmp;
+		}
 
-        inline constexpr friend bool operator==(const Iterator& a, const Iterator& b) noexcept
+		inline constexpr friend bool operator==(const Iterator& a, const Iterator& b) noexcept
 		{
 			return Equals(a.pElement, b.pElement);
 		};
 
-        inline constexpr friend bool operator!=(const Iterator& a, const Iterator& b) noexcept
+		inline constexpr friend bool operator!=(const Iterator& a, const Iterator& b) noexcept
 		{
 			return !(a == b);
 		};
@@ -77,8 +77,8 @@ private:
 
 	struct ConstIterator
 	{
-        using iterator_category = std::bidirectional_iterator_tag;
-        using difference_type = std::ptrdiff_t;
+		using iterator_category = std::bidirectional_iterator_tag;
+		using difference_type = std::ptrdiff_t;
 		using value_type = const T;
 		using pointer = const T*;  // or also value_type*
 		using reference = const T&;  // or also value_type&
@@ -107,27 +107,27 @@ private:
 			return tmp;
 		}
 
-        // Prefix decrement
-        constexpr ConstIterator& operator--()
-        {
-            this->pElement--;
-            return *this;
-        }
+		// Prefix decrement
+		constexpr ConstIterator& operator--()
+		{
+			this->pElement--;
+			return *this;
+		}
 
-        // Postfix decrement
-        constexpr ConstIterator operator--(int)
-        {
-            Iterator tmp = *this;
-            --(*this);
-            return tmp;
-        }
+		// Postfix decrement
+		constexpr ConstIterator operator--(int)
+		{
+			Iterator tmp = *this;
+			--(*this);
+			return tmp;
+		}
 
-        inline constexpr friend bool operator==(const ConstIterator& a, const ConstIterator& b) noexcept
+		inline constexpr friend bool operator==(const ConstIterator& a, const ConstIterator& b) noexcept
 		{
 			return Equals(a.pElement, b.pElement);
 		};
 
-        inline constexpr friend bool operator!=(const ConstIterator& a, const ConstIterator& b) noexcept
+		inline constexpr friend bool operator!=(const ConstIterator& a, const ConstIterator& b) noexcept
 		{
 			return !(a == b);
 		};
@@ -135,8 +135,8 @@ private:
 
 	struct ReverseIterator
 	{
-        using iterator_category = std::bidirectional_iterator_tag;
-        using difference_type = std::ptrdiff_t;
+		using iterator_category = std::bidirectional_iterator_tag;
+		using difference_type = std::ptrdiff_t;
 		using value_type = T;
 		using pointer = T*;  // or also value_type*
 		using reference = T&;  // or also value_type&
@@ -165,27 +165,27 @@ private:
 			return tmp;
 		}
 
-        // Prefix decrement
-        constexpr ReverseIterator& operator--()
-        {
-            this->pElement++;
-            return *this;
-        }
+		// Prefix decrement
+		constexpr ReverseIterator& operator--()
+		{
+			this->pElement++;
+			return *this;
+		}
 
-        // Postfix decrement
-        constexpr ReverseIterator operator--(int)
-        {
-            Iterator tmp = *this;
-            ++(*this);
-            return tmp;
-        }
+		// Postfix decrement
+		constexpr ReverseIterator operator--(int)
+		{
+			Iterator tmp = *this;
+			++(*this);
+			return tmp;
+		}
 
-        inline constexpr friend bool operator==(const ReverseIterator& a, const ReverseIterator& b) noexcept
+		inline constexpr friend bool operator==(const ReverseIterator& a, const ReverseIterator& b) noexcept
 		{
 			return Equals(a.pElement, b.pElement);
 		};
 
-        inline constexpr friend bool operator!=(const ReverseIterator& a, const ReverseIterator& b) noexcept
+		inline constexpr friend bool operator!=(const ReverseIterator& a, const ReverseIterator& b) noexcept
 		{
 			return !(a == b);
 		};
@@ -193,8 +193,8 @@ private:
 
 	struct ConstReverseIterator
 	{
-        using iterator_category = std::bidirectional_iterator_tag;
-        using difference_type = std::ptrdiff_t;
+		using iterator_category = std::bidirectional_iterator_tag;
+		using difference_type = std::ptrdiff_t;
 		using value_type = const T;
 		using pointer = const T*;  // or also value_type*
 		using reference = const T&;  // or also value_type&
@@ -223,27 +223,27 @@ private:
 			return tmp;
 		}
 
-        // Prefix decrement
-        constexpr ConstReverseIterator& operator--()
-        {
-            this->pElement++;
-            return *this;
-        }
+		// Prefix decrement
+		constexpr ConstReverseIterator& operator--()
+		{
+			this->pElement++;
+			return *this;
+		}
 
-        // Postfix decrement
-        constexpr ConstReverseIterator operator--(int)
-        {
-            Iterator tmp = *this;
-            ++(*this);
-            return tmp;
-        }
+		// Postfix decrement
+		constexpr ConstReverseIterator operator--(int)
+		{
+			Iterator tmp = *this;
+			++(*this);
+			return tmp;
+		}
 
-        inline constexpr friend bool operator==(const ConstReverseIterator& a, const ConstReverseIterator& b) noexcept
+		inline constexpr friend bool operator==(const ConstReverseIterator& a, const ConstReverseIterator& b) noexcept
 		{
 			return Equals(a.pElement, b.pElement);
 		};
 
-        inline constexpr friend bool operator!=(const ConstReverseIterator& a, const ConstReverseIterator& b) noexcept
+		inline constexpr friend bool operator!=(const ConstReverseIterator& a, const ConstReverseIterator& b) noexcept
 		{
 			return !(a == b);
 		};
@@ -280,7 +280,7 @@ public:
 		Data(nullptr),
 		Size(other.Size)
 	{
-		if(other.Size == 0) return;
+		if (other.Size == 0) return;
 
 		Data = new T[Size];
 		std::copy(other.Data, other.Data + other.Size, Data);
@@ -298,18 +298,18 @@ public:
 		Data(nullptr),
 		Size(l.size())
 	{
-		if(empty(l)) return;
+		if (empty(l)) return;
 
 		Data = new T[Size];
 		auto it = begin();
 		auto itl = l.begin();
-		for(; it != end(); ++it, ++itl)
+		for (; it != end(); ++it, ++itl)
 			*it = *itl;
 	}
 
 	constexpr ~Array() noexcept
 	{
-		if(Data != nullptr)
+		if (Data != nullptr)
 		{
 			delete[] Data;
 			Data = nullptr;
@@ -319,7 +319,7 @@ public:
 	// Using proxy class ArrayValue to handle this function as Getter/Setter
 	constexpr T& operator[](size_t index)
 	{
-		if((ssize_t)index > LastIndex())
+		if ((ssize_t)index > LastIndex())
 			throw std::out_of_range("index is too large for the resized array");
 
 		return Data[index];
@@ -335,7 +335,7 @@ public:
 	constexpr Array& operator=(Array&& other) noexcept
 	{
 		// Self-assignment detection
-		if(&other == this) return *this;
+		if (&other == this) return *this;
 
 		delete[] Data;
 		Data = other.Data;
@@ -349,10 +349,10 @@ public:
 
 	constexpr bool operator==(const Array& other) const noexcept
 	{
-		if(Size != other.Size) return false;
+		if (Size != other.Size) return false;
 
-		for(auto itself = cbegin(), itother = other.cbegin(); itself != cend(); ++itself, ++itother)
-			if(!Equals(*itself, *itother)) return false;
+		for (auto itself = cbegin(), itother = other.cbegin(); itself != cend(); ++itself, ++itother)
+			if (!Equals(*itself, *itother)) return false;
 
 		return true;
 	}
@@ -377,11 +377,11 @@ public:
 
 	constexpr void Add(const Array<T>& other) noexcept
 	{
-		if(other.IsEmpty()) return;
+		if (other.IsEmpty()) return;
 
 		auto newSize = Size + other.Size;
 		T* newArray = new T[newSize];
-		if(Size == 0)
+		if (Size == 0)
 		{
 			std::copy(other.Data, other.Data + other.Size, newArray);
 		}
@@ -398,19 +398,19 @@ public:
 
 	constexpr void AddAtIndex(const T& element, size_t index)
 	{
-		if(GetLength() == 0 && index == 0)
+		if (GetLength() == 0 && index == 0)
 		{
 			Add(element);
 			return;
 		}
 
-		if((ssize_t)index > LastIndex())
+		if ((ssize_t)index > LastIndex())
 			throw std::out_of_range("Invalid array boundaries");
 
 		size_t newSize = Size + 1;
 		T* newArray = new T[newSize];
 
-		// Copy preblock from start until the desired index
+		// Copy pre-block from start until the desired index
 		std::copy(Data, Data + index, newArray);
 
 		// Copy the following blocks until the end of the array
@@ -427,10 +427,10 @@ public:
 
 	constexpr void AddAtIndex(const Array& a, size_t index)
 	{
-		if((ssize_t)index > LastIndex())
+		if ((ssize_t)index > LastIndex())
 			throw std::out_of_range("Invalid array boundaries");
 
-		if(IsEmpty())
+		if (IsEmpty())
 			Add(a);
 		else
 		{
@@ -454,10 +454,10 @@ public:
 
 	constexpr bool Contains(const T& other) const noexcept
 	{
-		if(IsEmpty()) return false;
+		if (IsEmpty()) return false;
 
-		for(auto it = cbegin(); it != cend(); ++it)
-			if(Equals(*it, other)) return true;
+		for (auto it = cbegin(); it != cend(); ++it)
+			if (Equals(*it, other)) return true;
 
 		return false;
 	}
@@ -466,35 +466,35 @@ public:
 	static constexpr void
 		Copy(Array& sourceArray, size_t sourceIndex, Array& destinationArray, size_t destinationIndex)
 	{
-		if(sourceIndex > sourceArray.LastIndex() || destinationIndex > destinationArray.LastIndex())
+		if (sourceIndex > sourceArray.LastIndex() || destinationIndex > destinationArray.LastIndex())
 			throw std::out_of_range("Specified index is out of array bounds");
 
 		ssize_t copyAmount = sourceArray.Size - sourceIndex;
 		ssize_t availableSpace = destinationArray.Size - destinationIndex;
 
 		bool needExtraSpace = (copyAmount - availableSpace) > 0;
-		if(needExtraSpace)
+		if (needExtraSpace)
 			Array::Resize(destinationArray, destinationArray.Size + (copyAmount - availableSpace));
 
 		std::copy(sourceArray.Data + sourceIndex, sourceArray.Data + sourceIndex + copyAmount,
-				  destinationArray.Data + destinationIndex);
+			destinationArray.Data + destinationIndex);
 	}
 
 	constexpr size_t Count(const T& element) const noexcept
 	{
 		size_t total = 0;
-		for(auto it = cbegin(); it != cend(); ++it)
-			if(Equals(*it, element)) ++total;
+		for (auto it = cbegin(); it != cend(); ++it)
+			if (Equals(*it, element)) ++total;
 		return total;
 	}
 
-	static constexpr void Copy(Array& sourceArray, Array& destinationArray) noexcept
+	static constexpr void Copy(const Array& sourceArray, Array& destinationArray) noexcept
 	{
-		if(sourceArray.Size > destinationArray.Size)
+		if (sourceArray.Size > destinationArray.Size)
 			destinationArray = sourceArray;
 		else
 		{
-			for(auto itsource = sourceArray.begin(), itdestination = destinationArray.begin();
+			for (auto itsource = sourceArray.begin(), itdestination = destinationArray.begin();
 				itsource != sourceArray.end(); ++itsource, ++itdestination)
 			{
 				*itdestination = *itsource;
@@ -504,13 +504,13 @@ public:
 
 	constexpr void Fill(const T& element) noexcept
 	{
-		for(auto it = begin(); it != end(); ++it)
+		for (auto it = begin(); it != end(); ++it)
 			*it = element;
 	}
 
 	constexpr T& GetBack() const
 	{
-		if(IsEmpty())
+		if (IsEmpty())
 			throw std::out_of_range("The array is empty");
 
 		return *(Data + LastIndex());
@@ -518,7 +518,7 @@ public:
 
 	constexpr T& GetFront() const
 	{
-		if(IsEmpty())
+		if (IsEmpty())
 			throw std::out_of_range("The array is empty");
 
 		return *Data;
@@ -528,8 +528,8 @@ public:
 
 	constexpr ssize_t IndexOf(const T& element) const
 	{
-		for(auto it = cbegin(); it != cend(); ++it)
-			if(Equals(*it, element)) return std::distance(cbegin(), it);
+		for (auto it = cbegin(); it != cend(); ++it)
+			if (Equals(*it, element)) return std::distance(cbegin(), it);
 
 		return -1;
 	}
@@ -539,14 +539,14 @@ public:
 		size_t count = Count(element);
 		Array<size_t> a(count);
 
-		for(size_t i = 0, j = 0; i < Size; ++i)
+		for (size_t i = 0, j = 0; i < Size; ++i)
 		{
-			if(Equals(Data[i], element))
+			if (Equals(Data[i], element))
 			{
 				a[j] = i;
 				++j;
 
-				if(j == count) break;
+				if (j == count) break;
 			}
 		}
 
@@ -559,29 +559,29 @@ public:
 
 	constexpr ssize_t LastIndexOf(const T& element) const noexcept
 	{
-		for(auto it = crbegin(); it != crend(); ++it)
-			if(Equals(*it, element)) return LastIndex() - std::distance(crbegin(), it);
+		for (auto it = crbegin(); it != crend(); ++it)
+			if (Equals(*it, element)) return LastIndex() - std::distance(crbegin(), it);
 
 		return -1;
 	}
 
 	[[nodiscard]] constexpr T RemoveAt(size_t index)
 	{
-		if(IsEmpty() || (ssize_t)index > LastIndex())
+		if (IsEmpty() || (ssize_t)index > LastIndex())
 			throw std::out_of_range("index is too large for the resized array");
 
 		size_t newSize = Size - 1;
 		T* newArray = nullptr;
 		T obj = Data[index];
 
-		if(newSize > 0)
+		if (newSize > 0)
 		{
 			newArray = new T[newSize];
-			if(index == 0)
+			if (index == 0)
 			{
 				std::copy(Data + 1, Data + Size, newArray);
 			}
-			else if(index == LastIndex())
+			else if (index == LastIndex())
 			{
 				std::copy(Data, Data + index, newArray);
 			}
@@ -601,14 +601,14 @@ public:
 
 	[[nodiscard]] constexpr T RemoveBack()
 	{
-		if(IsEmpty())
+		if (IsEmpty())
 			throw std::out_of_range("Cannot remove element from an empty array");
 
 		size_t newSize = Size - 1;
 		T* newArray = nullptr;
 		T obj = Data[newSize];
 
-		if(newSize > 0)
+		if (newSize > 0)
 		{
 			newArray = new T[newSize];
 			std::copy(Data, Data + Size - 1, newArray);
@@ -623,7 +623,7 @@ public:
 
 	[[nodiscard]] constexpr T RemoveFront()
 	{
-		if(IsEmpty())
+		if (IsEmpty())
 			throw std::out_of_range("Cannot remove element from an empty array");
 
 		size_t newSize = Size - 1;
@@ -631,7 +631,7 @@ public:
 
 		T obj = *Data;
 
-		if(newSize > 0)
+		if (newSize > 0)
 		{
 			newArray = new T[newSize];
 			std::copy(Data + 1, Data + Size, newArray);
@@ -646,27 +646,27 @@ public:
 
 	static constexpr void Resize(Array& a, size_t newSize) noexcept
 	{
-		if(newSize == a.Size) return;
+		if (newSize == a.Size) return;
 
 		T* newArray = nullptr;
 
-		if(newSize > 0)
+		if (newSize > 0)
 		{
 			newArray = new T[newSize];
-			if(newSize > a.Size)
+			if (newSize > a.Size)
 			{
 				// Create a default object to fill the new spaces
 				T def{ 0 };
 
-				if(a.GetLength() > 0)
+				if (a.GetLength() > 0)
 				{
 					std::copy(a.Data, a.Data + a.Size, newArray);
-					for(size_t i = a.Size; i < newSize; ++i)
+					for (size_t i = a.Size; i < newSize; ++i)
 						newArray[i] = def;
 				}
 				else
 				{
-					for(size_t i = 0; i < newSize; ++i)
+					for (size_t i = 0; i < newSize; ++i)
 						newArray[i] = def;
 				}
 			}
@@ -694,7 +694,7 @@ public:
 
 		// We can compare the addresses between ite and itb because array always reallocates
 		// itself to another block. So we can perform pointer comparison
-		for(; &(*itb) < &(*ite); ++itb, ++ite)
+		for (; &(*itb) < &(*ite); ++itb, ++ite)
 		{
 			T tmp = *ite;
 			*ite = *itb;
