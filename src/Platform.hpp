@@ -18,13 +18,13 @@
 # define WINDOWS
 #endif
 
-#if _WIN64 | __x86_x64__ || __ppc64__
+#if _WIN64 || __x86_x64__ || __ppc64__
 #define ENVIRONMENT64
 #elif
 #define ENVIRONMENT32
 #endif
 
-#if _WIN32
+#ifdef WINDOWS
 typedef long long ssize_t;  /* Windows */
 #define SSIZE_MIN  LLONG_MIN
 #define SSIZE_MAX  LLONG_MAX
@@ -45,21 +45,21 @@ typedef long ssize_t;       /* Linux */
 // Compare function to handle with const char*
 // Char* must always be compared with strcmp() function
 template<typename T>
-static inline constexpr typename std::enable_if<std::is_same<T, const char*>::value, bool>::type Equals(const T& a, const T& b) noexcept
-{
+static inline constexpr typename std::enable_if<std::is_same<T, const char *>::value, bool>::type
+Equals(const T &a, const T &b) noexcept {
     return (strcmp(a, b) == 0);
 }
 
 template<typename T>
-static inline constexpr typename std::enable_if<std::is_same<T, const wchar_t*>::value, bool>::type Equals(const T& a, const T& b) noexcept
-{
+static inline constexpr typename std::enable_if<std::is_same<T, const wchar_t *>::value, bool>::type
+Equals(const T &a, const T &b) noexcept {
     return (wcscmp(a, b) == 0);
 }
 
 // Compare function for primitive and classes which contain implementation of operator==()
-template <typename T>
-static inline constexpr typename std::enable_if<!std::is_same<T, const char*>::value, bool>::type Equals(const T& a, const T& b) noexcept
-{
+template<typename T>
+static inline constexpr typename std::enable_if<!std::is_same<T, const char *>::value, bool>::type
+Equals(const T &a, const T &b) noexcept {
     return (a == b);
 }
 
@@ -91,7 +91,7 @@ static char *strnstr(const char *haystack, const char *needle, size_t length) {
     return ((char *) haystack);
 }
 
-static wchar_t* wcsnstr(const wchar_t* haystack, const wchar_t* needle, size_t length) {
+static wchar_t *wcsnstr(const wchar_t *haystack, const wchar_t *needle, size_t length) {
     wchar_t nC, hC;
 
     if ((nC = *needle++) != '\0') {
@@ -106,7 +106,7 @@ static wchar_t* wcsnstr(const wchar_t* haystack, const wchar_t* needle, size_t l
         } while (wcsncmp(haystack, needle, needleLength) != 0);
         --haystack;
     }
-    return ((wchar_t*)haystack);
+    return ((wchar_t *) haystack);
 }
 
 // Case-sensitive
@@ -121,19 +121,20 @@ static char *strnrstr(const char *str, const char *sub, int len) {
     return nullptr;
 }
 
-static wchar_t* wcstrnrstr(const wchar_t* str, const wchar_t* sub, int len) {
-    const wchar_t* pend = str + len;
-    const wchar_t* pstr;
+static wchar_t *wcstrnrstr(const wchar_t *str, const wchar_t *sub, int len) {
+    const wchar_t *pend = str + len;
+    const wchar_t *pstr;
     const int sl = wcslen(sub);
     for (pstr = pend - sl; pstr >= str; pstr--) {
         if (!wcsncmp(pstr, sub, sl))
-            return (wchar_t*)pstr;
+            return (wchar_t *) pstr;
     }
     return nullptr;
 }
 
-static char* strrstr(const char *str, const char *sub) { return strnrstr(str, sub, strlen(str)); }
-static wchar_t* wcsrstr(const wchar_t* str, const wchar_t* sub) { return wcstrnrstr(str, sub, wcslen(str)); }
+static char *strrstr(const char *str, const char *sub) { return strnrstr(str, sub, strlen(str)); }
+
+static wchar_t *wcsrstr(const wchar_t *str, const wchar_t *sub) { return wcstrnrstr(str, sub, wcslen(str)); }
 
 // Case-insensitive
 #ifdef __linux__
@@ -173,19 +174,20 @@ static char *strnrstri(const char *str, const char *sub, int len) {
     return nullptr;
 }
 
-static wchar_t* wcsnrstri(const wchar_t* str, const wchar_t* sub, int len) {
-    const wchar_t* pend = str + len;
-    const wchar_t* pstr;
+static wchar_t *wcsnrstri(const wchar_t *str, const wchar_t *sub, int len) {
+    const wchar_t *pend = str + len;
+    const wchar_t *pstr;
     int sl = wcslen(sub);
     for (pstr = pend - sl; pstr >= str; pstr--) {
         if (!wcsnicmp(pstr, sub, sl))
-            return (wchar_t*)pstr;
+            return (wchar_t *) pstr;
     }
     return nullptr;
 }
 
-static char* strrstri(const char *str, const char *sub) { return strnrstri(str, sub, strlen(str)); }
-static wchar_t* wcsrstri(const wchar_t* str, const wchar_t* sub) { return wcsnrstri(str, sub, wcslen(str)); }
+static char *strrstri(const char *str, const char *sub) { return strnrstri(str, sub, strlen(str)); }
+
+static wchar_t *wcsrstri(const wchar_t *str, const wchar_t *sub) { return wcsnrstri(str, sub, wcslen(str)); }
 
 static char *strnstri(const char *str, const char *sub, int len) {
     const char *pend = str + len;
@@ -198,18 +200,19 @@ static char *strnstri(const char *str, const char *sub, int len) {
     return nullptr;
 }
 
-static wchar_t* wcsnstri(const wchar_t* str, const wchar_t* sub, int len) {
-    const wchar_t* pend = str + len;
-    const wchar_t* pstr;
+static wchar_t *wcsnstri(const wchar_t *str, const wchar_t *sub, int len) {
+    const wchar_t *pend = str + len;
+    const wchar_t *pstr;
     int sl = wcslen(sub);
     for (pstr = str; pstr <= pend - sl; pstr++) {
         if (!wcsnicmp(pstr, sub, sl))
-            return (wchar_t*)pstr;
+            return (wchar_t *) pstr;
     }
     return nullptr;
 }
 
-static char* strstri(const char* str, const char* sub) { return strnstri(str, sub, strlen(str)); }
-static wchar_t* wcsstri(const wchar_t* str, const wchar_t* sub) { return wcsnstri(str, sub, wcslen(str)); }
+static char *strstri(const char *str, const char *sub) { return strnstri(str, sub, strlen(str)); }
+
+static wchar_t *wcsstri(const wchar_t *str, const wchar_t *sub) { return wcsnstri(str, sub, wcslen(str)); }
 
 #endif // CPPDATASTRUCTURES_PLATFORM_HPP

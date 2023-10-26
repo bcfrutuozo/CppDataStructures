@@ -737,6 +737,20 @@ public:
     template<typename T, std::enable_if_t<is_promotion_primitive<T>::value, bool> = true>
     friend inline constexpr Boolean operator>=(T const& lhs, Char const& rhs) noexcept requires(is_promotion_primitive<T>::value) { return lhs >= rhs.Value; }
 
+    /*
+     * Operator<< (Stream extraction)
+     */
+    friend inline std::istream& operator>>(std::istream& lhs, Char& rhs) {
+        return lhs >> rhs.Value;
+    }
+
+    /*
+     * Operator<< (Stream insertion)
+     */
+    friend inline std::ostream& operator<<(std::ostream& lhs, Char const& rhs) {
+        return lhs << rhs.Value;
+    }
+
     //</editor-fold>
 
     static String ConvertFromUTF32(int utf32) noexcept;

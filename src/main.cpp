@@ -5,6 +5,14 @@
 int main(int argc, char* argv[])
 {
 	String s("ABCDE");
+
+    Array<int> aa = {123, 4};
+
+    const int x = aa[1];
+
+    const char c1 = s[2];
+    std::cout << c1 << std::endl;
+
 	String s2 = "DEFG";
     String s3 = "ZZZ";
 

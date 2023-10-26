@@ -3,6 +3,7 @@ add_executable(LinkedList test_linkedlist.cpp)
 add_executable(List test_list.cpp)
 add_executable(Queue test_queue.cpp)
 add_executable(Stack test_stack.cpp)
+add_executable(String test_string.cpp)
 
 add_test(
         NAME
@@ -37,4 +38,11 @@ add_test(
         Stack
         COMMAND
         $<TARGET_FILE:Stack>
+)
+
+add_test(
+        NAME
+        String
+        COMMAND
+        $<TARGET_FILE:String>
 )

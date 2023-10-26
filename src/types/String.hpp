@@ -212,10 +212,14 @@ private:
     constexpr ImmutableString() noexcept: ImmutableString(nullptr) {}
 
     constexpr ImmutableString(const_pointer str, size_type startIndex, size_type len) noexcept {
-        if (startIndex > 0) len -= startIndex;
         assert(len < max_size() && "invalid string length");
         if (str == nullptr || len == 0) { mStr = mEmpty.str; }
         else {
+
+            // Readjust length value based on the size of the string plus the start index
+            auto totalSize = Algorithm::strlen(str) - startIndex;
+            if(len > totalSize) len = totalSize;
+
             size_type n = getAllocatedLength(len);
             prefix_type *ptr = allocate(n);
             std::atomic_init(reinterpret_cast<atomic_prefix_type *>(ptr), 1); // ref-counter = 1
@@ -739,16 +743,24 @@ private:
 
 public:
 
+    // Constructors
     constexpr String() noexcept: m_Data() {}
 
-    constexpr String(const char *c) : m_Data(c) {}
+    constexpr String(const char *c) noexcept : m_Data(c) {}
 
-    constexpr String(const char c, int count) : m_Data(c, count) {}
+    constexpr String(const char c, int count) noexcept : m_Data(c, count) {}
 
-    constexpr String(const char *c, int startIndex, int length) : m_Data(c, startIndex, length) {}
+    constexpr String(const char *c, int startIndex, int length) noexcept : m_Data(c, startIndex, length) {}
+
+    constexpr String(const String& other) noexcept = default;
+
+    constexpr String(String&& other) noexcept = default;
 
     // Copy assignment.
     constexpr String &operator=(const String &other) noexcept = default;
+
+    // Move Assignment.
+    constexpr String& operator=(String&&other) noexcept = default;
 
     constexpr String &operator=(const char *c) {
         m_Data = c;
@@ -777,10 +789,10 @@ public:
 
     inline constexpr Boolean operator!=(const char *c) const noexcept { return !(*this == c); }
 
-    inline constexpr Boolean operator!=(const String &s) const noexcept { return (*this == s); }
+    inline constexpr Boolean operator!=(const String &s) const noexcept { return !(*this == s); }
 
     // Returns a reference to the character at specified location pos in range [0, length()].
-    inline constexpr const Char &operator[](int pos) const {
+    inline constexpr const char &operator[](int pos) const {
         if (pos > m_Data.length() - 1) throw std::out_of_range("Out of string boundaries");
         return m_Data[pos];
     }
@@ -792,8 +804,6 @@ public:
     inline constexpr Boolean Contains(const char *c) const noexcept { return m_Data.contains(c); }
 
     inline constexpr Boolean Contains(const String &s) const noexcept { return m_Data.contains(s.m_Data.c_str()); }
-
-    inline constexpr bool Empty() const noexcept { return (m_Data.length() == 0); }
 
     inline constexpr size_t GetLength() const noexcept { return m_Data.length(); }
 
@@ -848,6 +858,8 @@ public:
 
     constexpr size_t Count(const String &s) const noexcept { return m_Data.count(s.m_Data.c_str()); }
 
+    static inline constexpr String Empty() noexcept { return nullptr; }
+
     //Boolean EndsWith(const char* c, StringComparison options = StringComparison::CaseSensitive) const noexcept;
     //
     //Boolean EndsWith(const wchar_t* c, StringComparison options = StringComparison::CaseSensitive) const noexcept;
@@ -899,6 +911,8 @@ public:
     //String Insert(size_t index, wchar_t c) const;
     //
     //String Insert(size_t index, const wchar_t* c) const;
+
+    inline constexpr bool IsEmpty() const noexcept { return (m_Data.length() == 0); }
 
     inline constexpr Boolean IsWhiteSpace() noexcept {
         if (GetLength() == 0) return true;

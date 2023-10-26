@@ -66,7 +66,7 @@ Int32 Char::ConvertToUTF32(String &s, int index) {
         }
     }
     // Not a high-surrogate or low-surrogate. Genereate the UTF32 value for the BMP characters.
-    return s[index].GetValue();
+    return s[index];
 }
 
 Int32 Char::GetHashCode() const noexcept {
