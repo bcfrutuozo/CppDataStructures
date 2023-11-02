@@ -462,6 +462,58 @@ private:
         return view().find(c, pos);
     }
 
+    // Find all ocurrences of a substring.
+    auto constexpr find_all_of(const ImmutableString &other, size_type pos = 0) const noexcept {
+
+        std::vector<size_type> entries{};
+        size_type lastIdx = 0;
+
+        for(auto idx = view().find(other.view(), pos); idx != std::string::npos; idx = view().find(other.view(), pos)) {
+            entries.push_back(idx);
+            pos = idx + 1;
+        }
+
+        return entries;
+    }
+
+    auto constexpr find_all_of(const_pointer str, size_type pos, size_type len) const {
+        std::vector<size_type> entries{};
+        size_type lastIdx = 0;
+
+        for(auto idx = view().find(sanitize(str).view(), pos, len); idx != std::string::npos; idx = view().find(sanitize(str).view(), pos, len)) {
+            entries.push_back(idx);
+            pos = idx + 1;
+        }
+
+        std::vector<size_t> a(entries.begin(), entries.end());
+
+        return entries;
+    }
+
+    auto constexpr find_all_of(const_pointer str, size_type pos = 0) const {
+        std::vector<size_type> entries{};
+        size_type lastIdx = 0;
+
+        for(auto idx = view().find(sanitize(str).view(), pos); idx != std::string::npos; idx = view().find(sanitize(str).view(), pos)) {
+            entries.push_back(idx);
+            pos = idx + 1;
+        }
+
+        return entries;
+    }
+
+    auto constexpr find_all_of(value_type c, size_type pos = 0) const noexcept {
+        std::vector<size_type> entries{};
+        size_type lastIdx = 0;
+
+        for(auto idx = view().find(c, pos); idx != std::string::npos; idx = view().find(c, pos)) {
+            entries.push_back(idx);
+            pos = idx + 1;
+        }
+
+        return entries;
+    }
+
     // Find the last occurrence of a substring.
     auto constexpr rfind(const ImmutableString &other, size_type pos = npos) const noexcept {
         return view().rfind(other.view(), pos);
@@ -752,6 +804,7 @@ public:
 
     constexpr String(const char *c, int startIndex, int length) noexcept : m_Data(c, startIndex, length) {}
 
+    // TODO: Set as implicit when we implement the StringPool for shared allocation
     constexpr String(const String& other) noexcept = default;
 
     constexpr String(String&& other) noexcept = default;
@@ -762,10 +815,11 @@ public:
     // Move Assignment.
     constexpr String& operator=(String&&other) noexcept = default;
 
-    constexpr String &operator=(const char *c) {
-        m_Data = c;
-        return *this;
-    }
+    // TODO: Handle StringPool implementation
+//    constexpr String &operator=(const char *c) noexcept {
+//        m_Data = c;
+//        return *this;
+//    }
 
     inline constexpr String operator+(const char *c) const { return String::Concat(m_Data.c_str(), c); }
 
@@ -799,14 +853,6 @@ public:
 
     inline constexpr operator const char *() const noexcept { return m_Data.c_str(); }
 
-    inline constexpr Boolean Contains(char c) const noexcept { return m_Data.contains(c); }
-
-    inline constexpr Boolean Contains(const char *c) const noexcept { return m_Data.contains(c); }
-
-    inline constexpr Boolean Contains(const String &s) const noexcept { return m_Data.contains(s.m_Data.c_str()); }
-
-    inline constexpr size_t GetLength() const noexcept { return m_Data.length(); }
-
     static constexpr String Concat(const char *a, const char *b) noexcept {
         return ImmutableString<char>::concat(a, b);
     }
@@ -831,26 +877,30 @@ public:
         return String::Concat(a.m_Data.c_str(), b.m_Data.c_str(), c.m_Data.c_str(), d.m_Data.c_str());
     }
 
-    constexpr String Concat(Array<String> &array) const noexcept {
-        size_t oldSize = m_Data.length();
-        size_t totalSize = oldSize;
+    static constexpr String Concat(Array<String> &array) noexcept {
+        size_t totalSize = 0;
 
         for (const auto &it: array) totalSize += it.GetLength();
 
         // Push what we already have
-        char *ch = new char[totalSize + 2];
-        Algorithm::strcat(ch, m_Data.data());
+        char *ch = new char[totalSize + 1];
 
         for (size_t i = 0, offset = 0; i < array.GetLength(); ++i) {
-            Algorithm::strcat(ch + oldSize + offset, array[i].m_Data.data());
+            Algorithm::strcat(ch + offset, array[i].m_Data.data());
             offset += array[i].GetLength();
         }
 
-        ch[totalSize + 1] = '\0';
+        ch[totalSize] = '\0';
         String ret = ch;
         delete[] ch;
         return ret;
     }
+
+    inline constexpr Boolean Contains(char c) const noexcept { return m_Data.contains(c); }
+
+    inline constexpr Boolean Contains(const char *c) const noexcept { return m_Data.contains(c); }
+
+    inline constexpr Boolean Contains(const String &s) const noexcept { return m_Data.contains(s.m_Data.c_str()); }
 
     constexpr size_t Count(char c) const noexcept { return m_Data.count(c); }
 
@@ -860,51 +910,31 @@ public:
 
     static inline constexpr String Empty() noexcept { return nullptr; }
 
-    //Boolean EndsWith(const char* c, StringComparison options = StringComparison::CaseSensitive) const noexcept;
-    //
-    //Boolean EndsWith(const wchar_t* c, StringComparison options = StringComparison::CaseSensitive) const noexcept;
-    //
-    //Boolean EndsWith(const Char* c, StringComparison options = StringComparison::CaseSensitive) const noexcept;
-    //
-    //size_t IndexOf(char c, StringComparison options = StringComparison::CaseSensitive) const noexcept;
-    //
-    //size_t IndexOf(wchar_t c, StringComparison options = StringComparison::CaseSensitive) const noexcept;
-    //
-    //size_t IndexOf(Char c, StringComparison options = StringComparison::CaseSensitive) const noexcept;
-    //
-    //size_t IndexOf(char c, int startIndex, StringComparison options = StringComparison::CaseSensitive) const noexcept;
-    //
-    //size_t IndexOf(wchar_t c, int startIndex, StringComparison options = StringComparison::CaseSensitive) const noexcept;
-    //
-    //size_t IndexOf(Char c, int startIndex, StringComparison options = StringComparison::CaseSensitive) const noexcept;
-    //
-    //size_t IndexOf(wchar_t c, int startIndex, int count, StringComparison options = StringComparison::CaseSensitive) const noexcept;
-    //
-    //size_t IndexOf(const char* c, StringComparison options = StringComparison::CaseSensitive) const noexcept;
-    //
-    //size_t IndexOf(const wchar_t* c, StringComparison options = StringComparison::CaseSensitive) const noexcept;
-    //
-    //size_t IndexOf(const Char* c, StringComparison options = StringComparison::CaseSensitive) const noexcept;
-    //
-    //size_t IndexOf(const char* c, int startIndex, StringComparison options = StringComparison::CaseSensitive) const noexcept;
-    //
-    //size_t IndexOf(const wchar_t* c, int startIndex, StringComparison options = StringComparison::CaseSensitive) const noexcept;
-    //
-    //size_t IndexOf(const Char* c, int startIndex, StringComparison options = StringComparison::CaseSensitive) const noexcept;
-    //
-    //size_t IndexOf(const char* c, int startIndex, int count, StringComparison options = StringComparison::CaseSensitive) const noexcept;
-    //
-    //size_t IndexOf(const wchar_t* c, int startIndex, int count, StringComparison options = StringComparison::CaseSensitive) const noexcept;
-    //
-    //size_t IndexOf(const Char* c, int startIndex, int count, StringComparison options = StringComparison::CaseSensitive) const noexcept;
-    //
-    //size_t IndexOfAny(const wchar_t* array) const noexcept;
-    //
-    //size_t IndexOfAny(const wchar_t* array, int startIndex) const noexcept;
-    //
-    //size_t IndexOfAny(const wchar_t* array, int startIndex, int count) const noexcept;
-    //
-    //Array<size_t> IndicesOf(wchar_t c) const noexcept;
+    inline constexpr Boolean EndsWith(const char c) const noexcept { char ptr[2]; ptr[0] = c; ptr[1] ='\0'; return m_Data.ends_with(ptr);}
+
+    inline constexpr Boolean EndsWith(const char* c) const noexcept { return m_Data.ends_with(c);}
+
+    inline constexpr Boolean EndsWith(const String& s) const noexcept { return m_Data.ends_with(s); }
+
+    inline constexpr size_t GetLength() const noexcept { return m_Data.length(); }
+
+    inline constexpr size_t IndexOf(const char c) const noexcept { return m_Data.find(c); }
+
+    inline constexpr size_t IndexOf(const char c, int startIndex) const noexcept { return m_Data.find(c, startIndex);};
+
+    inline constexpr size_t IndexOf(const char* c) const noexcept { return m_Data.find(c); }
+
+    inline constexpr size_t IndexOf(const char* c, int startIndex) const noexcept { return m_Data.find(c, startIndex);};
+
+    inline constexpr size_t IndexOfAny(const char c) const noexcept { return m_Data.find_first_of(c); }
+
+    inline constexpr size_t IndexOfAny(const char c, int startIndex) const noexcept { return m_Data.find_first_of(c, startIndex);};
+
+    inline constexpr size_t IndexOfAny(const char* c) const noexcept { return m_Data.find_first_of(c); }
+
+    inline constexpr size_t IndexOfAny(const char* c, int startIndex) const noexcept { return m_Data.find_first_of(c, startIndex);};
+
+    inline constexpr Array<size_t> IndicesOf(char c) const noexcept { auto ctn = m_Data.find_all_of(c); return {ctn.begin(), ctn.end()};}
     //
     //Array<size_t> IndicesOf(const wchar_t* c) const noexcept;
     //
@@ -990,7 +1020,6 @@ public:
     //String ToLower() const noexcept;
     //
     //String ToUpper() const noexcept;
-
 
     // Left trim spaces.
     //basic_cstring_view TrimStart() const {

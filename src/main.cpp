@@ -14,7 +14,7 @@ int main(int argc, char* argv[])
     std::cout << c1 << std::endl;
 
 	String s2 = "DEFG";
-    String s3 = "ZZZ";
+    String s3 = "AZAZZAZ";
 
 	if(s2 == "CDEABC") std::cout << "YEAH" << std::endl;
 
@@ -26,6 +26,10 @@ int main(int argc, char* argv[])
 
     String s10 = "A";
     String s11 = "B";
+
+    auto idx = s3.IndicesOf('Z');
+
+    for(size_t i = 0; i < idx.GetLength(); ++i) std::cout << idx[i] << std::endl;
 
 	//Array<String> f;
 	//f.Add(s);

@@ -7,6 +7,9 @@
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
+#include <vector>
+#include <list>
+
 TEST_CASE("Array<T>")
 {
 	SECTION("Instantiation")
@@ -204,6 +207,18 @@ TEST_CASE("Array<T>")
 			}
 		}
 
+        SECTION("Iterators constructor")
+        {
+            std::vector<int> a {1, 2, 3, 4, 5};
+            std::list<int> b{5, 4, 3, 2, 1};
+
+            Array<int> ar(a.begin(), a.end());
+            Array<int> br(b.begin(), b.end());
+
+            REQUIRE(ar == Array<int>{1, 2, 3, 4, 5});
+            REQUIRE(br == Array<int>{5 ,4, 3, 2, 1});
+        }
+
 		SECTION("Copy constructor")
 		{
 			Array<int> a{ 1, 2, 3, 4, 5, 6 };
@@ -265,19 +280,33 @@ TEST_CASE("Array<T>")
 		}
 	}
 
+    SECTION("Clear")
+    {
+        Array<int> a = {1, 2, 3, 4, 5};
+        REQUIRE(a.GetLength() == 5);
+        a.Clear();
+        REQUIRE(a.GetLength() == 5);
+        Array<int> b = {1,2,3,4,5};
+        Array<int>::Clear(b, 2, 2);
+        REQUIRE(b.GetLength() == 5);
+        REQUIRE(b[0] == 1);
+        REQUIRE(b[1] == 2);
+        REQUIRE(b[2] == 0);
+        REQUIRE(b[3] == 0);
+        REQUIRE(b[4] == 5);
+    }
+
 	SECTION("Elements insertion")
 	{
 		SECTION("Adding element at the end of a populated Array<T>")
 		{
 			Array<const char*> cpArray = { "BRUNO", "FRUTUOZO", "ENGINEERING", "LOREM", "IPSUM" };
 			REQUIRE(cpArray.GetLength() == 5);
-			REQUIRE(cpArray.LastIndex() == 4);
 
 			cpArray.Add("NEW");
 			cpArray.Add("NEW 2");
 			cpArray.Add("NEW 3");
 			REQUIRE(cpArray.GetLength() == 8);
-			REQUIRE(cpArray.LastIndex() == 7);
 			REQUIRE(cpArray == Array<const char*>{"BRUNO", "FRUTUOZO", "ENGINEERING", "LOREM", "IPSUM", "NEW", "NEW 2", "NEW 3"});
 		}
 
@@ -285,7 +314,6 @@ TEST_CASE("Array<T>")
 		{
 			Array<const char*> cpArray = { "BRUNO", "FRUTUOZO", "ENGINEERING", "LOREM", "IPSUM" };
 			REQUIRE(cpArray.GetLength() == 5);
-			REQUIRE(cpArray.LastIndex() == 4);
 
 			cpArray.Add("Single New");
 			cpArray.Add({ "ELEMENT 1", "ELEMENT 2", "ELEMENT 3", "ELEMENT 4", "ELEMENT 5",
@@ -294,7 +322,6 @@ TEST_CASE("Array<T>")
 
 			// Checking index and Size
 			REQUIRE(cpArray.GetLength() == 17);
-			REQUIRE(cpArray.LastIndex() == 16);
 
 			// Checking element contents
 			REQUIRE(strcmp(cpArray[2], "ENGINEERING") == 0);
@@ -313,11 +340,9 @@ TEST_CASE("Array<T>")
 			Array<int> emptyArrayForSingleInsertion;
 			// Checking index and Size
 			REQUIRE(emptyArrayForSingleInsertion.GetLength() == 0);
-			REQUIRE(emptyArrayForSingleInsertion.LastIndex() == -1);
 			emptyArrayForSingleInsertion.Add(10);
 			// Checking index and Size
 			REQUIRE(emptyArrayForSingleInsertion.GetLength() == 1);
-			REQUIRE(emptyArrayForSingleInsertion.LastIndex() == 0);
 			// Checking element contents
 			REQUIRE(emptyArrayForSingleInsertion[0] == 10);
 			REQUIRE(emptyArrayForSingleInsertion == Array<int>{10});
@@ -328,11 +353,9 @@ TEST_CASE("Array<T>")
 			Array<int> emptyArrayForRangeInsertion;
 			// Checking index and Size
 			REQUIRE(emptyArrayForRangeInsertion.GetLength() == 0);
-			REQUIRE(emptyArrayForRangeInsertion.LastIndex() == -1);
 			emptyArrayForRangeInsertion.Add({ 4, 6, 3, 1, 6, 6, 6, 19, 2, 164, 52231, 2, 1, 0, -132, -4, -7, 32, -999 });
 			// Checking index and Size
 			REQUIRE(emptyArrayForRangeInsertion.GetLength() == 19);
-			REQUIRE(emptyArrayForRangeInsertion.LastIndex() == 18);
 			// Checking element contents
 			REQUIRE(emptyArrayForRangeInsertion[0] == 4);
 			REQUIRE(emptyArrayForRangeInsertion[7] == 19);
@@ -371,7 +394,7 @@ TEST_CASE("Array<T>")
 
 			Array<char> e = { 1, 3, -4, 2, 8 };
 			Array<char> f = { 1, 3, 100, -4, 2, 8 };
-			e.AddAtIndex(f, e.LastIndex());
+            e.AddAtIndex(f, e.GetLength() - 1);
 			REQUIRE(e == Array<char>{1, 3, -4, 2, 1, 3, 100, -4, 2, 8, 8});
 		}
 	}
@@ -476,9 +499,8 @@ TEST_CASE("Array<T>")
 			REQUIRE(iArray.GetLength() == 5);
 			REQUIRE(iArray.GetBack() == -332);
 			REQUIRE(iArray.RemoveBack() == -332);
-			REQUIRE(iArray.RemoveAt(iArray.LastIndex()) == 45);
-			REQUIRE(iArray.GetLength() == 3);
-			REQUIRE(iArray == Array<int>{0, 2, 8});
+			REQUIRE(iArray.GetLength() == 4);
+			REQUIRE(iArray == Array<int>{0, 2, 8, 45});
 		}
 	}
 
@@ -543,7 +565,7 @@ TEST_CASE("Array<T>")
 			REQUIRE(a.IndexOf(0l) == 0);
 			REQUIRE(a.IndexOf(-1l) == 3);
 			REQUIRE(a.IndexOf(97057l) == 10);
-			REQUIRE(a.IndexOf(444444) == -1);
+			CHECK_THROWS(a.IndexOf(444444) == -1);
 		}
 
 		SECTION("Find the index of the last occurrence")
@@ -552,7 +574,7 @@ TEST_CASE("Array<T>")
 			REQUIRE(a.LastIndexOf(0l) == 11);
 			REQUIRE(a.LastIndexOf(-3321) == 9);
 			REQUIRE(a.LastIndexOf(3218875l) == 2);
-			REQUIRE(a.LastIndexOf(-4444) == -1);
+            CHECK_THROWS(a.LastIndexOf(-4444) == -1);
 		}
 
 		SECTION("Find all indices ")

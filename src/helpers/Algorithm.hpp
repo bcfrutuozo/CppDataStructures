@@ -12,6 +12,7 @@
 
 namespace Algorithm {
 
+
     // base template with 1 argument (which will be called from the variadic one).
     template<typename Char = char,
             typename Allocator = std::allocator<Char>,
