@@ -2,12 +2,18 @@
 #include "types/String.hpp"
 #include "collections/Array.hpp"
 
+#include <span>
+#include <queue>
+#include <list>
+
 int main(int argc, char* argv[])
 {
+    std::list a {1,2,3,4};
+
+    std::queue<int> c;
 	String s("ABCDE");
 
     Array<int> aa = {123, 4};
-
     const int x = aa[1];
 
     const char c1 = s[2];
@@ -27,9 +33,13 @@ int main(int argc, char* argv[])
     String s10 = "A";
     String s11 = "B";
 
-    auto idx = s3.IndicesOf('Z');
+    auto idx = s3.IndicesOf(s10);
 
     for(size_t i = 0; i < idx.GetLength(); ++i) std::cout << idx[i] << std::endl;
+
+    std::span<size_t> spn{idx};
+
+    for(auto& i : spn) std::cout << "SPAN!!!: " << i << std::endl;
 
 	//Array<String> f;
 	//f.Add(s);

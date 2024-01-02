@@ -248,13 +248,13 @@ TEST_CASE("List<T>")
         {
             List<const char *> cpList = {"BRUNO", "FRUTUOZO", "ENGINEERING", "LOREM", "IPSUM"};
             REQUIRE(cpList.GetLength() == 5);
-            REQUIRE(cpList.LastIndex() == 4);
+            REQUIRE(cpList.GetLastIndex() == 4);
 
             cpList.Add("NEW");
             cpList.Add("NEW 2");
             cpList.Add("NEW 3");
             REQUIRE(cpList.GetLength() == 8);
-            REQUIRE(cpList.LastIndex() == 7);
+            REQUIRE(cpList.GetLastIndex() == 7);
             REQUIRE(cpList == List<const char *>{"BRUNO", "FRUTUOZO", "ENGINEERING", "LOREM", "IPSUM", "NEW", "NEW 2", "NEW 3"});
         }
 
@@ -262,7 +262,7 @@ TEST_CASE("List<T>")
         {
             List<const char *> cpList = {"BRUNO", "FRUTUOZO", "ENGINEERING", "LOREM", "IPSUM"};
             REQUIRE(cpList.GetLength() == 5);
-            REQUIRE(cpList.LastIndex() == 4);
+            REQUIRE(cpList.GetLastIndex() == 4);
 
             cpList.Add("Single New");
             cpList.AddRange({"ELEMENT 1", "ELEMENT 2", "ELEMENT 3", "ELEMENT 4", "ELEMENT 5",
@@ -271,7 +271,7 @@ TEST_CASE("List<T>")
 
             // Checking index and Size
             REQUIRE(cpList.GetLength() == 17);
-            REQUIRE(cpList.LastIndex() == 16);
+            REQUIRE(cpList.GetLastIndex() == 16);
 
             // Checking element contents
             REQUIRE(cpList.IndexOf("ENGINEERING") == 2);
@@ -314,7 +314,7 @@ TEST_CASE("List<T>")
 
             List<char> e = {1, 3, -4, 2, 8};
             List<char> f = {1, 3, 100, -4, 2, 8};
-            e.AddRangeAt(f, e.LastIndex());
+            e.AddRangeAt(f, e.GetLastIndex());
             REQUIRE(e == List<char>{1, 3, -4, 2, 1, 3, 100, -4, 2, 8, 8});
         }
     }

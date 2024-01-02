@@ -16,14 +16,31 @@ class Queue {
 
 private:
 
-    struct QueueNode {
-        T Data;
-        QueueNode *Next;
+    struct Node {
 
-        constexpr explicit QueueNode(const T &element) noexcept: Data(element), Next(nullptr) {}
+        // Declarations
+        using pointer = T*;
+        using size_type = size_t;
+        using value_type = T;
+        using reference = value_type &;
+        using const_reference = const value_type&;
+        using const_pointer = const value_type*;
 
-        constexpr QueueNode(const T &element, QueueNode *next) noexcept: Data(element), Next(next) {}
+        value_type Data;
+        Node *Next;
+
+        constexpr explicit Node(const_reference element) noexcept: Data(element), Next(nullptr) {}
+
+        constexpr Node(const_reference element, Node *next) noexcept: Data(element), Next(next) {}
     };
+
+    // Declarations
+    using pointer = Node::pointer;
+    using size_type = Node::size_type;
+    using value_type = Node::value_type;
+    using reference = Node::reference;
+    using const_reference = Node::const_reference;
+    using const_pointer = Node::const_pointer;
 
     inline constexpr void DeleteFront() noexcept {
         auto f = Front;
@@ -34,9 +51,9 @@ private:
         --Size;
     }
 
-    QueueNode *Front;
-    QueueNode *Rear;
-    size_t Size;
+    Node *Front;
+    Node *Rear;
+    size_type Size;
 
 public:
 
@@ -54,7 +71,7 @@ public:
 
         auto poRear = other.Front;
         while (poRear != nullptr) {
-            auto n = new QueueNode(poRear->Data);
+            auto n = new Node(poRear->Data);
 
             if (Front == nullptr && Rear == nullptr) {
                 Front = Rear = n;
@@ -146,8 +163,8 @@ public:
         return false;
     }
 
-    constexpr void CopyTo(Array<T> &array, size_t arrayIndex) const {
-        if ((ssize_t) arrayIndex > array.LastIndex()) throw std::out_of_range("arrayIndex is out of Array boundaries");
+    constexpr void CopyTo(Array<value_type> &array, size_type arrayIndex) const {
+        if (arrayIndex > array.GetLastIndex()) throw std::out_of_range("arrayIndex is out of Array boundaries");
         if (IsEmpty()) return;
 
         /* diff represents the amount of additional space the provided array needs to
@@ -156,15 +173,15 @@ public:
          * additional slots
         */
         ssize_t diff = GetLength() - (array.GetLength() - arrayIndex);
-        if (diff > 0) Array<T>::Resize(array, array.GetLength() + (size_t) diff);
+        if (diff > 0) Array<value_type>::Resize(array, array.GetLength() + (size_type) diff);
         auto n = Front;
-        for (size_t i = arrayIndex; n != nullptr; ++i, n = n->Next) {
+        for (auto i = arrayIndex; n != nullptr; ++i, n = n->Next) {
             array[i] = n->Data;
         }
     }
 
-    constexpr void Enqueue(const T &element) noexcept {
-        auto n = new QueueNode(element);
+    constexpr void Enqueue(const_reference element) noexcept {
+        auto n = new Node(element);
         if (Rear == nullptr) {
             Rear = n;
             Front = n;
@@ -175,25 +192,25 @@ public:
         ++Size;
     }
 
-    constexpr void Enqueue(const Array<T> &array) noexcept {
+    constexpr void Enqueue(const Array<value_type> &array) noexcept {
         for (auto it = array.cbegin(); it != array.cend(); ++it) {
             Enqueue(*it);
         }
     }
 
-    [[nodiscard]] constexpr T Dequeue() {
+    [[nodiscard]] constexpr value_type Dequeue() {
         if (IsEmpty()) throw std::out_of_range("Queue is already empty");
 
-        T obj = Peek();
+        value_type obj = Peek();
         DeleteFront();
         return obj;
     }
 
-    [[nodiscard]] constexpr Array<T> Dequeue(size_t amount) {
+    [[nodiscard]] constexpr Array<value_type > Dequeue(size_type amount) {
         if (amount > GetLength())
             throw std::out_of_range("Cannot Pop a number of elements higher than the Stack itself");
 
-        Array<T> array(amount);
+        Array<value_type> array(amount);
         for (size_t i = 0; i < amount; ++i) {
             array[i] = Dequeue();
         }
@@ -201,11 +218,11 @@ public:
         return array;
     }
 
-    inline constexpr size_t GetLength() const noexcept { return Size; }
+    inline constexpr size_type GetLength() const noexcept { return Size; }
 
     inline constexpr bool IsEmpty() const noexcept { return Size == 0; }
 
-    constexpr T Peek() const {
+    constexpr value_type Peek() const {
         if (IsEmpty()) throw std::out_of_range("Queue is empty. There's no element to check");
         return Front->Data;
     }
@@ -218,12 +235,12 @@ public:
         swap(Size, other.Size);
     }
 
-    constexpr Array<T> ToArray() const noexcept {
-        if (IsEmpty()) return Array<T>(0);
+    constexpr Array<value_type > ToArray() const noexcept {
+        if (IsEmpty()) return Array<value_type >(0);
 
-        Array<T> a(Size);
+        Array<value_type > a(Size);
         auto n = Front;
-        for (size_t i = 0; n != nullptr; ++i, n = n->Next)
+        for (auto i = 0; n != nullptr; ++i, n = n->Next)
             a[i] = n->Data;
 
         return a;

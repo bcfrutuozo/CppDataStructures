@@ -15,14 +15,31 @@ template<typename T>
 class Stack {
 private:
 
-    struct StackNode {
-        T Data;
-        StackNode *Previous;
+    struct Node {
 
-        constexpr explicit StackNode(const T &element) noexcept: Data(element), Previous(nullptr) {}
+        // Declarations
+        using pointer = T*;
+        using size_type = size_t;
+        using value_type = T;
+        using reference = value_type &;
+        using const_reference = const value_type&;
+        using const_pointer = const value_type*;
 
-        constexpr StackNode(const T &element, StackNode *previous) noexcept: Data(element), Previous(previous) {}
+        value_type Data;
+        Node *Previous;
+
+        constexpr explicit Node(const_reference element) noexcept: Data(element), Previous(nullptr) {}
+
+        constexpr Node(const_reference element, Node *previous) noexcept: Data(element), Previous(previous) {}
     };
+
+    // Declarations
+    using pointer = Node::pointer;
+    using size_type = Node::size_type;
+    using value_type = Node::value_type;
+    using reference = Node::reference;
+    using const_reference = Node::const_reference;
+    using const_pointer = Node::const_pointer;
 
     inline constexpr void RemoveTop() noexcept {
         auto n = Top;
@@ -31,8 +48,8 @@ private:
         delete n;
     }
 
-    StackNode *Top;
-    size_t Size;
+    Node *Top;
+    size_type Size;
 
 public:
 
@@ -45,12 +62,12 @@ public:
         if (other.IsEmpty()) return;
 
         auto p = other.Top;                 // points to current node on other
-        auto tmp = new StackNode(p->Data); // make a copy of the first node
+        auto tmp = new Node(p->Data); // make a copy of the first node
         Top = tmp;
         auto tail = tmp;              // points to last node of this list
         while (p->Previous != nullptr) {
             p = p->Previous;
-            tmp = new StackNode(p->Data);
+            tmp = new Node(p->Data);
             tail->Previous = tmp;
             tail = tmp;
         }
@@ -63,7 +80,7 @@ public:
         other.Size = 0;
     }
 
-    constexpr Stack(std::initializer_list<T> l) noexcept
+    constexpr Stack(std::initializer_list<value_type> l) noexcept
             :
             Top(nullptr),
             Size(0) {   // Initialize it with 0 because Size will be increment in Push function
@@ -124,7 +141,7 @@ public:
             RemoveTop();
     }
 
-    constexpr bool Contains(const T &element) const noexcept {
+    constexpr bool Contains(const_reference element) const noexcept {
         auto n = Top;
         while (n != nullptr) {
             if (Equals(n->Data, element)) return true;
@@ -133,57 +150,57 @@ public:
         return false;
     }
 
-    constexpr void CopyTo(Array<T> &array, size_t arrayIndex) const {
-        if ((ssize_t)arrayIndex > array.LastIndex()) throw std::out_of_range("arrayIndex is out of Array boundaries");
+    constexpr void CopyTo(Array<value_type> &array, size_type arrayIndex) const {
+        if (arrayIndex > array.GetLastIndex()) throw std::out_of_range("arrayIndex is out of Array boundaries");
         if (IsEmpty()) return;
 
         /* diff represents the amount of additional space the provided array needs to
          * successfully copy all data at the desired index. If its 0 or negative, means
-         * the array has plenty of space. Otherwise it represents the number of
+         * the array has plenty of space. Otherwise, it represents the number of
          * additional slots
         */
         ssize_t diff = GetLength() - (array.GetLength() - arrayIndex);
-        if (diff > 0) Array<T>::Resize(array, array.GetLength() + (size_t)diff);
+        if (diff > 0) Array<value_type>::Resize(array, array.GetLength() + (size_type)diff);
         auto n = Top;
-        for (size_t i = arrayIndex + this->GetLength() - 1; n != nullptr; --i, n = n->Previous) {
+        for (size_type i = arrayIndex + this->GetLength() - 1; n != nullptr; --i, n = n->Previous) {
             array[i] = n->Data;
         }
     }
 
     inline constexpr bool IsEmpty() const noexcept { return (Top == nullptr); }
 
-    inline constexpr size_t GetLength() const noexcept { return Size; }
+    inline constexpr size_type GetLength() const noexcept { return Size; }
 
-    constexpr void Push(const T &element) noexcept {
-        auto n = new StackNode(element, Top);
+    constexpr void Push(const_reference element) noexcept {
+        auto n = new Node(element, Top);
         Top = n;
         ++Size;
     }
 
-    constexpr void Push(const Array<T> &array) noexcept {
+    constexpr void Push(const Array<value_type> &array) noexcept {
         for (auto it = array.cbegin(); it != array.cend(); ++it)
             Push(*it);
     }
 
-    constexpr T Peek() const {
+    constexpr value_type Peek() const {
         if (IsEmpty()) throw std::out_of_range("Stack is empty");
         return Top->Data;
     }
 
-    [[nodiscard]] constexpr T Pop() {
+    [[nodiscard]] constexpr value_type Pop() {
         if (IsEmpty()) throw std::out_of_range("Stack is empty");
 
-        T obj = Peek();
+        value_type obj = Peek();
         RemoveTop();
         return obj;
     }
 
-    [[nodiscard]] constexpr Array<T> Pop(size_t amount) {
+    [[nodiscard]] constexpr Array<value_type> Pop(size_type amount) {
         if (amount > GetLength())
             throw std::out_of_range("Cannot Pop a number of elements higher than the Stack itself");
 
-        Array<T> array(amount);
-        for (ssize_t i = 0; i < amount; ++i) {
+        Array<value_type> array(amount);
+        for (auto i = 0; i < amount; ++i) {
             array[i] = Pop();
         }
 
@@ -197,12 +214,12 @@ public:
         swap(Size, other.Size);
     }
 
-    constexpr Array<T> ToArray() const noexcept {
-        if (IsEmpty()) return Array<T>(0);
+    constexpr Array<value_type> ToArray() const noexcept {
+        if (IsEmpty()) return Array<value_type>(0);
 
-        Array<T> a(Size);
+        Array<value_type> a(Size);
         auto n = Top;
-        for (ssize_t i = a.LastIndex(); n != nullptr; --i, n = n->Previous)
+        for (auto i = a.GetLastIndex(); n != nullptr; --i, n = n->Previous)
             a[i] = n->Data;
 
         return a;

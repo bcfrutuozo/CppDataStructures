@@ -16,7 +16,7 @@
 template<typename T>
 class Array {
 
-public:
+private:
 
     // Declarations
     using pointer = T*;
@@ -29,8 +29,6 @@ public:
     using iterator = pointer;
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
     using reverse_iterator = std::reverse_iterator<iterator>;
-
-private:
 
     pointer Data;
     size_type Size;
@@ -300,7 +298,7 @@ public:
         return Data[0];
     }
 
-    constexpr size_type GetLastIndex() const {
+    inline constexpr size_type GetLastIndex() const {
         if (IsEmpty()) throw std::out_of_range("The array is empty");
         return Size - 1;
     }

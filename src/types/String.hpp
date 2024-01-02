@@ -281,7 +281,7 @@ private:
     }
 
     // Conversion to 'const char *'
-    constexpr operator const_pointer() const { return mStr; }
+    constexpr operator const_pointer() const noexcept { return mStr; }
 
     // Operators overloading
     inline constexpr ImmutableString operator+(const_pointer str) const noexcept {
@@ -297,10 +297,6 @@ private:
         mStr = p.mStr;
         incrementRefCounter(mStr);
         return *this;
-    }
-
-    inline constexpr ImmutableString &operator+=(const ImmutableString &str) noexcept {
-        return *this += str.mStr;
     }
 
     // Return length of string.
@@ -480,7 +476,7 @@ private:
         std::vector<size_type> entries{};
         size_type lastIdx = 0;
 
-        for(auto idx = view().find(sanitize(str).view(), pos, len); idx != std::string::npos; idx = view().find(sanitize(str).view(), pos, len)) {
+        for(auto idx = view().find(sanitize(str), pos, len); idx != std::string::npos; idx = view().find(sanitize(str), pos, len)) {
             entries.push_back(idx);
             pos = idx + 1;
         }
@@ -494,7 +490,7 @@ private:
         std::vector<size_type> entries{};
         size_type lastIdx = 0;
 
-        for(auto idx = view().find(sanitize(str).view(), pos); idx != std::string::npos; idx = view().find(sanitize(str).view(), pos)) {
+        for(auto idx = view().find(sanitize(str), pos); idx != std::string::npos; idx = view().find(sanitize(str), pos)) {
             entries.push_back(idx);
             pos = idx + 1;
         }
@@ -823,27 +819,13 @@ public:
 
     inline constexpr String operator+(const char *c) const { return String::Concat(m_Data.c_str(), c); }
 
-    inline constexpr String operator+(const String &s) const {
-        return String::Concat(m_Data.c_str(), s.m_Data.c_str());
-    }
-
     inline constexpr String &operator+=(const char *c) {
         m_Data += c;
         return *this;
     }
 
-    inline constexpr String &operator+=(const String &s) {
-        m_Data += s.m_Data;
-        return *this;
-    }
-
     inline constexpr Boolean operator==(const char *c) const noexcept { return m_Data == c; }
-
-    inline constexpr Boolean operator==(const String &s) const noexcept { return m_Data == s.m_Data; }
-
     inline constexpr Boolean operator!=(const char *c) const noexcept { return !(*this == c); }
-
-    inline constexpr Boolean operator!=(const String &s) const noexcept { return !(*this == s); }
 
     // Returns a reference to the character at specified location pos in range [0, length()].
     inline constexpr const char &operator[](int pos) const {
@@ -863,18 +845,6 @@ public:
 
     static constexpr String Concat(const char *a, const char *b, const char *c, const char *d) noexcept {
         return ImmutableString<char>::concat(a, b, c, d);
-    }
-
-    static constexpr String Concat(const String &a, const String &b) noexcept {
-        return String::Concat(a.m_Data.c_str(), b.m_Data.c_str());
-    }
-
-    static constexpr String Concat(const String &a, const String &b, const String &c) noexcept {
-        return String::Concat(a.m_Data.c_str(), b.m_Data.c_str(), c.m_Data.c_str());
-    }
-
-    static constexpr String Concat(const String &a, const String &b, const String &c, const String &d) noexcept {
-        return String::Concat(a.m_Data.c_str(), b.m_Data.c_str(), c.m_Data.c_str(), d.m_Data.c_str());
     }
 
     static constexpr String Concat(Array<String> &array) noexcept {
@@ -900,21 +870,15 @@ public:
 
     inline constexpr Boolean Contains(const char *c) const noexcept { return m_Data.contains(c); }
 
-    inline constexpr Boolean Contains(const String &s) const noexcept { return m_Data.contains(s.m_Data.c_str()); }
-
     constexpr size_t Count(char c) const noexcept { return m_Data.count(c); }
 
     constexpr size_t Count(const char *c) const noexcept { return m_Data.count(c); }
-
-    constexpr size_t Count(const String &s) const noexcept { return m_Data.count(s.m_Data.c_str()); }
 
     static inline constexpr String Empty() noexcept { return nullptr; }
 
     inline constexpr Boolean EndsWith(const char c) const noexcept { char ptr[2]; ptr[0] = c; ptr[1] ='\0'; return m_Data.ends_with(ptr);}
 
     inline constexpr Boolean EndsWith(const char* c) const noexcept { return m_Data.ends_with(c);}
-
-    inline constexpr Boolean EndsWith(const String& s) const noexcept { return m_Data.ends_with(s); }
 
     inline constexpr size_t GetLength() const noexcept { return m_Data.length(); }
 
@@ -935,11 +899,20 @@ public:
     inline constexpr size_t IndexOfAny(const char* c, int startIndex) const noexcept { return m_Data.find_first_of(c, startIndex);};
 
     inline constexpr Array<size_t> IndicesOf(char c) const noexcept { auto ctn = m_Data.find_all_of(c); return {ctn.begin(), ctn.end()};}
-    //
-    //Array<size_t> IndicesOf(const wchar_t* c) const noexcept;
-    //
-    //String Insert(size_t index, wchar_t c) const;
-    //
+
+    inline constexpr Array<size_t> IndicesOf(const char* c) const noexcept { auto ctn = m_Data.find_all_of(c); return {ctn.begin(), ctn.end()}; }
+
+//    constexpr String Insert(size_t index, char c) const
+//    {
+//        if(index == GetLength()) return *this + c;
+//        if(index == 0) return c + *this;
+//
+//        char* cp = new char[GetLength() + 1];
+//        std::copy(OLDDATA, SIZE, cp);
+//        return cp;
+//        delete[] cp;
+//    }
+
     //String Insert(size_t index, const wchar_t* c) const;
 
     inline constexpr bool IsEmpty() const noexcept { return (m_Data.length() == 0); }
@@ -1067,13 +1040,5 @@ public:
     //
     //String TrimStart(const wchar_t* c) const noexcept;
 };
-
-// The template specializations of std::hash
-//template<>
-//struct std::hash<String> {
-//	std::size_t operator()(const String& str) const {
-//		return std::hash<std::string_view>()(str.view());
-//	}
-//};
 
 #endif //CPPDATASTRUCTURES_STRING_HPP

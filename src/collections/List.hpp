@@ -15,13 +15,22 @@ template<typename T>
 class List {
 private:
 
-    struct ListNode {
-        T Data;
-        ListNode *Next;
+    struct Node {
 
-        constexpr explicit ListNode(const T &element) noexcept: Data(element), Next(nullptr) {}
+        // Declarations
+        using pointer = T*;
+        using size_type = size_t;
+        using value_type = T;
+        using reference = value_type &;
+        using const_reference = const value_type&;
+        using const_pointer = const value_type*;
 
-        constexpr ListNode(const T &element, ListNode *next) noexcept: Data(element), Next(next) {}
+        value_type  Data;
+        Node *Next;
+
+        constexpr explicit Node(const_reference element) noexcept: Data(element), Next(nullptr) {}
+
+        constexpr Node(const_reference element, Node *next) noexcept: Data(element), Next(next) {}
     };
 
     //<editor-fold desc="Iterators implementation">
@@ -30,13 +39,13 @@ private:
         using iterator_category = std::forward_iterator_tag;
         using difference_type = std::ptrdiff_t;
         using value_type = T;
-        using pointer = T *;  // or also value_type*
-        using reference = T &;  // or also value_type&
+        using pointer = T*;
+        using reference = T&;
 
         // Pointer field representation
-        ListNode *pElement = nullptr;
+        Node *pElement = nullptr;
 
-        constexpr Iterator(ListNode *ptr) noexcept: pElement(ptr) {}
+        constexpr Iterator(Node *ptr) noexcept: pElement(ptr) {}
 
         constexpr reference operator*() const { return pElement->Data; }
 
@@ -69,13 +78,13 @@ private:
         using iterator_category = std::forward_iterator_tag;
         using difference_type = std::ptrdiff_t;
         using value_type = const T;
-        using pointer = const T *;  // or also value_type*
-        using reference = const T &;  // or also value_type&
+        using pointer = const T*;  // or also value_type*
+        using reference = const T&;  // or also value_type&
 
         // Pointer field representation
-        ListNode *pElement = nullptr;
+        Node *pElement = nullptr;
 
-        constexpr ConstIterator(ListNode *ptr) noexcept: pElement(ptr) {}
+        constexpr ConstIterator(Node *ptr) noexcept: pElement(ptr) {}
 
         constexpr reference operator*() const { return pElement->Data; }
 
@@ -104,11 +113,19 @@ private:
     };
     //</editor-fold>
 
-    ListNode *Head;
-    ListNode *Tail;
-    size_t Size;
+    // Declarations
+    using pointer = Node::pointer;
+    using size_type = Node::size_type;
+    using value_type = Node::value_type;
+    using reference = Node::reference;
+    using const_reference = Node::const_reference;
+    using const_pointer = Node::const_pointer;
+    using iterator = List::Iterator;
+    using const_iterator = List::ConstIterator;
 
-
+    Node *Head;
+    Node *Tail;
+    size_type Size;
 
 public:
 
@@ -126,15 +143,15 @@ public:
         if (Size == 0) return;
 
         auto n = other.Head;
-        ListNode *previous = nullptr;
+        Node *previous = nullptr;
         while (n != nullptr) {
             if (Head == nullptr) {
-                Head = new ListNode(n->Data);
+                Head = new Node(n->Data);
                 //begin = Head;
                 previous = Head;
                 Tail = Head;
             } else {
-                auto newNode = new ListNode(n->Data);
+                auto newNode = new Node(n->Data);
                 Tail = newNode;
                 previous->Next = newNode;
                 previous = newNode;
@@ -151,7 +168,7 @@ public:
         other.Size = 0;
     }
 
-    constexpr List(std::initializer_list<T> l) noexcept
+    constexpr List(std::initializer_list<value_type> l) noexcept
             :
             Head(nullptr),
             Tail(nullptr),
@@ -204,8 +221,8 @@ public:
         return !(*this == other);
     }
 
-    constexpr void Add(const T &element) noexcept {
-        auto n = new ListNode(element);
+    constexpr void Add(const_reference element) noexcept {
+        auto n = new Node(element);
 
         if (GetLength() == 0) {
             Head = Tail = n;
@@ -217,23 +234,23 @@ public:
         ++Size;
     }
 
-    constexpr void AddAt(const T &element, size_t index) {
+    constexpr void AddAt(const_reference element, size_type index) {
 
         // By checking this, we eliminate the necessity to work with Head and Tail pointers
-        if (index == LastIndex() + 1) {
+        if (index == GetLastIndex() + 1) {
             Add(element);
             return;
         }
 
-        if ((ssize_t) index > LastIndex() + 1) throw std::out_of_range("Index is larger than the actual list index");
+        if (index > GetLastIndex() + 1) throw std::out_of_range("Index is larger than the actual list index");
 
         auto n = Head;
-        ListNode *previous = nullptr;
+        Node *previous = nullptr;
 
         // Move pointer and variables to the desired values
-        for (size_t i = 0; i < index; ++i, previous = n, n = n->Next);
+        for (auto i = 0; i < index; ++i, previous = n, n = n->Next);
 
-        auto newNode = new ListNode(element);
+        auto newNode = new Node(element);
         newNode->Next = n;
 
         if (previous == nullptr) Head = newNode;
@@ -242,28 +259,28 @@ public:
         ++Size;
     }
 
-    constexpr void AddRange(const List<T> &list) noexcept {
+    constexpr void AddRange(const List<value_type > &list) noexcept {
         for (auto it = list.cbegin(); it != list.cend(); ++it) {
             Add(*it);
         }
     }
 
-    constexpr void AddRangeAt(const List<T> &list, size_t index) {
-        if (index == LastIndex() + 1) {
+    constexpr void AddRangeAt(const List<value_type > &list, size_type index) {
+        if (index == GetLastIndex() + 1) {
             AddRange(list);
             return;
         }
 
-        if ((ssize_t) index > LastIndex() + 1) throw std::out_of_range("Index is larger than the actual list index");
+        if (index > GetLastIndex() + 1) throw std::out_of_range("Index is larger than the actual list index");
 
         auto n = Head;
-        ListNode *previous = nullptr;
+        Node *previous = nullptr;
         for (size_t i = 0; i < index; ++i, previous = n, n = n->Next);
 
         // Now that we are within range, let's add it!
         auto other = list.Head;
         while (other != nullptr) {
-            auto newNode = new ListNode(other->Data);
+            auto newNode = new Node(other->Data);
             if (previous == nullptr) {
                 previous = newNode;
                 newNode->Next = Head;
@@ -291,7 +308,7 @@ public:
         Head = Tail = nullptr;
     }
 
-    constexpr bool Contains(const T &other) const noexcept {
+    constexpr bool Contains(const_reference other) const noexcept {
         if (IsEmpty()) return false;
 
         for (auto it = cbegin(); it != cend(); ++it)
@@ -300,17 +317,17 @@ public:
         return false;
     }
 
-    constexpr void CopyTo(Array<T> &array, size_t arrayIndex) const {
-        if (arrayIndex > array.LastIndex()) throw std::out_of_range("arrayIndex is out of Array boundaries");
+    constexpr void CopyTo(Array<value_type> &array, size_type arrayIndex) const {
+        if (arrayIndex > array.GetLastIndex()) throw std::out_of_range("arrayIndex is out of Array boundaries");
         if (IsEmpty()) return;
 
         /* diff represents the amount of additional space the provided array needs to
          * successfully copy all data at the desired index. If its 0 or negative, means
-         * the array has plenty of space. Otherwise it represents the number of
+         * the array has plenty of space. Otherwise, it represents the number of
          * additional slots
         */
         ssize_t diff = (array.GetLength() + arrayIndex) - GetLength();
-        if (diff > 0) Array<T>::Resize(diff, array.GetLength() + diff);
+        if (diff > 0) Array<value_type >::Resize(diff, array.GetLength() + diff);
 
         auto itArray = array.begin();
         auto itself = cbegin();
@@ -318,20 +335,25 @@ public:
             *itArray = *itself;
     }
 
-    constexpr size_t Count(const T &element) const noexcept {
-        size_t total = 0;
+    constexpr size_type Count(const_reference element) const noexcept {
+        size_type total = 0;
         for (auto it = cbegin(); it != cend(); ++it)
             if (Equals(*it, element)) ++total;
         return total;
     }
 
-    inline constexpr size_t GetLength() const noexcept { return Size; }
+    inline constexpr size_type GetLastIndex() const {
+        if (IsEmpty()) throw std::out_of_range("The list is empty");
+        return Size - 1;
+    }
 
-    constexpr ssize_t IndexOf(const T &element) const noexcept {
+    inline constexpr size_type GetLength() const noexcept { return Size; }
+
+    constexpr size_type IndexOf(const_reference element) const noexcept {
         if (GetLength() == 0) return -1;
 
         auto n = Head;
-        size_t i = 0;
+        size_type i = 0;
         while (n != nullptr) {
             if (Equals(n->Data, element)) return i;
             n = n->Next;
@@ -341,12 +363,12 @@ public:
         return -1;
     }
 
-    constexpr Array<size_t> IndicesOf(const T &element) const noexcept {
-        if (GetLength() == 0) return Array<size_t>(0);
+    constexpr Array<size_type> IndicesOf(const_reference element) const noexcept {
+        if (GetLength() == 0) return Array<size_type>(0);
 
         auto n = Head;
-        size_t i = 0;
-        Queue<size_t> indices;
+        size_type i = 0;
+        Queue<size_type> indices;
         while (n != nullptr) {
             if (Equals(n->Data, element)) indices.Enqueue(i);
             n = n->Next;
@@ -358,26 +380,30 @@ public:
 
     inline constexpr bool IsEmpty() const noexcept { return Size == 0; }
 
-    inline constexpr ssize_t LastIndex() const noexcept { return Size - 1; }
-
-    constexpr ssize_t LastIndexOf(const T &element) const noexcept {
+    constexpr size_type LastIndexOf(const_reference element) const noexcept {
         if (GetLength() == 0) return -1;
 
         auto n = Head;
-        size_t i = 0;
-        ssize_t idx = -1;
+        size_type i = 0, foundIndex = 0;
+        bool found = false;
         while (n != nullptr) {
-            if (Equals(n->Data, element)) idx = i;
+            if (Equals(n->Data, element)) {
+                found = true;
+                foundIndex = i;
+                break;
+            }
             n = n->Next;
             ++i;
         }
 
-        return idx;
+        if(!found) throw std::out_of_range("No element found in the list");
+
+        return foundIndex;
     }
 
-    [[nodiscard]] constexpr bool Remove(const T &element) noexcept {
+    [[nodiscard]] constexpr bool Remove(const_reference element) noexcept {
         auto n = Head;
-        ListNode *previous = nullptr;
+        Node *previous = nullptr;
         while (n != nullptr) {
             if (Equals(n->Data, element)) {
                 if (Head != n) previous->Next = n->Next;
@@ -398,9 +424,9 @@ public:
         return false;
     }
 
-    constexpr void RemoveAll(const T &element) noexcept {
+    constexpr void RemoveAll(const_reference element) noexcept {
         auto n = Head;
-        ListNode *previous = nullptr;
+        Node *previous = nullptr;
         while (n != nullptr) {
             if (Equals(n->Data, element)) {
                 if (Head != n) previous->Next = n->Next;
@@ -419,17 +445,17 @@ public:
         if (Size == 0) Head = Tail = nullptr;
     }
 
-    [[nodiscard]] constexpr T RemoveAt(size_t index) {
-        if ((ssize_t) index > LastIndex()) throw std::out_of_range("Index is out of bounds");
+    [[nodiscard]] constexpr value_type RemoveAt(size_type index) {
+        if (index > GetLastIndex()) throw std::out_of_range("Index is out of bounds");
 
         auto n = Head;
-        ListNode *previous = nullptr;
+        Node *previous = nullptr;
 
         // Empty for statement to move pointers to the desired ListNode. O(n) operation again...
-        for (size_t i = 0; i < index; ++i, previous = n, n = n->Next);
+        for (auto i = 0; i < index; ++i, previous = n, n = n->Next);
 
         if (previous != nullptr) previous->Next = n->Next;
-        T obj = n->Data;
+        value_type obj = n->Data;
         if (Head == n) Head = n->Next;
         if (Tail == n) Tail = previous;
 
@@ -441,19 +467,19 @@ public:
         return obj;
     }
 
-    [[nodiscard]] constexpr Array<T> RemoveRange(size_t index, size_t count) {
+    [[nodiscard]] constexpr Array<value_type> RemoveRange(size_type index, size_type count) {
         if (count < 1) throw std::invalid_argument("count cannot be 0 or negative");
-        if ((ssize_t) index > LastIndex()) throw std::out_of_range("Index is out of bounds");
-        if ((ssize_t) (index + count - 1) > LastIndex())
+        if (index > GetLastIndex()) throw std::out_of_range("Index is out of bounds");
+        if ((index + count - 1) > GetLastIndex())
             throw std::out_of_range("Provided ranged is not valid for the operation");
 
         auto n = Head;
-        ListNode *previous = nullptr;
-        Array<T> array(count);
+        Node *previous = nullptr;
+        Array<value_type> array(count);
         // Empty for statement to move pointers to the desired ListNode. O(n) operation again...
-        for (size_t i = 0; i < index; ++i, previous = n, n = n->Next);
+        for (auto i = 0; i < index; ++i, previous = n, n = n->Next);
 
-        for (size_t i = 0; i < count; ++i) {
+        for (auto i = 0; i < count; ++i) {
             if (previous != nullptr) previous->Next = n->Next;
 
             if (Head == n) Head = n->Next;
@@ -479,24 +505,24 @@ public:
         swap(Size, other.Size);
     }
 
-    constexpr Array<T> ToArray() const noexcept {
-        if (IsEmpty()) return Array<T>(0);
+    constexpr Array<value_type > ToArray() const noexcept {
+        if (IsEmpty()) return Array<value_type >(0);
 
-        Array<T> a(Size);
+        Array<value_type > a(Size);
         auto n = Head;
-        for (size_t i = 0; n != nullptr; ++i, n = n->Next)
+        for (auto i = 0; n != nullptr; ++i, n = n->Next)
             a[i] = n->Data;
 
         return a;
     }
 
-    constexpr Iterator begin() noexcept { return Head; }
+    constexpr iterator begin() noexcept { return Head; }
 
-    constexpr Iterator end() noexcept { return nullptr; }
+    constexpr iterator end() noexcept { return nullptr; }
 
-    constexpr ConstIterator cbegin() const noexcept { return Head; }
+    constexpr const_iterator cbegin() const noexcept { return Head; }
 
-    constexpr ConstIterator cend() const noexcept { return nullptr; }
+    constexpr const_iterator cend() const noexcept { return nullptr; }
 };
 
 #endif //CPPDATASTRUCTURES_LIST_HPP
