@@ -1,7 +1,7 @@
 # Data Structures - C++
 
 ## Overview
-This repository is a education purpose of open-source implementation of a variety of algorithms implemented in C++ and licensed under MIT License.
+This repository is an education purpose of open-source implementation of a variety of algorithms implemented in C++ and licensed under MIT License.
 It also feature functions that are not implemented in the default STL library. However, as it is for education, it was never mean to be compared with STL.
 So its suggested that this repository is NEVER used in large projects. Always use the STL library for these cases.
 
